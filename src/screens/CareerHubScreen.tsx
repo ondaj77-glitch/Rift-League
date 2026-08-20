@@ -191,7 +191,7 @@ export function CareerHubScreen() {
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: career.currentTeam.color }} />
                         <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
                         <span className="text-xs text-slate-400 font-bold">
-                          ({career.lifestyle.rosterStatus === 'starter' ? t('hub.starter' as any) : t('hub.substitute' as any)})
+                          ({(lifestyle.rosterStatus ?? 'free_agent') === 'starter' ? t('hub.starter' as any) : t('hub.substitute' as any)})
                         </span>
                       </>
                     ) : (

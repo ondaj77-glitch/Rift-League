@@ -15,17 +15,26 @@ export function SoloQScreen() {
 
   const [activeTab, setActiveTab] = useState<'hub' | 'leaderboard'>('hub');
 
-  if (!career) return null;
+  if (!career) {
+    return (
+      <div className="p-4 text-center">
+        <p className="text-slate-400 text-sm">Načítám SoloQ data...</p>
+      </div>
+    );
+  }
 
-  const rank = career.rank;
+  const rank = career.rank || { tier: 'BRONZE', division: 'IV', lp: 0, globalRank: 1500000 };
   const colors = TIER_COLORS[rank.tier] || TIER_COLORS.BRONZE;
   const icon = TIER_ICONS[rank.tier] || '🥉';
-  const winRate = career.soloqWins + career.soloqLosses > 0
-    ? Math.round((career.soloqWins / (career.soloqWins + career.soloqLosses)) * 100)
+  const soloqWins = career.soloqWins ?? 0;
+  const soloqLosses = career.soloqLosses ?? 0;
+  const winRate = soloqWins + soloqLosses > 0
+    ? Math.round((soloqWins / (soloqWins + soloqLosses)) * 100)
     : 50;
   const playerMainChamp = career.championPool?.[0] || 'Aatrox';
-  const leaderboard = generateLeaderboard(rank, career.gameName, career.week, career.year, playerMainChamp, winRate);
-  const eloInfo = calculateEloDifficulty(rank.tier, career.stats);
+  const leaderboard = generateLeaderboard(rank, career.gameName || 'Prodigy', career.week ?? 1, career.year ?? 2025, playerMainChamp, winRate);
+  const eloInfo = calculateEloDifficulty(rank.tier, career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 });
+  const energy = career.lifestyle?.energy ?? 100;
 
   return (
     <div className="space-y-6">
@@ -138,11 +147,11 @@ export function SoloQScreen() {
           {/* Stats & Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Card className="p-4 text-center">
-              <p className="text-2xl font-black text-green-400">{career.soloqWins}</p>
+              <p className="text-2xl font-black text-green-400">{soloqWins}</p>
               <p className="text-xs text-slate-400 mt-1">SoloQ Wins</p>
             </Card>
             <Card className="p-4 text-center">
-              <p className="text-2xl font-black text-red-400">{career.soloqLosses}</p>
+              <p className="text-2xl font-black text-red-400">{soloqLosses}</p>
               <p className="text-xs text-slate-400 mt-1">SoloQ Losses</p>
             </Card>
             <Card className="p-4 text-center">
@@ -157,7 +166,7 @@ export function SoloQScreen() {
               variant="gold"
               size="lg"
               fullWidth
-              disabled={career.lifestyle.energy < 20}
+              disabled={energy < 20}
               onClick={startSoloQMatch}
             >
               ⚔️ {t('soloq.play_interactive_match')} (-20⚡)
@@ -166,7 +175,7 @@ export function SoloQScreen() {
               variant="secondary"
               size="lg"
               fullWidth
-              disabled={career.lifestyle.energy < 15}
+              disabled={energy < 15}
               onClick={grindSoloQFast}
             >
               ⚡ {t('soloq.quick_grind_match')} (-15⚡)

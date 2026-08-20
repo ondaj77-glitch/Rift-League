@@ -483,10 +483,12 @@ export const useGameStore = create<GameStore>()(
         const { career, addNotification } = get();
         if (!career) return;
         const remaining = career.swapsRemainingThisSplit ?? 2;
-        if (remaining <= 0 || career.lifestyle.energy < 30) return;
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+        if (remaining <= 0 || currentLifestyle.energy < 30) return;
 
-        const newPool = career.championPool.map(id => id === oldChampId ? newChampId : id);
-        const masteries = { ...career.masteries };
+        const currentPool = career.championPool || ['Aatrox'];
+        const newPool = currentPool.map(id => id === oldChampId ? newChampId : id);
+        const masteries = { ...(career.masteries || {}) };
         if (!masteries[newChampId]) {
           masteries[newChampId] = { championId: newChampId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
         }
@@ -500,8 +502,8 @@ export const useGameStore = create<GameStore>()(
             masteries,
             swapsRemainingThisSplit: remaining - 1,
             lifestyle: {
-              ...state.career!.lifestyle,
-              energy: state.career!.lifestyle.energy - 30,
+              ...currentLifestyle,
+              energy: Math.max(0, currentLifestyle.energy - 30),
             },
           },
         }));
@@ -511,22 +513,26 @@ export const useGameStore = create<GameStore>()(
         const { career, addNotification } = get();
         if (!career) return;
 
-        if (action === 'job' && career.lifestyle.energy >= 30) {
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+        const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
+        const currentStats = career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 };
+
+        if (action === 'job' && currentLifestyle.energy >= 30) {
           addNotification(`+$450 Výdělek z brigády (-30⚡)`, 'positive', '💼');
           set(state => ({
             career: {
               ...state.career!,
-              lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 30 },
-              finances: { ...state.career!.finances, savings: state.career!.finances.savings + 450 },
-              stats: { ...state.career!.stats, mental: clamp(state.career!.stats.mental - 3) },
+              lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 30 },
+              finances: { ...currentFinances, savings: currentFinances.savings + 450 },
+              stats: { ...currentStats, mental: clamp(currentStats.mental - 3) },
             },
           }));
-        } else if (action === 'stream' && career.lifestyle.energy >= 25) {
+        } else if (action === 'stream' && currentLifestyle.energy >= 25) {
           const currentFollowers = career.streamFollowers ?? 100;
-          const gainedFollowers = 250 + Math.floor(career.stats.reputation * 15) + Math.floor(Math.random() * 100);
+          const gainedFollowers = 250 + Math.floor((currentStats.reputation ?? 20) * 15) + Math.floor(Math.random() * 100);
           const newFollowers = currentFollowers + gainedFollowers;
           const newViewers = Math.max(10, Math.floor(newFollowers * 0.08));
-          const streamCash = 200 + Math.floor(newViewers * 1.5) + Math.floor(career.stats.reputation * 4);
+          const streamCash = 200 + Math.floor(newViewers * 1.5) + Math.floor((currentStats.reputation ?? 20) * 4);
 
           addNotification(`+${gainedFollowers} Followerů & +$${streamCash} z darů!`, 'gold', '🎥');
 
@@ -535,31 +541,31 @@ export const useGameStore = create<GameStore>()(
               ...state.career!,
               streamFollowers: newFollowers,
               streamViewers: newViewers,
-              lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 25 },
-              finances: { ...state.career!.finances, savings: state.career!.finances.savings + streamCash },
-              stats: { ...state.career!.stats, reputation: clamp(state.career!.stats.reputation + 2) },
+              lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 25 },
+              finances: { ...currentFinances, savings: currentFinances.savings + streamCash },
+              stats: { ...currentStats, reputation: clamp(currentStats.reputation + 2) },
             },
           }));
-        } else if (action === 'vod' && career.lifestyle.energy >= 20) {
+        } else if (action === 'vod' && currentLifestyle.energy >= 20) {
           addNotification(`+3 Znalost hry · +2 Přizpůsobivost (-20⚡)`, 'positive', '🧠');
           set(state => ({
             career: {
               ...state.career!,
-              lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 20 },
+              lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 20 },
               stats: {
-                ...state.career!.stats,
-                gameKnowledge: clamp(state.career!.stats.gameKnowledge + 3),
-                adaptability: clamp(state.career!.stats.adaptability + 2),
+                ...currentStats,
+                gameKnowledge: clamp(currentStats.gameKnowledge + 3),
+                adaptability: clamp(currentStats.adaptability + 2),
               },
             },
           }));
-        } else if (action === 'gym' && career.lifestyle.energy >= 20) {
+        } else if (action === 'gym' && currentLifestyle.energy >= 20) {
           addNotification(`+8 Mentál · Tilt vymazán (-20⚡)`, 'positive', '🏋️');
           set(state => ({
             career: {
               ...state.career!,
-              lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 20 },
-              stats: { ...state.career!.stats, mental: clamp(state.career!.stats.mental + 8) },
+              lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 20 },
+              stats: { ...currentStats, mental: clamp(currentStats.mental + 8) },
             },
           }));
         }
@@ -568,18 +574,22 @@ export const useGameStore = create<GameStore>()(
       upgradePC: () => {
         const { career, addNotification } = get();
         if (!career) return;
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+        const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
+        const currentStats = career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 };
+
         const costs = [0, 1500, 5000];
-        const nextCost = costs[career.lifestyle.pcLevel] || 99999;
-        if (career.finances.savings >= nextCost) {
+        const nextCost = costs[currentLifestyle.pcLevel] || 99999;
+        if (currentFinances.savings >= nextCost) {
           addNotification(`🖥️ Nový PC Setup zakoupen! (+4 Mechanika)`, 'gold', '⚡');
           set(state => ({
             career: {
               ...state.career!,
-              finances: { ...state.career!.finances, savings: state.career!.finances.savings - nextCost },
-              lifestyle: { ...state.career!.lifestyle, pcLevel: state.career!.lifestyle.pcLevel + 1 },
+              finances: { ...currentFinances, savings: currentFinances.savings - nextCost },
+              lifestyle: { ...currentLifestyle, pcLevel: currentLifestyle.pcLevel + 1 },
               stats: {
-                ...state.career!.stats,
-                mechanics: clamp(state.career!.stats.mechanics + 4),
+                ...currentStats,
+                mechanics: clamp(currentStats.mechanics + 4),
               },
             },
           }));
@@ -590,7 +600,7 @@ export const useGameStore = create<GameStore>()(
         const { career } = get();
         if (!career) return;
 
-        const rankOrder = TIER_ORDER.indexOf(career.rank.tier);
+        const rankOrder = TIER_ORDER.indexOf(career.rank?.tier || 'BRONZE');
         const offers: TeamOffer[] = [];
 
         // Check teams in player's region and others
@@ -617,6 +627,8 @@ export const useGameStore = create<GameStore>()(
       acceptTeamOffer: (offer) => {
         const { career } = get();
         if (!career) return;
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+        const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
 
         set(state => ({
           career: {
@@ -624,11 +636,11 @@ export const useGameStore = create<GameStore>()(
             currentTeam: offer.team,
             teamStrength: offer.team.strength,
             finances: {
-              ...state.career!.finances,
+              ...currentFinances,
               salary: offer.salary,
             },
             lifestyle: {
-              ...state.career!.lifestyle,
+              ...currentLifestyle,
               rosterStatus: offer.role === 'Starter' ? 'starter' : 'sub',
               coachTrust: 75,
               housing: 'gaming_house',
@@ -641,15 +653,17 @@ export const useGameStore = create<GameStore>()(
       leaveTeam: () => {
         const { career } = get();
         if (!career) return;
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+        const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
 
         set(state => ({
           career: {
             ...state.career!,
             currentTeam: null,
             teamStrength: 0,
-            finances: { ...state.career!.finances, salary: 0 },
+            finances: { ...currentFinances, salary: 0 },
             lifestyle: {
-              ...state.career!.lifestyle,
+              ...currentLifestyle,
               rosterStatus: 'free_agent',
               coachTrust: 0,
               housing: 'budget_room',
