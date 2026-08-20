@@ -4,7 +4,7 @@ import { useGameStore } from '../store/gameStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { ALL_CHAMPIONS, getChampIconUrl, getChampSplashUrl, getChampionsByRole } from '../data/champions';
+import { ALL_CHAMPIONS, getChampIconUrl, getChampSplashUrl, getChampionsByRole, TIER_PRIORITY, generateMetaPatch } from '../data/champions';
 
 export function ChampionPoolScreen() {
   const { t } = useTranslation();
@@ -19,14 +19,16 @@ export function ChampionPoolScreen() {
 
   if (!career) return null;
 
-  const currentPatch = career.currentPatch;
-  const poolChamps = ALL_CHAMPIONS.filter(c => career.championPool.includes(c.id));
+  const currentPatch = career.currentPatch || generateMetaPatch('15.1', 15);
+  const patchTiers = currentPatch.tiers || {};
+  const champPool = career.championPool || [];
+  const poolChamps = ALL_CHAMPIONS.filter(c => champPool.includes(c.id));
   const roleChamps = getChampionsByRole(career.role).sort(
     (a, b) =>
-      TIER_PRIORITY[currentPatch.tiers[a.id]?.tier || 'A'] -
-      TIER_PRIORITY[currentPatch.tiers[b.id]?.tier || 'A']
+      (TIER_PRIORITY[patchTiers[a.id]?.tier || 'A'] ?? 3) -
+      (TIER_PRIORITY[patchTiers[b.id]?.tier || 'A'] ?? 3)
   );
-  const energy = career.lifestyle.energy;
+  const energy = career.lifestyle?.energy ?? 100;
   const remainingSwaps = career.swapsRemainingThisSplit ?? 2;
 
   function handleOpenSwap(oldChampId: string) {
@@ -91,8 +93,8 @@ export function ChampionPoolScreen() {
       {/* 6 Main Champions Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {poolChamps.map((champ) => {
-          const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stabilní pick' };
-          const mastery = career.masteries[champ.id] || { masteryLevel: 1, gamesPlayed: 0, wins: 0 };
+          const meta = patchTiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stabilní pick v metě' };
+          const mastery = career.masteries?.[champ.id] || { masteryLevel: 1, gamesPlayed: 0, wins: 0 };
 
           return (
             <motion.div
@@ -178,8 +180,8 @@ export function ChampionPoolScreen() {
 
         <div className="space-y-2">
           {roleChamps.map((champ) => {
-            const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stabilní' };
-            const isInPool = career.championPool.includes(champ.id);
+            const meta = patchTiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stabilní' };
+            const isInPool = champPool.includes(champ.id);
 
             return (
               <div
@@ -256,10 +258,10 @@ export function ChampionPoolScreen() {
 
               <div className="overflow-y-auto flex-1 space-y-2 pr-1">
                 {roleChamps
-                  .filter(c => !career.championPool.includes(c.id))
+                  .filter(c => !champPool.includes(c.id))
                   .map((champ) => {
                     const isSelected = newChampToSelect === champ.id;
-                    const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0 };
+                    const meta = patchTiers[champ.id] || { tier: 'A', winRate: 50.0 };
 
                     return (
                       <div
