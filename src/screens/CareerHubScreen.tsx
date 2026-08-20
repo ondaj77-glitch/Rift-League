@@ -168,7 +168,7 @@ export function CareerHubScreen() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
                   <span className="text-xs text-slate-400 uppercase font-semibold">
-                    {t('hub.status_title' as any) || 'Aktuální status'}
+                    {t('hub.status_title' as any) || 'Status'}
                   </span>
                   <div className="flex items-center gap-2 mt-0.5">
                     {career.currentTeam ? (
@@ -176,12 +176,14 @@ export function CareerHubScreen() {
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: career.currentTeam.color }} />
                         <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
                         <span className="text-xs text-slate-400 font-bold">
-                          ({career.lifestyle.rosterStatus === 'starter' ? 'ZÁKLADNÍ SESTAVA' : 'NÁHRADNÍK'})
+                          ({career.lifestyle.rosterStatus === 'starter' ? t('hub.starter' as any) : t('hub.substitute' as any)})
                         </span>
                       </>
                     ) : (
                       <span className="font-bold text-amber-400 text-base">
-                        {career.age < 18 ? `Neupsaný SoloQ Talent (${career.age} Let)` : 'Volný Hráč (Free Agent)'}
+                        {career.age < 18
+                          ? t('hub.prodigy_status' as any).replace('{age}', String(career.age))
+                          : t('hub.free_agent' as any)}
                       </span>
                     )}
                   </div>
@@ -191,7 +193,7 @@ export function CareerHubScreen() {
                   <div className="flex items-center gap-4 text-xs font-semibold">
                     <span className="text-green-400">{career.wins} {t('season.wins')}</span>
                     <span className="text-red-400">{career.losses} {t('season.losses')}</span>
-                    <span className="text-gold-400">Síla týmu {career.teamStrength}</span>
+                    <span className="text-gold-400">{t('hub.team_strength' as any)}: {career.teamStrength}</span>
                   </div>
                 )}
               </div>
@@ -199,7 +201,7 @@ export function CareerHubScreen() {
 
             {/* Player Stats */}
             <Card>
-              <CardHeader title={t('hub.stats')} icon="📊" subtitle="Atributy přímo ovlivňují výhry v SoloQ i oficiálních zápasech" />
+              <CardHeader title={t('hub.stats')} icon="📊" subtitle={t('hub.stats_subtitle' as any) || 'Player stats'} />
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {STATS.map(stat => (
                   <StatBar
@@ -217,7 +219,9 @@ export function CareerHubScreen() {
                 <div>
                   <p className="text-xs text-slate-400 mb-1">{t('hub.career_goal')}</p>
                   <p className="text-gold-400 font-bold text-sm">
-                    {career.worldsWins > 0 ? `🏆 ${career.worldsWins}x Mistr Světa (Worlds Champion)` : t('hub.goal.worlds')}
+                    {career.worldsWins > 0
+                      ? t('hub.worlds_champion_count' as any).replace('{count}', String(career.worldsWins))
+                      : t('hub.goal.worlds')}
                   </p>
                 </div>
                 <div className="text-right">
@@ -236,8 +240,8 @@ export function CareerHubScreen() {
                 onClick={handleContinue}
               >
                 {currentEvent
-                  ? `📋 ${t('event.week')} ${career.week} Událost →`
-                  : `📅 ${t('hub.continue')} (Posunout na Týden ${career.week + 1})`}
+                  ? `📋 ${t('hub.event_week_btn' as any).replace('{week}', String(career.week))}`
+                  : `📅 ${t('hub.advance_to_week' as any).replace('{week}', String(career.week + 1))}`}
               </Button>
             </div>
           </div>

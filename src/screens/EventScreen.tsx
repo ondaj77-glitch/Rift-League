@@ -39,13 +39,33 @@ export function EventScreen() {
   const career = useGameStore(s => s.career);
   const currentEvent = useGameStore(s => s.currentEvent);
   const resolveEvent = useGameStore(s => s.resolveEvent);
+  const setPhase = useGameStore(s => s.setPhase);
 
   // Selection state before confirmation
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const [appliedIdx, setAppliedIdx] = useState<number | null>(null);
 
-  if (!currentEvent || !career) return null;
+  if (!career) {
+    return (
+      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
+        <Button onClick={() => setPhase('MENU')}>Menu</Button>
+      </div>
+    );
+  }
+
+  if (!currentEvent) {
+    return (
+      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
+        <Card className="p-6 text-center space-y-4 max-w-sm border-gold-600/30">
+          <p className="text-white font-bold text-base">Pokračovat do dalšího týdne</p>
+          <Button variant="primary" fullWidth onClick={() => setPhase('CAREER_HUB')}>
+            Kariérní Centrum
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   function handleSelectOption(index: number) {
     if (showResult) return;

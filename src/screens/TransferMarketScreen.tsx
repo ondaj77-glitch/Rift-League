@@ -15,8 +15,8 @@ export function TransferMarketScreen() {
 
   if (!career) return null;
 
-  const trust = career.lifestyle.coachTrust;
-  const status = career.lifestyle.rosterStatus;
+  const trust = career.lifestyle?.coachTrust ?? 50;
+  const status = career.lifestyle?.rosterStatus ?? 'free_agent';
 
   return (
     <div className="space-y-6">

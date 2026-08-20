@@ -155,13 +155,25 @@ export function InteractiveMatch() {
   const [logs, setLogs] = useState<Array<{ phase: string; text: string; success: boolean; scoreDelta: number }>>([]);
   const [resolving, setResolving] = useState(false);
 
-  if (!career || !interactiveMatch) return null;
+  if (!career || !interactiveMatch) {
+    return (
+      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
+        <Card className="p-6 text-center space-y-4 max-w-sm border-gold-600/30">
+          <p className="text-white font-bold">Zápas nebyl nalezen</p>
+          <Button variant="primary" fullWidth onClick={() => useGameStore.getState().setPhase('CAREER_HUB')}>
+            Kariérní Centrum
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
-  const currentPatch = career.currentPatch;
-  const poolChamps = ALL_CHAMPIONS.filter(c => career.championPool.includes(c.id));
+  const currentPatch = career.currentPatch || { patchVersion: '15.1', season: 15, tiers: {} };
+  const champPool = career.championPool || [];
+  const poolChamps = ALL_CHAMPIONS.filter(c => champPool.includes(c.id));
   const roleChamps = getChampionsByRole(career.role);
   // Pick opponent champion for the lane
-  const enemyChamp = roleChamps.find(c => !career.championPool.includes(c.id)) || roleChamps[0];
+  const enemyChamp = roleChamps.find(c => !champPool.includes(c.id)) || roleChamps[0];
 
   const currentChoices =
     step === 'laning' ? LANING_CHOICES :

@@ -25,11 +25,28 @@ export function LifestyleScreen() {
 
   if (!career) return null;
 
-  const energy = career.lifestyle.energy;
-  const maxEnergy = career.lifestyle.maxEnergy;
-  const housing = HOUSING_NAMES[career.lifestyle.housing] || HOUSING_NAMES.parents_home;
-  const nextPC = PC_NAMES.find(p => p.level === career.lifestyle.pcLevel + 1);
-  const canStream = career.lifestyle.pcLevel >= 2;
+  const energy = career.lifestyle?.energy ?? 100;
+  const maxEnergy = career.lifestyle?.maxEnergy ?? 100;
+  const pcLevel = career.lifestyle?.pcLevel ?? 1;
+  const housingKey = career.lifestyle?.housing ?? 'budget_room';
+
+  const housingLabels: Record<string, { label: string; rent: number }> = {
+    parents_home: { label: t('housing.parents' as any) || '🏠 Rodinný dům u rodičů', rent: 0 },
+    budget_room: { label: t('housing.budget' as any) || '🏢 Sdílený byt', rent: 600 },
+    gaming_house: { label: t('housing.gaming_house' as any) || '⚡ Týmový Gaming House', rent: 0 },
+    luxury_apt: { label: t('housing.penthouse' as any) || '🌆 Luxusní Penthouse', rent: 3500 },
+  };
+
+  const housing = housingLabels[housingKey] || housingLabels.budget_room;
+
+  const pcNames = [
+    { level: 1, name: 'Potato 60Hz Setup (Starý PC)', cost: 0, bonus: 'Základní odezva, nedostačuje pro stream' },
+    { level: 2, name: 'Esports 144Hz Rig + Stream Webcam', cost: 1500, bonus: '+5 Mechanika · Odemkne možnost Streamování' },
+    { level: 3, name: 'Pro 360Hz Beast + Dual PC Streaming Rig', cost: 5000, bonus: '+10 Mechanika & Mentál · +50% Stream Výdělky' },
+  ];
+
+  const nextPC = pcNames.find(p => p.level === pcLevel + 1);
+  const canStream = pcLevel >= 2;
   const followers = career.streamFollowers ?? 0;
   const viewers = career.streamViewers ?? 0;
 
@@ -41,7 +58,7 @@ export function LifestyleScreen() {
         {/* Weekly Energy */}
         <Card className="p-4 space-y-2">
           <div className="flex justify-between items-center text-xs font-semibold">
-            <span className="text-slate-400">⚡ Týdenní Energie & Focus</span>
+            <span className="text-slate-400">{t('lifestyle.energy_title')}</span>
             <span className="text-amber-400 font-bold">{energy} / {maxEnergy}</span>
           </div>
           <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden">
@@ -50,45 +67,51 @@ export function LifestyleScreen() {
               animate={{ width: `${(energy / maxEnergy) * 100}%` }}
             />
           </div>
-          <p className="text-[11px] text-slate-500">Obnovuje se každý týden. Využij ji na SoloQ, práci nebo trénink.</p>
+          <p className="text-[11px] text-slate-500">{t('lifestyle.energy_desc')}</p>
         </Card>
 
         {/* Current Housing */}
         <Card className="p-4 space-y-1">
-          <p className="text-xs text-slate-400 font-medium">Bydlení</p>
+          <p className="text-xs text-slate-400 font-medium">{t('lifestyle.housing_label')}</p>
           <p className="text-sm font-bold text-white">{housing.label}</p>
-          <p className="text-xs text-slate-400">${housing.rent}/měsíc nájem</p>
+          <p className="text-xs text-slate-400">${housing.rent}{t('lifestyle.rent_month')}</p>
         </Card>
 
         {/* Twitch & Stream Audience */}
         <Card className="p-4 space-y-1">
-          <p className="text-xs text-slate-400 font-medium">Twitch / Stream Sledující</p>
+          <p className="text-xs text-slate-400 font-medium">{t('lifestyle.twitch_followers')}</p>
           <p className="text-base font-black text-purple-400 font-mono">
-            {followers.toLocaleString()} Followerů
+            {followers.toLocaleString()} {t('lifestyle.followers')}
           </p>
           <p className="text-[11px] text-slate-400">
-            {canStream ? `Průměrně ${viewers.toLocaleString()} diváků online` : '🔒 Vyžaduje Level 2 PC Setup'}
+            {canStream
+              ? t('lifestyle.avg_viewers').replace('{viewers}', viewers.toLocaleString())
+              : t('lifestyle.stream_locked')}
           </p>
         </Card>
       </div>
 
       {/* Weekly Life Actions (Energy Spenders) */}
       <Card>
-        <CardHeader title="⚡ Týdenní Aktivity & Životní Styl" icon="🎮" subtitle="Využij energii pro výdělek, zlepšení mentálu nebo trénink" />
+        <CardHeader
+          title={t('lifestyle.activities_title')}
+          icon="🎮"
+          subtitle={t('lifestyle.activities_subtitle')}
+        />
         <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-          {/* Part-time Job (Crucial for Free Agents!) */}
+          {/* Part-time Job */}
           <div className="p-4 rounded-xl border border-rift-border bg-rift-surface space-y-3">
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-bold text-white text-sm">💼 Brigáda / Práce na dohodu</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Směna v kavárně nebo skladu na zaplacení nájmu.</p>
+                <h4 className="font-bold text-white text-sm">{t('lifestyle.job_title')}</h4>
+                <p className="text-xs text-slate-400 mt-0.5">{t('lifestyle.job_desc')}</p>
               </div>
               <span className="text-xs font-bold text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40 font-mono">
                 -30⚡
               </span>
             </div>
-            <div className="text-xs text-green-400 font-semibold">+ $450 Hotovost · -3 Mentál</div>
+            <div className="text-xs text-green-400 font-semibold">{t('lifestyle.job_effects')}</div>
             <Button
               variant="secondary"
               size="sm"
@@ -96,7 +119,7 @@ export function LifestyleScreen() {
               disabled={energy < 30}
               onClick={() => performWeeklyAction('job')}
             >
-              Odpracovat Směnu
+              {t('lifestyle.job_btn')}
             </Button>
           </div>
 
@@ -106,16 +129,16 @@ export function LifestyleScreen() {
           }`}>
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-bold text-white text-sm">🎥 Streamovat SoloQ na Twitchi</h4>
+                <h4 className="font-bold text-white text-sm">{t('lifestyle.stream_title')}</h4>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {canStream ? 'Vysílat zápasy, bavit diváky a sbírat donaty.' : '🔒 Odemkne se nákupem Esports PC Rig!'}
+                  {canStream ? t('lifestyle.stream_desc') : t('lifestyle.stream_desc_locked')}
                 </p>
               </div>
               <span className="text-xs font-bold text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40 font-mono">
                 -25⚡
               </span>
             </div>
-            <div className="text-xs text-green-400 font-semibold">+ $200-$600 Suby & Donaty · +Followeři</div>
+            <div className="text-xs text-green-400 font-semibold">{t('lifestyle.stream_effects')}</div>
             <Button
               variant={canStream ? 'secondary' : 'ghost'}
               size="sm"
@@ -123,7 +146,7 @@ export function LifestyleScreen() {
               disabled={!canStream || energy < 25}
               onClick={() => performWeeklyAction('stream')}
             >
-              {canStream ? 'Spustit Stream' : '🔒 Koupit Stream PC'}
+              {canStream ? t('lifestyle.stream_btn') : t('lifestyle.stream_btn_buy')}
             </Button>
           </div>
 
@@ -131,14 +154,14 @@ export function LifestyleScreen() {
           <div className="p-4 rounded-xl border border-rift-border bg-rift-surface space-y-3">
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-bold text-white text-sm">🧠 Hluboká VOD & Makro Analýza</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Studium rotací a wardování korejských Challenger hráčů.</p>
+                <h4 className="font-bold text-white text-sm">{t('lifestyle.vod_title')}</h4>
+                <p className="text-xs text-slate-400 mt-0.5">{t('lifestyle.vod_desc')}</p>
               </div>
               <span className="text-xs font-bold text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40 font-mono">
                 -20⚡
               </span>
             </div>
-            <div className="text-xs text-blue-400 font-semibold">+3 Znalost hry · +2 Přizpůsobivost</div>
+            <div className="text-xs text-blue-400 font-semibold">{t('lifestyle.vod_effects')}</div>
             <Button
               variant="secondary"
               size="sm"
@@ -146,7 +169,7 @@ export function LifestyleScreen() {
               disabled={energy < 20}
               onClick={() => performWeeklyAction('vod')}
             >
-              Studovat VODy
+              {t('lifestyle.vod_btn')}
             </Button>
           </div>
 
@@ -154,14 +177,14 @@ export function LifestyleScreen() {
           <div className="p-4 rounded-xl border border-rift-border bg-rift-surface space-y-3">
             <div className="flex justify-between items-start">
               <div>
-                <h4 className="font-bold text-white text-sm">🏋️ Fitko & Mentální Reset</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Trénink a sauna k odstranění tiltu a únavy ze SoloQ.</p>
+                <h4 className="font-bold text-white text-sm">{t('lifestyle.gym_title')}</h4>
+                <p className="text-xs text-slate-400 mt-0.5">{t('lifestyle.gym_desc')}</p>
               </div>
               <span className="text-xs font-bold text-amber-400 bg-amber-950/50 px-2 py-0.5 rounded border border-amber-800/40 font-mono">
                 -20⚡
               </span>
             </div>
-            <div className="text-xs text-emerald-400 font-semibold">+8 Mentál · Vymaže Tilt</div>
+            <div className="text-xs text-emerald-400 font-semibold">{t('lifestyle.gym_effects')}</div>
             <Button
               variant="secondary"
               size="sm"
@@ -169,7 +192,7 @@ export function LifestyleScreen() {
               disabled={energy < 20}
               onClick={() => performWeeklyAction('gym')}
             >
-              Jít do Fitka
+              {t('lifestyle.gym_btn')}
             </Button>
           </div>
 
@@ -178,35 +201,45 @@ export function LifestyleScreen() {
 
       {/* Hardware Setup & Upgrades */}
       <Card>
-        <CardHeader title="🖥️ Herní Vybavení & Battle Station" icon="⚡" subtitle="Lepší počítač a monitor zvyšuje mechaniku a odemyká streaming" />
+        <CardHeader
+          title={t('lifestyle.upgrade_pc_title')}
+          icon="⚡"
+          subtitle={t('lifestyle.activities_subtitle')}
+        />
         <div className="p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-slate-400">Aktuální Setup</p>
+              <p className="text-xs text-slate-400">{t('lifestyle.current_pc')}</p>
               <p className="font-bold text-white text-base">
-                {PC_NAMES[career.lifestyle.pcLevel - 1]?.name || 'Základní Setup'}
+                {pcNames[pcLevel - 1]?.name || 'Base Setup'}
               </p>
               <p className="text-xs text-gold-400 mt-0.5">
-                {PC_NAMES[career.lifestyle.pcLevel - 1]?.bonus}
+                {pcNames[pcLevel - 1]?.bonus}
               </p>
             </div>
           </div>
 
-          {nextPC && (
+          {nextPC ? (
             <div className="p-4 rounded-xl border border-gold-600/30 bg-gold-950/20 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div>
-                <span className="text-xs text-gold-400 font-bold uppercase">Dostupný Upgrade</span>
+                <span className="text-xs text-gold-400 font-bold uppercase">
+                  {t('lifestyle.upgrade_to')}
+                </span>
                 <h4 className="font-bold text-white text-sm">{nextPC.name}</h4>
                 <p className="text-xs text-slate-300">{nextPC.bonus}</p>
               </div>
               <Button
                 variant="gold"
                 size="md"
-                disabled={career.finances.savings < nextPC.cost}
+                disabled={(career.finances?.savings ?? 0) < nextPC.cost}
                 onClick={upgradePC}
               >
-                Koupit Upgrade (${nextPC.cost.toLocaleString()})
+                ${nextPC.cost.toLocaleString()} Upgrade
               </Button>
+            </div>
+          ) : (
+            <div className="p-3 bg-rift-surface rounded-xl border border-rift-border text-center text-xs text-amber-300 font-bold">
+              {t('lifestyle.max_pc_level')}
             </div>
           )}
         </div>

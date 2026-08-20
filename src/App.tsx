@@ -13,6 +13,7 @@ import { RetirementScreen } from './screens/RetirementScreen';
 import { DailyChallengeScreen } from './screens/DailyChallengeScreen';
 import { StatToast } from './components/ui/StatToast';
 import { PatchNotesModal } from './components/ui/PatchNotesModal';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 const pageTransition = {
   initial: { opacity: 0 },
@@ -45,7 +46,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <ErrorBoundary>
       <AnimatePresence mode="wait">
         <motion.div key={phase} {...pageTransition} className="min-h-screen">
           {renderScreen()}
@@ -57,6 +58,6 @@ export default function App() {
 
       {/* Global Animated Stat & Notification Toasts */}
       <StatToast notifications={notifications} />
-    </>
+    </ErrorBoundary>
   );
 }

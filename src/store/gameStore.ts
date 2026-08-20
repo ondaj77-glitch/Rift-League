@@ -631,23 +631,36 @@ export const useGameStore = create<GameStore>()(
         const newEnergy = 100;
 
         // Charge weekly living costs
-        const weeklyRent = Math.floor(career.finances.monthlyExpenses / 4);
-        const newSavings = Math.max(0, career.finances.savings - weeklyRent);
+        const expenses = career.finances?.monthlyExpenses ?? 0;
+        const currentSavings = career.finances?.savings ?? 300;
+        const weeklyRent = Math.floor(expenses / 4);
+        const newSavings = Math.max(0, currentSavings - weeklyRent);
 
         // Check coach trust & benching (if in team)
-        let rosterStatus = career.lifestyle.rosterStatus;
+        const lifestyle = career.lifestyle || {
+          energy: 100,
+          maxEnergy: 100,
+          housing: 'parents_home',
+          pcLevel: 1,
+          coachTrust: 50,
+          rosterStatus: career.currentTeam ? 'starter' : 'free_agent',
+        };
+
+        let rosterStatus = lifestyle.rosterStatus;
         let currentTeam = career.currentTeam;
 
         if (currentTeam) {
-          if (career.lifestyle.coachTrust <= 0) {
+          if ((lifestyle.coachTrust ?? 50) <= 0) {
             // Fired from team!
             rosterStatus = 'free_agent';
             currentTeam = null;
-          } else if (career.lifestyle.coachTrust < 25) {
+          } else if ((lifestyle.coachTrust ?? 50) < 25) {
             rosterStatus = 'benched';
           } else {
             rosterStatus = 'starter';
           }
+        } else {
+          rosterStatus = 'free_agent';
         }
 
         if (career.week >= WEEKS_PER_SPLIT) {
@@ -656,12 +669,12 @@ export const useGameStore = create<GameStore>()(
         }
 
         // Pick next event with proper hasTeam filter
-        const usedIds = career.eventHistory.map(e => e.eventId);
+        const usedIds = (career.eventHistory || []).map(e => e.eventId);
         const event = getWeeklyEvent(
           {
             age: career.age,
-            reputation: career.stats.reputation,
-            inInternational: career.inInternational,
+            reputation: career.stats?.reputation ?? 10,
+            inInternational: Boolean(career.inInternational),
             hasTeam: currentTeam !== null,
           },
           usedIds,
@@ -677,12 +690,12 @@ export const useGameStore = create<GameStore>()(
               ...state.career!,
               week: state.career!.week + 1,
               currentTeam,
-              finances: { ...state.career!.finances, savings: newSavings },
-              lifestyle: { ...state.career!.lifestyle, energy: newEnergy, rosterStatus },
+              finances: { ...(state.career!.finances || { savings: 300, salary: 0, monthlyExpenses: 0 }), savings: newSavings },
+              lifestyle: { ...lifestyle, energy: newEnergy, rosterStatus },
             },
             interactiveMatch: {
               opponentTeam: opponent,
-              selectedChampion: state.career!.championPool[0] || 'Aatrox',
+              selectedChampion: state.career!.championPool?.[0] || 'Aatrox',
               currentStep: 'champion_select',
               playerScore: 50,
               opponentScore: 50,
@@ -698,8 +711,8 @@ export const useGameStore = create<GameStore>()(
               ...state.career!,
               week: state.career!.week + 1,
               currentTeam,
-              finances: { ...state.career!.finances, savings: newSavings },
-              lifestyle: { ...state.career!.lifestyle, energy: newEnergy, rosterStatus },
+              finances: { ...(state.career!.finances || { savings: 300, salary: 0, monthlyExpenses: 0 }), savings: newSavings },
+              lifestyle: { ...lifestyle, energy: newEnergy, rosterStatus },
             },
             currentEvent: event,
             phase: 'EVENT',
