@@ -1126,6 +1126,467 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // ══════════════════════════════════════════════════════
+  //  EXPANDED DYNAMIC EVENTS (SOLOQ, PRO STAGE, STREAM, DRAMA)
+  // ══════════════════════════════════════════════════════
+
+  {
+    id: 'soloq_faker_matchup',
+    category: 'soloq',
+    titleKey: 'event.soloq_faker.title',
+    descriptionKey: 'event.soloq_faker.desc',
+    weight: 8,
+    minReputation: 25,
+    choices: [
+      {
+        textKey: 'event.soloq_faker.a',
+        effects: { mechanics: 10, reputation: 12, mental: 6 },
+        nextTextKey: 'event.soloq_faker.a.result',
+      },
+      {
+        textKey: 'event.soloq_faker.b',
+        effects: { gameKnowledge: 10, mental: 4, reputation: 6 },
+        nextTextKey: 'event.soloq_faker.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_broken_mouse_tilt',
+    category: 'soloq',
+    titleKey: 'event.soloq_tilt.title',
+    descriptionKey: 'event.soloq_tilt.desc',
+    weight: 8,
+    choices: [
+      {
+        textKey: 'event.soloq_tilt.a',
+        effects: { savings: -150, mental: 6, mechanics: 4 },
+        nextTextKey: 'event.soloq_tilt.a.result',
+      },
+      {
+        textKey: 'event.soloq_tilt.b',
+        effects: { mental: -8, gameKnowledge: 6 },
+        nextTextKey: 'event.soloq_tilt.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_t1_scout_kr',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_t1.title',
+    descriptionKey: 'event.prodigy_t1.desc',
+    weight: 6,
+    minReputation: 40,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_t1.a',
+        effects: { mechanics: 12, gameKnowledge: 10, savings: -1200, reputation: 15 },
+        nextTextKey: 'event.prodigy_t1.a.result',
+      },
+      {
+        textKey: 'event.prodigy_t1.b',
+        effects: { reputation: 8, mental: 6 },
+        nextTextKey: 'event.prodigy_t1.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_smurf_duo_girl',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_duo.title',
+    descriptionKey: 'event.prodigy_duo.desc',
+    weight: 8,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_duo.a',
+        effects: { mental: 8, mechanics: 4, gameKnowledge: -3 },
+        nextTextKey: 'event.prodigy_duo.a.result',
+      },
+      {
+        textKey: 'event.prodigy_duo.b',
+        effects: { mechanics: 6, mental: -4 },
+        nextTextKey: 'event.prodigy_duo.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_shady_manager',
+    category: 'contract',
+    titleKey: 'event.prodigy_shady.title',
+    descriptionKey: 'event.prodigy_shady.desc',
+    weight: 7,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_shady.a',
+        effects: { savings: 800, reputation: -10, mental: -6 },
+        nextTextKey: 'event.prodigy_shady.a.result',
+      },
+      {
+        textKey: 'event.prodigy_shady.b',
+        effects: { mental: 6, reputation: 8, gameKnowledge: 6 },
+        nextTextKey: 'event.prodigy_shady.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_toxic_adc_ragequit',
+    category: 'team_dynamics',
+    titleKey: 'event.team_toxic_adc.title',
+    descriptionKey: 'event.team_toxic_adc.desc',
+    weight: 8,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_toxic_adc.a',
+        effects: { communication: 10, mental: 6, coachTrust: 15 },
+        nextTextKey: 'event.team_toxic_adc.a.result',
+      },
+      {
+        textKey: 'event.team_toxic_adc.b',
+        effects: { mental: -6, teamStrength: -5, coachTrust: -10 },
+        nextTextKey: 'event.team_toxic_adc.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_coach_pocket_dispute',
+    category: 'team_dynamics',
+    titleKey: 'event.team_pocket.title',
+    descriptionKey: 'event.team_pocket.desc',
+    weight: 8,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_pocket.a',
+        effects: { mechanics: 8, reputation: 10, coachTrust: -10 },
+        nextTextKey: 'event.team_pocket.a.result',
+      },
+      {
+        textKey: 'event.team_pocket.b',
+        effects: { communication: 8, gameKnowledge: 8, coachTrust: 20 },
+        nextTextKey: 'event.team_pocket.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_bootcamp_seoul',
+    category: 'training',
+    titleKey: 'event.team_seoul.title',
+    descriptionKey: 'event.team_seoul.desc',
+    weight: 7,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_seoul.a',
+        effects: { mechanics: 14, gameKnowledge: 12, mental: -8, teamStrength: 8 },
+        nextTextKey: 'event.team_seoul.a.result',
+      },
+      {
+        textKey: 'event.team_seoul.b',
+        effects: { mental: 8, communication: 10, teamStrength: 4 },
+        nextTextKey: 'event.team_seoul.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_energy_drink_commercial',
+    category: 'social',
+    titleKey: 'event.team_ad.title',
+    descriptionKey: 'event.team_ad.desc',
+    weight: 7,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_ad.a',
+        effects: { savings: 2500, reputation: 10, mental: -4 },
+        nextTextKey: 'event.team_ad.a.result',
+      },
+      {
+        textKey: 'event.team_ad.b',
+        effects: { mechanics: 6, mental: 4 },
+        nextTextKey: 'event.team_ad.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_stage_jitters_panic',
+    category: 'match',
+    titleKey: 'event.team_jitters.title',
+    descriptionKey: 'event.team_jitters.desc',
+    weight: 8,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_jitters.a',
+        effects: { mental: 12, communication: 8, reputation: 8 },
+        nextTextKey: 'event.team_jitters.a.result',
+      },
+      {
+        textKey: 'event.team_jitters.b',
+        effects: { mechanics: 8, mental: -5 },
+        nextTextKey: 'event.team_jitters.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_riot_allchat_fine',
+    category: 'career',
+    titleKey: 'event.team_fine.title',
+    descriptionKey: 'event.team_fine.desc',
+    weight: 7,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_fine.a',
+        effects: { savings: -1500, reputation: 12, coachTrust: -10 },
+        nextTextKey: 'event.team_fine.a.result',
+      },
+      {
+        textKey: 'event.team_fine.b',
+        effects: { savings: -1500, coachTrust: 10, reputation: -4 },
+        nextTextKey: 'event.team_fine.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_sub_opportunity_fast',
+    category: 'career',
+    titleKey: 'event.team_sub_chance.title',
+    descriptionKey: 'event.team_sub_chance.desc',
+    weight: 8,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_sub_chance.a',
+        effects: { reputation: 15, mechanics: 8, coachTrust: 25 },
+        nextTextKey: 'event.team_sub_chance.a.result',
+      },
+      {
+        textKey: 'event.team_sub_chance.b',
+        effects: { mental: 8, coachTrust: -10 },
+        nextTextKey: 'event.team_sub_chance.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_nightclub_scandal',
+    category: 'social',
+    titleKey: 'event.team_club.title',
+    descriptionKey: 'event.team_club.desc',
+    weight: 6,
+    requiresTeam: true,
+    choices: [
+      {
+        textKey: 'event.team_club.a',
+        effects: { reputation: -8, coachTrust: -20, mental: -6 },
+        nextTextKey: 'event.team_club.a.result',
+      },
+      {
+        textKey: 'event.team_club.b',
+        effects: { reputation: 6, coachTrust: 10, savings: -500 },
+        nextTextKey: 'event.team_club.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'stream_ibai_megaraid',
+    category: 'social',
+    titleKey: 'event.stream_raid.title',
+    descriptionKey: 'event.stream_raid.desc',
+    weight: 7,
+    choices: [
+      {
+        textKey: 'event.stream_raid.a',
+        effects: { savings: 1800, reputation: 14, mechanics: 6 },
+        nextTextKey: 'event.stream_raid.a.result',
+      },
+      {
+        textKey: 'event.stream_raid.b',
+        effects: { reputation: 8, mental: 6 },
+        nextTextKey: 'event.stream_raid.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'stream_subathon_exhaustion',
+    category: 'social',
+    titleKey: 'event.stream_subathon.title',
+    descriptionKey: 'event.stream_subathon.desc',
+    weight: 6,
+    choices: [
+      {
+        textKey: 'event.stream_subathon.a',
+        effects: { savings: 3500, reputation: 12, mental: -12, energy: -40 },
+        nextTextKey: 'event.stream_subathon.a.result',
+      },
+      {
+        textKey: 'event.stream_subathon.b',
+        effects: { mental: 8, energy: 20 },
+        nextTextKey: 'event.stream_subathon.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'stream_ddos_extortion',
+    category: 'social',
+    titleKey: 'event.stream_ddos.title',
+    descriptionKey: 'event.stream_ddos.desc',
+    weight: 6,
+    choices: [
+      {
+        textKey: 'event.stream_ddos.a',
+        effects: { savings: -600, mental: 8, gameKnowledge: 4 },
+        nextTextKey: 'event.stream_ddos.a.result',
+      },
+      {
+        textKey: 'event.stream_ddos.b',
+        effects: { mental: -10, lp: -25 },
+        nextTextKey: 'event.stream_ddos.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'social_podcast_interview',
+    category: 'social',
+    titleKey: 'event.social_podcast_interview.title',
+    descriptionKey: 'event.social_podcast_interview.desc',
+    weight: 7,
+    minReputation: 30,
+    choices: [
+      {
+        textKey: 'event.social_podcast_interview.a',
+        effects: { reputation: 15, mental: 4, coachTrust: -5 },
+        nextTextKey: 'event.social_podcast_interview.a.result',
+      },
+      {
+        textKey: 'event.social_podcast_interview.b',
+        effects: { reputation: 10, coachTrust: 15, communication: 6 },
+        nextTextKey: 'event.social_podcast_interview.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'social_hater_meme_viral',
+    category: 'social',
+    titleKey: 'event.social_meme.title',
+    descriptionKey: 'event.social_meme.desc',
+    weight: 7,
+    choices: [
+      {
+        textKey: 'event.social_meme.a',
+        effects: { mental: 10, reputation: 10, mechanics: 6 },
+        nextTextKey: 'event.social_meme.a.result',
+      },
+      {
+        textKey: 'event.social_meme.b',
+        effects: { mental: -8, mechanics: 8 },
+        nextTextKey: 'event.social_meme.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'contract_lpl_megadeal',
+    category: 'contract',
+    titleKey: 'event.contract_lpl.title',
+    descriptionKey: 'event.contract_lpl.desc',
+    weight: 5,
+    minReputation: 60,
+    choices: [
+      {
+        textKey: 'event.contract_lpl.a',
+        effects: { savings: 25000, adaptability: 12, reputation: 15 },
+        nextTextKey: 'event.contract_lpl.a.result',
+      },
+      {
+        textKey: 'event.contract_lpl.b',
+        effects: { reputation: 10, coachTrust: 20, mental: 6 },
+        nextTextKey: 'event.contract_lpl.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'intl_korean_food_spice',
+    category: 'international',
+    titleKey: 'event.intl_spice.title',
+    descriptionKey: 'event.intl_spice.desc',
+    weight: 7,
+    requiresInternational: true,
+    choices: [
+      {
+        textKey: 'event.intl_spice.a',
+        effects: { mental: -8, energy: -30 },
+        nextTextKey: 'event.intl_spice.a.result',
+      },
+      {
+        textKey: 'event.intl_spice.b',
+        effects: { mental: 6, mechanics: 6 },
+        nextTextKey: 'event.intl_spice.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'intl_faker_nod_respect',
+    category: 'international',
+    titleKey: 'event.intl_faker_nod.title',
+    descriptionKey: 'event.intl_faker_nod.desc',
+    weight: 6,
+    requiresInternational: true,
+    choices: [
+      {
+        textKey: 'event.intl_faker_nod.a',
+        effects: { mental: 15, reputation: 20, mechanics: 10 },
+        nextTextKey: 'event.intl_faker_nod.a.result',
+      },
+      {
+        textKey: 'event.intl_faker_nod.b',
+        effects: { gameKnowledge: 14, mental: 10 },
+        nextTextKey: 'event.intl_faker_nod.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'career_burnout_warning',
+    category: 'health',
+    titleKey: 'event.career_burnout.title',
+    descriptionKey: 'event.career_burnout.desc',
+    weight: 7,
+    choices: [
+      {
+        textKey: 'event.career_burnout.a',
+        effects: { mental: 15, energy: 30, mechanics: -4 },
+        nextTextKey: 'event.career_burnout.a.result',
+      },
+      {
+        textKey: 'event.career_burnout.b',
+        effects: { mechanics: 8, mental: -12, energy: -25 },
+        nextTextKey: 'event.career_burnout.b.result',
+      },
+    ],
+  },
 ];
 
 // Get a random set of events for a week, filtered by career state

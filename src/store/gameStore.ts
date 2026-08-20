@@ -69,6 +69,7 @@ interface GameStore extends GameState {
   resetGame: () => void;
   loadDailyChallenge: () => void;
   addNotification: (text: string, type?: 'positive' | 'negative' | 'neutral' | 'gold', icon?: string) => void;
+  setShowPatchNotesModal: (show: boolean) => void;
 }
 
 const INITIAL_STATE: GameState = {
@@ -82,12 +83,16 @@ const INITIAL_STATE: GameState = {
   pendingOffers: [],
   dailyChallenge: null,
   notifications: [],
+  showPatchNotesModal: false,
+  setShowPatchNotesModal: () => {},
 };
 
 export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
       ...INITIAL_STATE,
+
+      setShowPatchNotesModal: (show) => set({ showPatchNotesModal: show }),
 
       addNotification: (text, type = 'positive', icon = '✨') => {
         const id = Math.random().toString(36).substring(2, 9);
@@ -132,12 +137,8 @@ export const useGameStore = create<GameStore>()(
           masteries[id] = { championId: id, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
         });
 
-        // Patch init
-        const initialPatch: MetaPatch = {
-          patchVersion: '15.1',
-          season: 15,
-          tiers: generateMetaPatch('15.1'),
-        };
+        // Patch init with full rich details
+        const initialPatch = generateMetaPatch('15.1', 15);
 
         // Starting rank: Bronze IV (if Prodigy) or Diamond I / Master (if Pro Debut)
         const startTier: Tier = isProdigy ? 'BRONZE' : 'DIAMOND';
@@ -225,6 +226,7 @@ export const useGameStore = create<GameStore>()(
           currentMatch: null,
           interactiveMatch: null,
           pendingOffers: [],
+          showPatchNotesModal: true,
         });
       },
 
@@ -275,7 +277,7 @@ export const useGameStore = create<GameStore>()(
           mmr: 2500,
           championPool: pool,
           masteries,
-          currentPatch: { patchVersion: '15.1', season: 15, tiers: generateMetaPatch('15.1') },
+          currentPatch: generateMetaPatch('15.1', 15),
           currentTeam: team,
           region,
           stats,
@@ -799,11 +801,7 @@ export const useGameStore = create<GameStore>()(
 
         // Dynamic patch generation each split
         const newPatchVersion = `15.${nextSplitNumber + 1}`;
-        const newPatch: MetaPatch = {
-          patchVersion: newPatchVersion,
-          season: 15,
-          tiers: generateMetaPatch(newPatchVersion),
-        };
+        const newPatch = generateMetaPatch(newPatchVersion, 15);
 
         if (nextAge >= 31) {
           set(state => ({
@@ -838,6 +836,7 @@ export const useGameStore = create<GameStore>()(
               swapsRemainingThisSplit: 2,
               finances: { ...state.career!.finances, savings: newSavings },
             },
+            showPatchNotesModal: true,
             phase: 'WORLDS_BRACKET',
           }));
         } else if (qualifiedPlayoffs) {
@@ -856,6 +855,7 @@ export const useGameStore = create<GameStore>()(
               swapsRemainingThisSplit: 2,
               finances: { ...state.career!.finances, savings: newSavings },
             },
+            showPatchNotesModal: true,
             phase: 'PLAYOFF_BRACKET',
           }));
         } else {
@@ -876,6 +876,7 @@ export const useGameStore = create<GameStore>()(
               swapsRemainingThisSplit: 2,
               finances: { ...state.career!.finances, savings: newSavings },
             },
+            showPatchNotesModal: true,
             phase: 'CAREER_HUB',
           }));
         }

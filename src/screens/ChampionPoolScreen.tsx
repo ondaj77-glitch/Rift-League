@@ -10,6 +10,7 @@ export function ChampionPoolScreen() {
   const { t } = useTranslation();
   const career = useGameStore(s => s.career);
   const swapPoolChampion = useGameStore(s => s.swapPoolChampion);
+  const setShowPatchNotesModal = useGameStore(s => s.setShowPatchNotesModal);
 
   const [selectedPoolChamp, setSelectedPoolChamp] = useState<string | null>(null);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
@@ -65,10 +66,14 @@ export function ChampionPoolScreen() {
           <div className="bg-amber-950/50 px-3 py-1.5 rounded-lg border border-amber-800/40 text-xs font-bold text-amber-300">
             🔄 Výměny: {remainingSwaps}/2 tento split (30⚡)
           </div>
-          <div className="flex items-center gap-2 bg-rift-surface px-3 py-1.5 rounded-lg border border-rift-border">
-            <span className="text-xs text-slate-400">Aktuální Patch:</span>
-            <span className="text-xs font-black text-gold-400 font-mono">v{currentPatch.patchVersion}</span>
-          </div>
+          <button
+            onClick={() => setShowPatchNotesModal(true)}
+            className="flex items-center gap-2 bg-rift-surface hover:bg-gold-950/40 px-3 py-1.5 rounded-lg border border-rift-border hover:border-gold-500/50 transition-all text-xs cursor-pointer group shadow-sm"
+            title="Klikni pro detailní přehled Patch Notes a změn"
+          >
+            <span className="text-slate-400 group-hover:text-slate-200">📋 Patch:</span>
+            <span className="font-black text-gold-400 font-mono">v{currentPatch.patchVersion}</span>
+          </button>
         </div>
       </div>
 

@@ -67,9 +67,21 @@ export interface ChampionMastery {
   wins: number;
 }
 
+export interface PatchChampionChange {
+  championId: string;
+  changeType: 'buff' | 'nerf';
+  oldTier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D';
+  newTier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D';
+  summary: string;
+}
+
 export interface MetaPatch {
   patchVersion: string;
   season: number;
+  headline: string;
+  systemChanges: string[];
+  buffs: PatchChampionChange[];
+  nerfs: PatchChampionChange[];
   tiers: Record<string, {
     tier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D';
     winRate: number;
@@ -313,4 +325,6 @@ export interface GameState {
   pendingOffers: TeamOffer[];
   dailyChallenge: DailyChallenge | null;
   notifications: GameNotification[];
+  showPatchNotesModal: boolean;
+  setShowPatchNotesModal: (show: boolean) => void;
 }

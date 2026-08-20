@@ -30,6 +30,7 @@ export function CareerHubScreen() {
   const setPhase = useGameStore(s => s.setPhase);
   const currentEvent = useGameStore(s => s.currentEvent);
   const retire = useGameStore(s => s.retire);
+  const setShowPatchNotesModal = useGameStore(s => s.setShowPatchNotesModal);
 
   const [forfeitModalOpen, setForfeitModalOpen] = useState(false);
 
@@ -88,6 +89,15 @@ export function CareerHubScreen() {
           <div className="flex flex-wrap items-center gap-3 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
             {/* Live In-Game Language Switcher */}
             <LanguageSwitcher size="sm" />
+
+            {/* Patch Notes Button */}
+            <button
+              onClick={() => setShowPatchNotesModal(true)}
+              className="bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-600/40 px-2.5 py-1 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1 shadow-sm"
+              title="Zobrazit aktuální Patch Notes a meta změny"
+            >
+              📋 {career.currentPatch.patchVersion}
+            </button>
 
             {/* Energy */}
             <div className="bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-800/40 text-center">

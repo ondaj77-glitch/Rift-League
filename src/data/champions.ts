@@ -1,4 +1,4 @@
-import type { Role } from '../types/game';
+import type { Role, MetaPatch, PatchChampionChange } from '../types/game';
 
 export interface ChampionData {
   id: string;          // Riot Data Dragon ID
@@ -120,37 +120,102 @@ export function getChampionsByRole(role: Role): ChampionData[] {
     .sort((a, b) => TIER_PRIORITY[a.baseTier] - TIER_PRIORITY[b.baseTier]);
 }
 
-// Generate dynamic meta tier list per patch
-export function generateMetaPatch(patchNumber: string): Record<string, { tier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D'; winRate: number; note: string }> {
-  const meta: Record<string, { tier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D'; winRate: number; note: string }> = {};
+// Generate dynamic meta tier list & rich patch notes per patch
+export function generateMetaPatch(patchNumber: string, seasonNumber = 15): MetaPatch {
+  const tiers: Record<string, { tier: 'S+' | 'S' | 'A' | 'B' | 'C' | 'D'; winRate: number; note: string }> = {};
+  const buffs: PatchChampionChange[] = [];
+  const nerfs: PatchChampionChange[] = [];
 
-  const notes = [
-    'Buffed base AD & Q cooldown reduced',
-    'Core items got cheaper this patch',
-    'Minor nerfs to base HP, still strong',
-    'Untouched, solid comfort pick in meta',
-    'Hard nerfed in pro play patch',
-    'New item synergy discovered by KR soloq',
-    'Slight scaling buff to ultimate',
-    'Direct counters buffed, tier dropped',
+  const patchNotesBuff = [
+    'Zvýšen základní AD o +4 a snížen cooldown na Q o 1.5s',
+    'Nové mytické itemy perfektně synergují s kitem v korejské SoloQ',
+    'Zvýšeno AP škálování na ultimate abilitě o +15%',
+    'Snížena cena core itemů o 250 goldů, rychlejší powerspike',
+    'Zvýšen základní armor a léčení v rané fázi hry',
   ];
+
+  const patchNotesNerf = [
+    'Sníženo základní HP o -45 a oslaben pasivní damage',
+    'Zvýšen cooldown na únikové abilitě po dominanci v pro playi',
+    'Klíčový item dostal těžký nerf na AD a attack speed',
+    'Oslaben base damage na spellu pro snížení lane dominance',
+    'Zvýšena cena core itemu o 300 goldů pro zpomalení snowballu',
+  ];
+
+  const systemChangesPool = [
+    '🐉 Chemtech & Infernal Dragon Soul damage zvýšen o +8%',
+    '⚔️ Lethality & Armor Penetration itemy upraveny pro agresivnější skirmishe',
+    '🛡️ Gold bounty z věžových plátů (Turret Plating) zvýšena o 25g',
+    '👾 Voidgrub spawn čas upraven pro podporu soubojů na top lince',
+    '💨 Cloud Drake bonus k rychlosti pohybu zvýšen na všech serverech',
+    '🏰 Baron Nashor buff dává více AD/AP pro rychlejší ukončování her',
+  ];
+
+  const headlinesPool = [
+    'Velký Meta Shift: Rework itemů a návrat agresivních hypercarry',
+    'Mid-Season Shakeup: Nadvláda AP mágů a úpravy na mapě',
+    'Worlds Meta Patch: Návrat tanků a engage supportů',
+    'Split Launch: Úpravy draků a optimalizace run pro SoloQ',
+  ];
+
+  const patchSeed = patchNumber.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const headline = headlinesPool[patchSeed % headlinesPool.length];
+  const systemChanges = [
+    systemChangesPool[patchSeed % systemChangesPool.length],
+    systemChangesPool[(patchSeed + 2) % systemChangesPool.length],
+  ];
+
+  const tierMap: Record<number, 'S+' | 'S' | 'A' | 'B' | 'C' | 'D'> = {
+    1: 'S+', 2: 'S', 3: 'A', 4: 'B', 5: 'C', 6: 'D',
+  };
 
   ALL_CHAMPIONS.forEach((champ, idx) => {
     const hash = (champ.id + patchNumber).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    // Dynamic shift: mostly stays close to baseTier with +/- 1 tier shift
     const shift = (hash % 3) - 1; // -1, 0, or 1
     const basePrio = TIER_PRIORITY[champ.baseTier];
     const newPrio = Math.max(1, Math.min(6, basePrio + shift));
-    const tierMap: Record<number, 'S+' | 'S' | 'A' | 'B' | 'C' | 'D'> = {
-      1: 'S+', 2: 'S', 3: 'A', 4: 'B', 5: 'C', 6: 'D',
-    };
-    const tier = tierMap[newPrio];
-    const baseWinRate = tier === 'S+' ? 53.5 : tier === 'S' ? 51.8 : tier === 'A' ? 50.2 : tier === 'B' ? 48.5 : tier === 'C' ? 46.8 : 44.5;
-    const winRate = Number((baseWinRate + (Math.sin(hash + idx) * 1.2)).toFixed(1));
-    const note = notes[hash % notes.length];
+    const newTier = tierMap[newPrio];
 
-    meta[champ.id] = { tier, winRate, note };
+    const baseWinRate = newTier === 'S+' ? 53.5 : newTier === 'S' ? 51.8 : newTier === 'A' ? 50.2 : newTier === 'B' ? 48.5 : newTier === 'C' ? 46.8 : 44.5;
+    const winRate = Number((baseWinRate + (Math.sin(hash + idx) * 1.2)).toFixed(1));
+
+    let note = 'Stabilní pick v aktuální metě';
+    if (newPrio < basePrio) {
+      // Buffed
+      note = patchNotesBuff[hash % patchNotesBuff.length];
+      if (buffs.length < 4) {
+        buffs.push({
+          championId: champ.id,
+          changeType: 'buff',
+          oldTier: champ.baseTier,
+          newTier,
+          summary: note,
+        });
+      }
+    } else if (newPrio > basePrio) {
+      // Nerfed
+      note = patchNotesNerf[hash % patchNotesNerf.length];
+      if (nerfs.length < 4) {
+        nerfs.push({
+          championId: champ.id,
+          changeType: 'nerf',
+          oldTier: champ.baseTier,
+          newTier,
+          summary: note,
+        });
+      }
+    }
+
+    tiers[champ.id] = { tier: newTier, winRate, note };
   });
 
-  return meta;
+  return {
+    patchVersion: patchNumber,
+    season: seasonNumber,
+    headline,
+    systemChanges,
+    buffs,
+    nerfs,
+    tiers,
+  };
 }

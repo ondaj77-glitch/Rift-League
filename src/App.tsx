@@ -12,6 +12,7 @@ import { WorldsBracketScreen } from './screens/WorldsBracketScreen';
 import { RetirementScreen } from './screens/RetirementScreen';
 import { DailyChallengeScreen } from './screens/DailyChallengeScreen';
 import { StatToast } from './components/ui/StatToast';
+import { PatchNotesModal } from './components/ui/PatchNotesModal';
 
 const pageTransition = {
   initial: { opacity: 0 },
@@ -50,6 +51,9 @@ export default function App() {
           {renderScreen()}
         </motion.div>
       </AnimatePresence>
+
+      {/* Visual Riot Patch Notes Modal */}
+      <PatchNotesModal />
 
       {/* Global Animated Stat & Notification Toasts */}
       <StatToast notifications={notifications} />
