@@ -9,7 +9,7 @@ import { TEAMS, REGION_FLAGS } from '../data/teams';
 import { generateStandings } from '../utils/simulation';
 import { TIER_ICONS, TIER_COLORS, TIER_ORDER } from '../data/ranks';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
-import type { Team, TeamOffer } from '../types/game';
+import type { TeamOffer } from '../types/game';
 
 export function SeasonSummaryScreen() {
   const { t, language } = useTranslation();
@@ -19,7 +19,7 @@ export function SeasonSummaryScreen() {
   const acceptTeamOffer = useGameStore(s => s.acceptTeamOffer);
   const setPhase = useGameStore(s => s.setPhase);
 
-  const [selectedOffer, setSelectedOffer] = useState<TeamOffer | null>(null);
+  const [, setSelectedOffer] = useState<TeamOffer | null>(null);
 
   if (!career) {
     return (
@@ -30,6 +30,8 @@ export function SeasonSummaryScreen() {
   }
 
   const isProdigy = !career.currentTeam;
+  const isOffSeason = career.splitNumber === 3 || career.split === 'Summer';
+
   const soloqWins = career.soloqWins ?? 0;
   const soloqLosses = career.soloqLosses ?? 0;
   const totalSoloq = soloqWins + soloqLosses;
@@ -38,7 +40,7 @@ export function SeasonSummaryScreen() {
   const totalPro = career.wins + career.losses;
   const proWinRate = totalPro > 0 ? Math.round((career.wins / totalPro) * 100) : 0;
   const qualifiedPlayoffs = !isProdigy && (career.wins / Math.max(1, totalPro) >= 0.5 || career.wins >= 5);
-  const qualifiedIntl = !isProdigy && proWinRate >= 60 && (career.stats?.reputation ?? 0) >= 60 && career.splitNumber === 3;
+  const qualifiedIntl = !isProdigy && proWinRate >= 60 && (career.stats?.reputation ?? 0) >= 60;
 
   const rank = career.rank || { tier: 'BRONZE', division: 'IV', lp: 0, globalRank: 1500000 };
   const rankColors = TIER_COLORS[rank.tier] || TIER_COLORS.BRONZE;
@@ -55,9 +57,16 @@ export function SeasonSummaryScreen() {
 
   const playerRank = !isProdigy ? standings.findIndex(s => s.isPlayer) + 1 : 0;
 
-  // Generate Off-Season Transfer Offers (Tier 1 / Tier 2 Academy)
+  // Tournament title based on split
+  const tournamentName = career.splitNumber === 1
+    ? (isCs ? 'Winter Playoffs & First Stand (FST)' : 'Winter Playoffs & First Stand (FST)')
+    : career.splitNumber === 2
+    ? (isCs ? 'Spring Playoffs & MSI (Mid-Season Invitational)' : 'Spring Playoffs & MSI')
+    : (isCs ? 'Championship Finals & WORLDS' : 'Championship Finals & WORLDS');
+
+  // Generate Off-Season Transfer Offers ONLY during Off-Season (after Summer / Split 3)
   const offSeasonOffers: TeamOffer[] = useMemo(() => {
-    if (career.age < 17) return [];
+    if (!isOffSeason || career.age < 17) return [];
 
     const availableTeams = TEAMS.filter(
       t => t.region === career.region && t.id !== career.currentTeam?.id
@@ -69,10 +78,6 @@ export function SeasonSummaryScreen() {
       const isMidTeam = team.strength >= 74 && team.strength < 85;
       const isAcademyTeam = team.strength < 74;
 
-      // Tier eligibility based on rank:
-      // Master/GM/Challenger => Tier 1 & Tier 2
-      // Diamond => Tier 2 & Tier 3
-      // Platinum => Tier 3 Academy
       let eligible = false;
       if (rankOrder >= 7) eligible = true;
       else if (rankOrder >= 5 && !isTopTeam) eligible = true;
@@ -92,7 +97,7 @@ export function SeasonSummaryScreen() {
     });
 
     return offers;
-  }, [career.age, career.region, career.currentTeam, rankOrder]);
+  }, [isOffSeason, career.age, career.region, career.currentTeam, rankOrder]);
 
   function handleSign(offer: TeamOffer) {
     acceptTeamOffer(offer);
@@ -111,14 +116,16 @@ export function SeasonSummaryScreen() {
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl sm:text-3xl font-black text-white text-center font-heading uppercase tracking-wide">
-            {isProdigy
-              ? (isCs ? '👑 Zhodnocení SoloQ Splitu & Off-Season' : '👑 SoloQ Split Summary & Off-Season')
-              : t('season.title')}
+            {isOffSeason
+              ? (isCs ? '👑 Konec Sezóny & Off-Season' : '👑 End of Season & Off-Season')
+              : isProdigy
+              ? (isCs ? '👑 Zhodnocení SoloQ Splitu' : '👑 SoloQ Split Summary')
+              : `${career.split} Split Summary`}
           </h1>
           <p className="text-center text-slate-400 text-sm mt-1">
             {isProdigy
               ? (isCs ? `SoloQ Talent (${career.age} let) · ${career.split} Split ${career.year}` : `SoloQ Prodigy (${career.age} y/o) · ${career.split} Split ${career.year}`)
-              : `${career.split} Split ${career.year}`}
+              : `${career.currentTeam?.name} · ${career.split} Split ${career.year}`}
           </p>
         </motion.div>
 
@@ -180,10 +187,16 @@ export function SeasonSummaryScreen() {
                 </div>
               </div>
 
-              {qualifiedIntl ? (
-                <p className="text-gold-400 font-bold">{t('season.qualified_intl')}</p>
+              {qualifiedIntl && career.splitNumber === 3 ? (
+                <div className="p-3 bg-gold-950/50 border border-gold-500/50 rounded-xl space-y-1">
+                  <p className="text-gold-300 font-black text-base">👑 KVALIFIKACE NA WORLDS!</p>
+                  <p className="text-xs text-gold-400/80">Tým si vybojoval účast na Mistrovství světa League of Legends!</p>
+                </div>
               ) : qualifiedPlayoffs ? (
-                <p className="text-green-400 font-bold">{t('season.qualified')}</p>
+                <div className="p-3 bg-emerald-950/50 border border-emerald-500/50 rounded-xl space-y-1">
+                  <p className="text-emerald-300 font-black text-base">🏆 POSTUP DO PLAYOFFS!</p>
+                  <p className="text-xs text-emerald-400/80">{tournamentName}</p>
+                </div>
               ) : (
                 <p className="text-slate-500 text-sm">{t('season.eliminated')}</p>
               )}
@@ -218,106 +231,126 @@ export function SeasonSummaryScreen() {
           </div>
         )}
 
-        {/* OFF-SEASON CONTRACT & TRANSFER WINDOW */}
-        <Card className="p-5 space-y-4 border-gold-600/40">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🤝</span>
+        {/* MID-SEASON CONTRACT NOTICE (During Winter & Spring) */}
+        {!isOffSeason && career.currentTeam && (
+          <Card className="p-4 bg-slate-900/60 border border-slate-800 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <TeamLogo team={career.currentTeam} size="sm" />
               <div>
-                <h3 className="font-bold text-white text-base font-heading">
-                  {isCs ? 'Off-Season Přestupové Okno' : 'Off-Season Transfer Market'}
-                </h3>
-                <p className="text-xs text-slate-400">
-                  {isCs ? 'Nabídky smluv pro nadcházející split na základě tvých výkonů' : 'Contract offers for the upcoming split'}
+                <h4 className="text-xs font-bold text-white">Smlouva pokračuje do dalšího splitu</h4>
+                <p className="text-[11px] text-slate-400">
+                  Jsi pod kontraktem v {career.currentTeam.name}. Přestupové okno se otevře až v Off-Season po Summer Splitu.
                 </p>
               </div>
             </div>
-            <span className="text-xs px-2.5 py-1 rounded-full bg-gold-500/20 text-gold-300 font-bold border border-gold-500/30">
-              OFF-SEASON
+            <span className="text-xs px-2 py-1 rounded bg-slate-800 text-slate-300 font-bold border border-slate-700">
+              Aktivní kontrakt
             </span>
-          </div>
+          </Card>
+        )}
 
-          {/* Current Team Status / Extension */}
-          {career.currentTeam && (
-            <div className="p-4 rounded-xl border border-emerald-600/40 bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <TeamLogo team={career.currentTeam} size="md" />
+        {/* OFF-SEASON TRANSFER WINDOW (Only after Summer Split / Worlds) */}
+        {isOffSeason && (
+          <Card className="p-5 space-y-4 border-gold-600/40">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🤝</span>
                 <div>
-                  <span className="text-[11px] text-emerald-400 font-bold uppercase">
-                    {isCs ? 'Aktuální Tým (Smluvní opce)' : 'Current Organization'}
-                  </span>
-                  <h4 className="font-bold text-white text-sm">{career.currentTeam.name}</h4>
-                  <p className="text-xs text-slate-300 font-mono">${career.finances.salary.toLocaleString()} / rok</p>
+                  <h3 className="font-bold text-white text-base font-heading">
+                    {isCs ? 'Off-Season Přestupové Okno' : 'Off-Season Transfer Market'}
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    {isCs ? 'Nabídky smluv na novou sezónu na základě tvých celoročních výkonů' : 'Contract offers for the upcoming season'}
+                  </p>
                 </div>
               </div>
-              <span className="text-xs text-emerald-300 font-bold bg-emerald-900/60 px-3 py-1.5 rounded-lg border border-emerald-700">
-                ✅ {isCs ? 'Smlouva prodloužena' : 'Contract Extended'}
+              <span className="text-xs px-2.5 py-1 rounded-full bg-gold-500/20 text-gold-300 font-bold border border-gold-500/30">
+                OFF-SEASON
               </span>
             </div>
-          )}
 
-          {/* Incoming Offers */}
-          <div className="space-y-3 pt-2">
-            <h4 className="text-xs text-slate-400 font-bold uppercase tracking-wider">
-              {isCs ? 'Nové Nabídky Smluv (Tier 1 & Tier 2):' : 'Incoming Contract Offers (Tier 1 & Tier 2):'}
-            </h4>
-
-            {offSeasonOffers.length === 0 ? (
-              <div className="p-4 rounded-xl bg-rift-surface border border-rift-border text-center text-xs text-slate-400">
-                {career.age < 17
-                  ? (isCs ? `Věk ${career.age} let. Profi nabídky vyžadují věk 17+ let.` : `Age ${career.age}. Pro offers require age 17+.`)
-                  : (isCs ? 'Žádné nové externí nabídky. Dosáhni vyššího SoloQ ranku (Diamond/Master+) pro Tier 1 zájem!' : 'No new external offers. Reach Master+ for Tier 1 interest!')}
+            {/* Current Team Status / Extension */}
+            {career.currentTeam && (
+              <div className="p-4 rounded-xl border border-emerald-600/40 bg-emerald-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <TeamLogo team={career.currentTeam} size="md" />
+                  <div>
+                    <span className="text-[11px] text-emerald-400 font-bold uppercase">
+                      {isCs ? 'Aktuální Tým (Smluvní opce)' : 'Current Organization'}
+                    </span>
+                    <h4 className="font-bold text-white text-sm">{career.currentTeam.name}</h4>
+                    <p className="text-xs text-slate-300 font-mono">${career.finances.salary.toLocaleString()} / rok</p>
+                  </div>
+                </div>
+                <span className="text-xs text-emerald-300 font-bold bg-emerald-900/60 px-3 py-1.5 rounded-lg border border-emerald-700">
+                  ✅ {isCs ? 'Smlouva prodloužena na novou sezónu' : 'Contract Extended for New Season'}
+                </span>
               </div>
-            ) : (
-              offSeasonOffers.map((offer, idx) => {
-                const isSigned = career.currentTeam?.id === offer.team.id;
-                return (
-                  <div
-                    key={offer.team.id + idx}
-                    className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
-                      isSigned
-                        ? 'border-gold-500 bg-gold-950/30'
-                        : 'border-rift-border bg-rift-surface'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <TeamLogo team={offer.team} size="md" />
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h5 className="font-bold text-white text-sm">{offer.team.name}</h5>
-                          <span className="text-[10px] bg-purple-950 text-purple-300 px-1.5 py-0.5 rounded border border-purple-800">
-                            {REGION_FLAGS[offer.team.region]} {offer.team.region}
-                          </span>
+            )}
+
+            {/* Incoming Offers */}
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs text-slate-400 font-bold uppercase tracking-wider">
+                {isCs ? 'Nové Nabídky Smluv na Další Rok (Tier 1 & Tier 2):' : 'Incoming Contract Offers for Next Year (Tier 1 & Tier 2):'}
+              </h4>
+
+              {offSeasonOffers.length === 0 ? (
+                <div className="p-4 rounded-xl bg-rift-surface border border-rift-border text-center text-xs text-slate-400">
+                  {career.age < 17
+                    ? (isCs ? `Věk ${career.age} let. Profi nabídky vyžadují věk 17+ let.` : `Age ${career.age}. Pro offers require age 17+.`)
+                    : (isCs ? 'Žádné nové externí nabídky. Dosáhni vyššího SoloQ ranku (Diamond/Master+) pro Tier 1 zájem!' : 'No new external offers. Reach Master+ for Tier 1 interest!')}
+                </div>
+              ) : (
+                offSeasonOffers.map((offer, idx) => {
+                  const isSigned = career.currentTeam?.id === offer.team.id;
+                  return (
+                    <div
+                      key={offer.team.id + idx}
+                      className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                        isSigned
+                          ? 'border-gold-500 bg-gold-950/30'
+                          : 'border-rift-border bg-rift-surface'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <TeamLogo team={offer.team} size="md" />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h5 className="font-bold text-white text-sm">{offer.team.name}</h5>
+                            <span className="text-[10px] bg-purple-950 text-purple-300 px-1.5 py-0.5 rounded border border-purple-800">
+                              {REGION_FLAGS[offer.team.region]} {offer.team.region}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-400">
+                            {offer.role} · {offer.contractYears} {isCs ? 'rok(y)' : 'yr(s)'} · <strong className="text-green-400 font-mono">${offer.salary.toLocaleString()}/rok</strong>
+                          </p>
                         </div>
-                        <p className="text-xs text-slate-400">
-                          {offer.role} · {offer.contractYears} {isCs ? 'rok(y)' : 'yr(s)'} · <strong className="text-green-400 font-mono">${offer.salary.toLocaleString()}/rok</strong>
-                        </p>
+                      </div>
+
+                      <div>
+                        {isSigned ? (
+                          <span className="text-xs text-gold-400 font-bold">
+                            ✅ {isCs ? 'Podepsáno' : 'Signed'}
+                          </span>
+                        ) : (
+                          <Button
+                            variant="gold"
+                            size="sm"
+                            onClick={() => handleSign(offer)}
+                          >
+                            ✍️ {isCs ? 'Podepsat Kontrakt' : 'Sign Contract'}
+                          </Button>
+                        )}
                       </div>
                     </div>
+                  );
+                })
+              )}
+            </div>
+          </Card>
+        )}
 
-                    <div>
-                      {isSigned ? (
-                        <span className="text-xs text-gold-400 font-bold">
-                          ✅ {isCs ? 'Podepsáno' : 'Signed'}
-                        </span>
-                      ) : (
-                        <Button
-                          variant="gold"
-                          size="sm"
-                          onClick={() => handleSign(offer)}
-                        >
-                          ✍️ {isCs ? 'Podepsat Kontrakt' : 'Sign Contract'}
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </Card>
-
-        {/* Continue to Next Split Button */}
+        {/* Continue to Next Split / Tournament Button */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           <Button
             variant={qualifiedPlayoffs ? 'gold' : 'primary'}
@@ -325,7 +358,13 @@ export function SeasonSummaryScreen() {
             fullWidth
             onClick={nextSplit}
           >
-            {qualifiedPlayoffs ? `🏆 ${t('season.playoff_start')}` : (isCs ? 'Vstoupit do dalšího Splitu →' : t('season.next_split'))}
+            {qualifiedIntl && career.splitNumber === 3
+              ? `👑 ${isCs ? 'Vstoupit na WORLDS' : 'Enter WORLDS Championship'}`
+              : qualifiedPlayoffs
+              ? `🏆 ${isCs ? 'Hrát ' + tournamentName : 'Play ' + tournamentName}`
+              : isOffSeason
+              ? (isCs ? 'Zahájit Novou Sezónu (' + (career.year + 1) + ') →' : 'Start New Season (' + (career.year + 1) + ') →')
+              : (isCs ? 'Pokračovat do dalšího Splitu →' : t('season.next_split'))}
           </Button>
         </motion.div>
       </div>

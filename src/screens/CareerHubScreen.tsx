@@ -142,8 +142,8 @@ export function CareerHubScreen() {
             </div>
           </div>
 
-          {/* Clean 4-Card Quick Stats Grid (RFT Rating, Solo Queue, Followers, Money) */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Clean 5-Card Quick Stats Grid (RFT Rating, Energy, Solo Queue, Followers, Money) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {/* 1. Overall Rating */}
             <div className="bg-rift-surface p-3 rounded-xl border border-rift-border flex items-center justify-between">
               <div>
@@ -154,10 +154,28 @@ export function CareerHubScreen() {
                   </span>
                 </div>
               </div>
-              <span className="text-xl opacity-80">⚡</span>
+              <span className="text-xl opacity-80">👑</span>
             </div>
 
-            {/* 2. Solo Queue Rank */}
+            {/* 2. Weekly Energy */}
+            <div className="bg-rift-surface p-3 rounded-xl border border-amber-800/40 bg-amber-950/20">
+              <div className="flex justify-between items-center">
+                <span className="text-[10px] text-amber-300 font-bold uppercase tracking-wider">
+                  ⚡ {isCs ? 'ENERGIE' : 'ENERGY'}
+                </span>
+                <span className="text-xs font-black text-amber-400 font-mono">
+                  {energy}/{maxEnergy}
+                </span>
+              </div>
+              <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden mt-2">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full"
+                  style={{ width: `${Math.min(100, (energy / maxEnergy) * 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* 3. Solo Queue Rank */}
             <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">SOLO QUEUE</span>
               <div className="flex items-center gap-1.5 mt-1">
@@ -171,7 +189,7 @@ export function CareerHubScreen() {
               </div>
             </div>
 
-            {/* 3. Stream Followers */}
+            {/* 4. Stream Followers */}
             <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">FOLLOWERS</span>
               <p className="text-base font-black text-purple-400 font-mono mt-1">
@@ -181,8 +199,8 @@ export function CareerHubScreen() {
               </p>
             </div>
 
-            {/* 4. Money / Savings */}
-            <div className={`p-3 rounded-xl border ${
+            {/* 5. Money / Savings */}
+            <div className={`p-3 rounded-xl border col-span-2 sm:col-span-1 ${
               finances.savings < 0
                 ? 'bg-rose-950/40 border-rose-600/80 shadow-md shadow-rose-950/40'
                 : 'bg-rift-surface border-rift-border'

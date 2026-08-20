@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { TEAMS, getTopTeamsByRegion } from '../data/teams';
 import { simulateMatch } from '../utils/simulation';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+import { TeamLogo } from '../components/ui/TeamLogo';
 import type { Team } from '../types/game';
 
 type BracketRound = 'QF' | 'SF' | 'F';
@@ -144,22 +145,22 @@ export function WorldsBracketScreen() {
 
   function MatchCard({ match, label }: { match: BracketMatch & { winner?: Team; score?: string }; label?: string }) {
     return (
-      <div className="bg-rift-surface rounded-lg border border-rift-border p-3 space-y-2">
+      <div className="bg-rift-surface rounded-xl border border-rift-border p-3 space-y-2">
         {label && <p className="text-xs text-slate-500 uppercase tracking-wider">{label}</p>}
         {[match.teamA, match.teamB].map((team, i) => (
-          <div key={i} className={`flex items-center justify-between p-2 rounded ${
-            match.winner?.id === team.id ? 'bg-green-950/30 border border-green-800/30' :
-            match.winner && match.winner.id !== team.id ? 'opacity-40' : ''
+          <div key={i} className={`flex items-center justify-between p-2 rounded-lg ${
+            match.winner?.id === team.id ? 'bg-green-950/40 border border-green-700/50 shadow-sm' :
+            match.winner && match.winner.id !== team.id ? 'opacity-40' : 'bg-slate-900/40'
           }`}>
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: team.color }} />
+              <TeamLogo team={team} size="xs" />
               <span className={`text-sm font-medium ${team.id === career!.currentTeam?.id ? 'text-white font-bold' : 'text-slate-300'}`}>
                 {team.shortName}
-                {team.id === career!.currentTeam?.id && <span className="text-rift-purple text-xs ml-1">({t('bracket.you')})</span>}
+                {team.id === career!.currentTeam?.id && <span className="text-rift-purple text-xs ml-1 font-bold">({t('bracket.you')})</span>}
               </span>
             </div>
             {match.winner?.id === team.id && (
-              <span className="text-green-400 text-xs font-bold">{match.score} ✓</span>
+              <span className="text-green-400 text-xs font-black font-mono">{match.score} ✓</span>
             )}
           </div>
         ))}
