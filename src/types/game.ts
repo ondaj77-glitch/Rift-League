@@ -295,6 +295,13 @@ export interface TeamOffer {
   expiresWeeks: number;
 }
 
+export interface GameNotification {
+  id: string;
+  text: string;
+  type: 'positive' | 'negative' | 'neutral' | 'gold';
+  icon: string;
+}
+
 export interface GameState {
   phase: GamePhase;
   currentTab: HubTab;
@@ -305,4 +312,5 @@ export interface GameState {
   interactiveMatch: InteractiveMatchState | null;
   pendingOffers: TeamOffer[];
   dailyChallenge: DailyChallenge | null;
+  notifications: GameNotification[];
 }

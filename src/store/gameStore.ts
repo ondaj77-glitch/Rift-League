@@ -68,6 +68,7 @@ interface GameStore extends GameState {
   retire: () => void;
   resetGame: () => void;
   loadDailyChallenge: () => void;
+  addNotification: (text: string, type?: 'positive' | 'negative' | 'neutral' | 'gold', icon?: string) => void;
 }
 
 const INITIAL_STATE: GameState = {
@@ -80,12 +81,25 @@ const INITIAL_STATE: GameState = {
   interactiveMatch: null,
   pendingOffers: [],
   dailyChallenge: null,
+  notifications: [],
 };
 
 export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
       ...INITIAL_STATE,
+
+      addNotification: (text, type = 'positive', icon = '✨') => {
+        const id = Math.random().toString(36).substring(2, 9);
+        set(state => ({
+          notifications: [...(state.notifications || []).slice(-3), { id, text, type, icon }],
+        }));
+        setTimeout(() => {
+          set(state => ({
+            notifications: (state.notifications || []).filter(n => n.id !== id),
+          }));
+        }, 3000);
+      },
 
       setLanguage: (lang) => set({ language: lang }),
       setPhase: (phase) => set({ phase }),
@@ -323,7 +337,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       grindSoloQFast: () => {
-        const { career } = get();
+        const { career, addNotification } = get();
         if (!career || career.lifestyle.energy < 15) return;
 
         const winChance = (career.stats.mechanics * 0.4 + career.stats.gameKnowledge * 0.3 + career.stats.mental * 0.3) / 100;
@@ -340,6 +354,12 @@ export const useGameStore = create<GameStore>()(
         };
 
         const newRank = calculateRankProgression(career.rank, won);
+
+        if (won) {
+          addNotification(`+24 LP Výhra v SoloQ (${champId})!`, 'positive', '⚔️');
+        } else {
+          addNotification(`-18 LP Prohra v SoloQ (-1 Mentál)`, 'negative', '💀');
+        }
 
         set(state => ({
           career: {
@@ -359,7 +379,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       finishInteractiveMatch: (won, championId) => {
-        const { career, interactiveMatch } = get();
+        const { career, interactiveMatch, addNotification } = get();
         if (!career || !interactiveMatch) return;
 
         const prevMastery = career.masteries[championId] || { championId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
@@ -372,6 +392,11 @@ export const useGameStore = create<GameStore>()(
 
         if (interactiveMatch.isSoloQ) {
           const newRank = calculateRankProgression(career.rank, won);
+          if (won) {
+            addNotification(`SoloQ Vítězství! +24 LP & +1 Mechanika`, 'gold', '🏆');
+          } else {
+            addNotification(`SoloQ Porážka! -18 LP & -1 Mentál`, 'negative', '💔');
+          }
           set(state => ({
             career: {
               ...state.career!,
@@ -382,7 +407,7 @@ export const useGameStore = create<GameStore>()(
               stats: {
                 ...state.career!.stats,
                 mechanics: clamp(state.career!.stats.mechanics + (won ? 1 : 0)),
-                mental: clamp(state.career!.stats.mental + (won ? 1 : -1)),
+                mental: clamp(state.career!.stats.mental + (won ? 0 : -1)),
               },
             },
             interactiveMatch: null,
@@ -393,6 +418,12 @@ export const useGameStore = create<GameStore>()(
           const newTrust = won
             ? clamp(career.lifestyle.coachTrust + 6)
             : clamp(career.lifestyle.coachTrust - 8);
+
+          if (won) {
+            addNotification(`Týmové Vítězství! +6 Důvěra trenéra`, 'gold', '🏆');
+          } else {
+            addNotification(`Týmová Prohra! -8 Důvěra trenéra`, 'negative', '⚠️');
+          }
 
           set(state => ({
             career: {
@@ -409,7 +440,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       swapPoolChampion: (oldChampId, newChampId) => {
-        const { career } = get();
+        const { career, addNotification } = get();
         if (!career) return;
         const remaining = career.swapsRemainingThisSplit ?? 2;
         if (remaining <= 0 || career.lifestyle.energy < 30) return;
@@ -419,6 +450,8 @@ export const useGameStore = create<GameStore>()(
         if (!masteries[newChampId]) {
           masteries[newChampId] = { championId: newChampId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
         }
+
+        addNotification(`Vyměněn ${oldChampId} ➔ ${newChampId} (-30⚡)`, 'gold', '🔄');
 
         set(state => ({
           career: {
@@ -435,10 +468,11 @@ export const useGameStore = create<GameStore>()(
       },
 
       performWeeklyAction: (action) => {
-        const { career } = get();
+        const { career, addNotification } = get();
         if (!career) return;
 
         if (action === 'job' && career.lifestyle.energy >= 30) {
+          addNotification(`+$450 Výdělek z brigády (-30⚡)`, 'positive', '💼');
           set(state => ({
             career: {
               ...state.career!,
@@ -449,9 +483,12 @@ export const useGameStore = create<GameStore>()(
           }));
         } else if (action === 'stream' && career.lifestyle.energy >= 25) {
           const currentFollowers = career.streamFollowers ?? 100;
-          const newFollowers = currentFollowers + 250 + Math.floor(career.stats.reputation * 15) + Math.floor(Math.random() * 100);
+          const gainedFollowers = 250 + Math.floor(career.stats.reputation * 15) + Math.floor(Math.random() * 100);
+          const newFollowers = currentFollowers + gainedFollowers;
           const newViewers = Math.max(10, Math.floor(newFollowers * 0.08));
           const streamCash = 200 + Math.floor(newViewers * 1.5) + Math.floor(career.stats.reputation * 4);
+
+          addNotification(`+${gainedFollowers} Followerů & +$${streamCash} z darů!`, 'gold', '🎥');
 
           set(state => ({
             career: {
@@ -464,6 +501,7 @@ export const useGameStore = create<GameStore>()(
             },
           }));
         } else if (action === 'vod' && career.lifestyle.energy >= 20) {
+          addNotification(`+3 Znalost hry · +2 Přizpůsobivost (-20⚡)`, 'positive', '🧠');
           set(state => ({
             career: {
               ...state.career!,
@@ -476,6 +514,7 @@ export const useGameStore = create<GameStore>()(
             },
           }));
         } else if (action === 'gym' && career.lifestyle.energy >= 20) {
+          addNotification(`+8 Mentál · Tilt vymazán (-20⚡)`, 'positive', '🏋️');
           set(state => ({
             career: {
               ...state.career!,
@@ -487,11 +526,12 @@ export const useGameStore = create<GameStore>()(
       },
 
       upgradePC: () => {
-        const { career } = get();
+        const { career, addNotification } = get();
         if (!career) return;
         const costs = [0, 1500, 5000];
         const nextCost = costs[career.lifestyle.pcLevel] || 99999;
         if (career.finances.savings >= nextCost) {
+          addNotification(`🖥️ Nový PC Setup zakoupen! (+4 Mechanika)`, 'gold', '⚡');
           set(state => ({
             career: {
               ...state.career!,
@@ -665,7 +705,7 @@ export const useGameStore = create<GameStore>()(
       },
 
       resolveEvent: (event, choiceIndex) => {
-        const { career } = get();
+        const { career, addNotification } = get();
         if (!career) return;
 
         const choice = event.choices[choiceIndex];
@@ -681,6 +721,17 @@ export const useGameStore = create<GameStore>()(
         };
 
         const newTrust = clamp(career.lifestyle.coachTrust + (effects.coachTrust || 0));
+
+        // Format short toast summary of event outcomes
+        const gains: string[] = [];
+        if (effects.mechanics) gains.push(`${effects.mechanics > 0 ? '+' : ''}${effects.mechanics} Mech`);
+        if (effects.mental) gains.push(`${effects.mental > 0 ? '+' : ''}${effects.mental} Mentál`);
+        if (effects.gameKnowledge) gains.push(`${effects.gameKnowledge > 0 ? '+' : ''}${effects.gameKnowledge} Znalost`);
+        if (effects.savings) gains.push(`${effects.savings > 0 ? '+$' : '-$'}${Math.abs(effects.savings)}`);
+        if (effects.reputation) gains.push(`${effects.reputation > 0 ? '+' : ''}${effects.reputation} Rep`);
+        if (gains.length > 0) {
+          addNotification(gains.join(' · '), gains[0].startsWith('+') ? 'positive' : 'negative', '📋');
+        }
 
         if (newStats.mental <= 0) {
           set(state => ({
@@ -784,6 +835,7 @@ export const useGameStore = create<GameStore>()(
               inInternational: true,
               internationalEvent: 'Worlds',
               currentPatch: newPatch,
+              swapsRemainingThisSplit: 2,
               finances: { ...state.career!.finances, savings: newSavings },
             },
             phase: 'WORLDS_BRACKET',
@@ -801,6 +853,7 @@ export const useGameStore = create<GameStore>()(
               losses: 0,
               inPlayoffs: true,
               currentPatch: newPatch,
+              swapsRemainingThisSplit: 2,
               finances: { ...state.career!.finances, savings: newSavings },
             },
             phase: 'PLAYOFF_BRACKET',
@@ -866,14 +919,22 @@ function calculateScore(career: Career): number {
   score += career.worldsWins * 35;
   score += career.msiWins * 15;
   score += career.splitTitles * 6;
+
+  const rankBonus: Record<string, number> = {
+    IRON: 2, BRONZE: 5, SILVER: 8, GOLD: 12,
+    PLATINUM: 16, EMERALD: 20, DIAMOND: 25,
+    MASTER: 30, GRANDMASTER: 35, CHALLENGER: 40,
+  };
+  score += rankBonus[career.rank.tier] || 5;
+
   const avgStat = (
     career.stats.mechanics + career.stats.gameKnowledge +
     career.stats.communication + career.stats.mental +
     career.stats.adaptability + career.stats.reputation
   ) / 6;
   score += Math.floor(avgStat / 5);
-  score += Math.min(15, Math.floor(career.finances.savings / 50000));
-  score += Math.min(10, career.age - 14);
+  score += Math.min(15, Math.floor(career.finances.savings / 15000));
+  score += Math.min(10, Math.floor((career.streamFollowers ?? 0) / 1000));
   return Math.min(100, Math.max(5, score));
 }
 

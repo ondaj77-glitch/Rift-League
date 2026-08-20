@@ -5,6 +5,8 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { StatBar } from '../components/ui/StatBar';
 import { RoleBadge } from '../components/ui/RoleBadge';
+import { TIER_ICONS } from '../data/ranks';
+import { REGION_FLAGS } from '../data/teams';
 import type { StatKey } from '../types/game';
 
 const STATS: StatKey[] = ['mechanics', 'gameKnowledge', 'communication', 'mental', 'adaptability', 'reputation'];
@@ -38,116 +40,142 @@ export function RetirementScreen() {
 
   const score = career.careerScore;
   const titleKey = getCareerTitle(score);
-  const yearsPlayed = career.age - 18;
+  const totalSoloQGames = career.soloqWins + career.soloqLosses;
+  const soloQWinrate = totalSoloQGames > 0 ? Math.round((career.soloqWins / totalSoloQGames) * 100) : 0;
+  const totalProGames = career.wins + career.losses;
+  const proWinrate = totalProGames > 0 ? Math.round((career.wins / totalProGames) * 100) : 0;
   const isChampion = career.worldsWins > 0;
+  const rankIcon = TIER_ICONS[career.rank.tier] || '🏆';
 
   return (
-    <div className="screen-bg min-h-screen py-8 px-4">
+    <div className="screen-bg min-h-screen py-8 px-4 pb-16">
       <div className="max-w-xl mx-auto space-y-6">
 
-        {/* Trophy / Memorial */}
+        {/* Trophy / Memorial Header */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 150 }}
-          className="text-center py-10"
+          className="text-center py-6"
         >
           <motion.div
-            animate={isChampion ? { rotate: [0, -5, 5, 0] } : {}}
-            transition={{ duration: 1, delay: 0.5 }}
-            className={`text-8xl ${isChampion ? 'trophy-glow' : 'opacity-60'}`}
+            animate={isChampion ? { rotate: [0, -6, 6, 0] } : {}}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            className={`text-7xl ${isChampion ? 'trophy-glow' : 'opacity-70'}`}
           >
-            {isChampion ? '🏆' : '💙'}
+            {isChampion ? '🏆' : '📜'}
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-6 space-y-2"
+            transition={{ delay: 0.2 }}
+            className="mt-4 space-y-1"
           >
             <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>
               {career.gameName}
             </h1>
-            <p className="text-gold-400 font-semibold text-lg">{t(titleKey as any)}</p>
-            <div className="flex items-center justify-center gap-2 mt-3">
+            <p className="text-gold-400 font-bold text-lg">{t(titleKey as any)}</p>
+            <div className="flex items-center justify-center gap-2 mt-2">
               <RoleBadge role={career.role} size="md" />
               <span className="text-slate-400 text-sm">•</span>
-              <span className="text-slate-400 text-sm">{career.startRegion}</span>
+              <span className="text-slate-300 text-sm font-semibold">{REGION_FLAGS[career.region]} {career.region}</span>
+              <span className="text-slate-400 text-sm">•</span>
+              <span className="text-slate-400 text-sm">Věk {career.age}</span>
             </div>
           </motion.div>
         </motion.div>
 
-        {/* Score */}
+        {/* Final Career Score Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Card gold className="p-6 text-center">
-            <p className="text-xs text-slate-500 uppercase tracking-widest mb-2">{t('retire.score')}</p>
+          <Card gold className="p-6 text-center shadow-2xl">
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold mb-1">
+              Celkové Skóre Běhu (Career Score)
+            </p>
             <motion.p
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-              className="text-7xl font-black text-gold-400"
+              transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+              className="text-7xl font-black text-gold-400 font-mono tracking-tight"
               style={{ fontFamily: 'Cinzel, serif' }}
             >
               {score}
             </motion.p>
+            <p className="text-xs text-slate-400 mt-1 font-medium">
+              Vypočteno z trofejí, SoloQ ranku, reputace a financí
+            </p>
           </Card>
         </motion.div>
 
-        {/* Career Summary */}
+        {/* SoloQ & Competitive Breakdown */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
+          className="space-y-4"
         >
-          <Card className="p-5">
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div>
-                <p className="text-3xl font-black text-gold-400">{career.worldsWins}</p>
-                <p className="text-xs text-slate-500 mt-1">{t('retire.worlds_wins')}</p>
+          <Card className="p-5 space-y-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider border-b border-rift-border pb-2">
+              ⚔️ SoloQ & Herní Výsledky
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-center">
+              <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
+                <div className="text-2xl mb-1">{rankIcon}</div>
+                <p className="text-white font-bold text-sm">{career.rank.tier} {career.rank.division || ''}</p>
+                <p className="text-[11px] text-slate-400 font-mono">{career.rank.lp} LP (#{career.rank.globalRank?.toLocaleString() || '1.5M'})</p>
               </div>
-              <div>
-                <p className="text-3xl font-black text-blue-400">{career.msiWins}</p>
-                <p className="text-xs text-slate-500 mt-1">{t('retire.msi_wins')}</p>
+
+              <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
+                <p className="text-xl font-black text-blue-400 font-mono">{soloQWinrate}%</p>
+                <p className="text-xs font-bold text-slate-200 mt-1">SoloQ Win Rate</p>
+                <p className="text-[11px] text-slate-400 font-mono">{career.soloqWins}V - {career.soloqLosses}P</p>
               </div>
-              <div>
-                <p className="text-3xl font-black text-purple-400">{career.splitTitles}</p>
-                <p className="text-xs text-slate-500 mt-1">Split Titles</p>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-green-400">{yearsPlayed}</p>
-                <p className="text-xs text-slate-500 mt-1">{t('retire.years')}</p>
+
+              <div className="bg-rift-surface p-3 rounded-xl border border-rift-border col-span-2 sm:col-span-1">
+                <p className="text-xl font-black text-purple-400 font-mono">{(career.streamFollowers ?? 0).toLocaleString()}</p>
+                <p className="text-xs font-bold text-slate-200 mt-1">Twitch Followerů</p>
+                <p className="text-[11px] text-slate-400">Stream audience</p>
               </div>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-rift-border grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-slate-500 mb-1">{t('retire.age_retired')}</p>
-                <p className="text-white font-bold">{career.age}</p>
+            {/* Pro Titles */}
+            <div className="grid grid-cols-3 gap-3 text-center pt-2">
+              <div className="bg-gold-950/30 p-2.5 rounded-xl border border-gold-600/30">
+                <p className="text-2xl font-black text-gold-400">{career.worldsWins}</p>
+                <p className="text-[11px] text-slate-300 font-bold">🏆 Worlds</p>
               </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1">Total Savings</p>
-                <p className="text-white font-bold">{formatMoney(career.finances.savings)}</p>
+              <div className="bg-blue-950/30 p-2.5 rounded-xl border border-blue-600/30">
+                <p className="text-2xl font-black text-blue-400">{career.msiWins}</p>
+                <p className="text-[11px] text-slate-300 font-bold">🌍 MSI</p>
               </div>
+              <div className="bg-purple-950/30 p-2.5 rounded-xl border border-purple-600/30">
+                <p className="text-2xl font-black text-purple-400">{career.splitTitles}</p>
+                <p className="text-[11px] text-slate-300 font-bold">🥇 Splity</p>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-rift-border flex justify-between text-xs font-semibold">
+              <span className="text-slate-400">Ušetřené Jmění:</span>
+              <span className="text-green-400 font-mono font-bold">{formatMoney(career.finances.savings)}</span>
             </div>
           </Card>
         </motion.div>
 
-        {/* Final Stats */}
+        {/* Final Attributes */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <Card>
-            <div className="px-5 py-4 border-b border-rift-border">
-              <p className="text-sm font-semibold text-slate-200">{t('retire.stats_final')}</p>
-            </div>
-            <div className="p-5 space-y-3">
+          <Card className="p-5 space-y-3">
+            <p className="text-sm font-bold text-slate-200 border-b border-rift-border pb-2">
+              📊 Konečné Atributy Hráče
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               {STATS.map(stat => (
                 <StatBar key={stat} label={t(`stat.${stat}` as any)} value={career.stats[stat]} />
               ))}
@@ -155,54 +183,38 @@ export function RetirementScreen() {
           </Card>
         </motion.div>
 
-        {/* Achievements */}
-        {career.achievements.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card>
-              <div className="px-5 py-4 border-b border-rift-border">
-                <p className="text-sm font-semibold text-slate-200">{t('retire.achievements')}</p>
-              </div>
-              <div className="p-4 flex flex-wrap gap-2">
-                {career.achievements.map((a, i) => (
-                  <motion.span
-                    key={i}
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.5 + i * 0.05 }}
-                    className="text-xs bg-gold-600/10 border border-gold-600/30 text-gold-400 px-3 py-1.5 rounded-full"
-                  >
-                    {t(a.titleKey as any)} · {a.year}
-                  </motion.span>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Buttons */}
+        {/* Action Buttons: New Career or Return to Menu */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="pb-8 space-y-3"
+          transition={{ delay: 0.5 }}
+          className="pt-2 space-y-3"
         >
-          <Button variant="gold" size="lg" fullWidth onClick={() => {
-            resetGame();
-            setPhase('CHARACTER_CREATION');
-          }}>
-            🔄 {t('retire.play_again')}
+          <Button
+            variant="gold"
+            size="lg"
+            fullWidth
+            onClick={() => {
+              resetGame();
+              setPhase('CHARACTER_CREATION');
+            }}
+          >
+            🚀 Začít Nový RUN (Nová Kariéra)
           </Button>
-          <Button variant="ghost" size="md" fullWidth onClick={() => {
-            resetGame();
-            setPhase('MENU');
-          }}>
-            ← {t('menu.resume').replace('Resume', 'Back to')} Menu
+
+          <Button
+            variant="secondary"
+            size="md"
+            fullWidth
+            onClick={() => {
+              resetGame();
+              setPhase('MENU');
+            }}
+          >
+            🏠 Zpět do Hlavního Menu
           </Button>
         </motion.div>
+
       </div>
     </div>
   );

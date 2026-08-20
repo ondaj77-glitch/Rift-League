@@ -1,19 +1,23 @@
-import { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { RoleBadge } from '../components/ui/RoleBadge';
 import { REGION_FLAGS } from '../data/teams';
+import { TIER_ICONS } from '../data/ranks';
 
 export function MenuScreen() {
   const { t } = useTranslation();
   const career = useGameStore(s => s.career);
   const dailyChallenge = useGameStore(s => s.dailyChallenge);
   const setPhase = useGameStore(s => s.setPhase);
+  const resetGame = useGameStore(s => s.resetGame);
   const loadDailyChallenge = useGameStore(s => s.loadDailyChallenge);
   const setLanguage = useGameStore(s => s.setLanguage);
   const language = useGameStore(s => s.language);
+
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
   useEffect(() => {
     loadDailyChallenge();
@@ -30,6 +34,20 @@ export function MenuScreen() {
     return 'career_name.0';
   }
 
+  function handleStartNewCareer() {
+    if (career) {
+      setConfirmResetOpen(true);
+    } else {
+      setPhase('CHARACTER_CREATION');
+    }
+  }
+
+  function handleConfirmReset() {
+    resetGame();
+    setConfirmResetOpen(false);
+    setPhase('CHARACTER_CREATION');
+  }
+
   return (
     <div className="screen-bg min-h-screen flex items-center justify-center py-12">
       <div className="w-full max-w-lg px-4 space-y-6">
@@ -38,9 +56,9 @@ export function MenuScreen() {
         <div className="flex justify-end">
           <button
             onClick={() => setLanguage(language === 'en' ? 'cs' : 'en')}
-            className="text-xs text-slate-500 hover:text-slate-300 border border-rift-border px-2 py-1 rounded transition-colors"
+            className="text-xs text-slate-400 hover:text-white border border-rift-border bg-rift-card px-3 py-1.5 rounded-lg transition-colors font-bold"
           >
-            {language === 'en' ? '🇨🇿 CS' : '🇬🇧 EN'}
+            {language === 'en' ? '🇨🇿 Čeština' : '🇬🇧 English'}
           </button>
         </div>
 
@@ -63,13 +81,13 @@ export function MenuScreen() {
               <span className="text-white">RIFT </span>
               <span className="text-gold-400 animate-glow">LEGACY</span>
             </h1>
-            <p className="text-slate-500 text-sm mt-3 max-w-xs mx-auto leading-relaxed">
+            <p className="text-slate-400 text-xs mt-3 max-w-xs mx-auto leading-relaxed font-medium">
               {t('menu.tagline')}
             </p>
           </div>
 
           {/* Region logos */}
-          <div className="flex justify-center gap-2 text-xl opacity-40">
+          <div className="flex justify-center gap-2 text-xl opacity-60">
             {['🇰🇷', '🇨🇳', '🇪🇺', '🇺🇸', '🌎', '🌏'].map((flag, i) => (
               <motion.span
                 key={i}
@@ -97,7 +115,7 @@ export function MenuScreen() {
               fullWidth
               onClick={() => setPhase('CAREER_HUB')}
             >
-              ▶ {t('menu.resume')}
+              ▶ {t('menu.resume')} ({career.gameName} · Věk {career.age})
             </Button>
           )}
 
@@ -105,9 +123,9 @@ export function MenuScreen() {
             variant={career ? 'secondary' : 'primary'}
             size="lg"
             fullWidth
-            onClick={() => setPhase('CHARACTER_CREATION')}
+            onClick={handleStartNewCareer}
           >
-            {career ? '+ ' : '▶ '}{t('menu.new')}
+            🚀 {career ? 'Začít novou kariéru' : t('menu.new')}
           </Button>
 
           <Button
@@ -120,33 +138,48 @@ export function MenuScreen() {
           </Button>
         </motion.div>
 
-        {/* Best Career Card */}
+        {/* Current / Best Career Preview */}
         {career && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="bg-rift-card border border-gold-600/20 rounded-xl p-4 space-y-2"
+            className="bg-rift-card border border-gold-600/30 rounded-xl p-4 space-y-2 shadow-lg"
           >
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">
-              {t('menu.best_career')}
-            </p>
             <div className="flex items-center justify-between">
+              <p className="text-xs text-gold-400 uppercase tracking-widest font-bold">
+                Aktuální Uložený Run
+              </p>
+              <button
+                onClick={() => {
+                  if (window.confirm('Opravdu chceš smazat uloženou hru?')) {
+                    resetGame();
+                  }
+                }}
+                className="text-[11px] text-red-400 hover:text-red-300 font-semibold"
+              >
+                🗑️ Smazat save
+              </button>
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">💀</span>
+                <span className="text-2xl p-1.5 bg-rift-surface rounded-lg border border-rift-border">
+                  {TIER_ICONS[career.rank.tier] || '⚔️'}
+                </span>
                 <div>
-                  <p className="text-white font-semibold text-sm">{career.gameName}</p>
+                  <p className="text-white font-bold text-sm">{career.gameName}</p>
                   <p className="text-slate-400 text-xs">
-                    {t(careerNameKey as any)}
+                    {career.rank.tier} {career.rank.division || ''} ({career.rank.lp} LP) · Věk {career.age}
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-gold-400 font-black text-2xl">{bestScore}</p>
                 <div className="flex items-center gap-1 justify-end">
                   <RoleBadge role={career.role} size="sm" />
-                  <span className="text-slate-500 text-xs">{REGION_FLAGS[career.region]}</span>
+                  <span className="text-slate-300 text-xs font-bold">{REGION_FLAGS[career.region]}</span>
                 </div>
+                <p className="text-green-400 font-mono text-xs font-bold mt-0.5">${career.finances.savings.toLocaleString()}</p>
               </div>
             </div>
           </motion.div>
@@ -161,7 +194,7 @@ export function MenuScreen() {
             className="bg-rift-card border border-rift-border rounded-xl p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-500 uppercase tracking-widest font-medium">
+              <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">
                 {t('daily.title')}
               </p>
               <span className="text-xs bg-purple-900/60 text-purple-300 border border-purple-700/40 px-2 py-0.5 rounded-full font-semibold">
@@ -171,11 +204,11 @@ export function MenuScreen() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-slate-500 mb-1">{t('menu.daily.role')}</p>
+                <p className="text-xs text-slate-400 mb-1">{t('menu.daily.role')}</p>
                 <RoleBadge role={dailyChallenge.role} size="md" />
               </div>
               <div>
-                <p className="text-xs text-slate-500 mb-1">{t('menu.daily.region')}</p>
+                <p className="text-xs text-slate-400 mb-1">{t('menu.daily.region')}</p>
                 <span className="text-white text-sm font-medium">
                   {REGION_FLAGS[dailyChallenge.region]} {dailyChallenge.region}
                 </span>
@@ -183,7 +216,7 @@ export function MenuScreen() {
             </div>
 
             <div>
-              <p className="text-xs text-slate-500 mb-1">{t('menu.daily.objective')}</p>
+              <p className="text-xs text-slate-400 mb-1">{t('menu.daily.objective')}</p>
               <p className="text-white text-sm font-medium">
                 {t(dailyChallenge.objectiveKey as any, dailyChallenge.objectiveTarget)}
               </p>
@@ -195,8 +228,44 @@ export function MenuScreen() {
           </motion.div>
         )}
 
-        <p className="text-center text-slate-600 text-xs">{t('menu.not_affiliated')}</p>
+        <p className="text-center text-slate-500 text-xs">{t('menu.not_affiliated')}</p>
       </div>
+
+      {/* CONFIRM START NEW CAREER MODAL */}
+      <AnimatePresence>
+        {confirmResetOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-rift-card border border-gold-600/40 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-center"
+            >
+              <div className="text-5xl mb-2">🚀</div>
+              <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+                Začít zbrusu novou kariéru?
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Máš rozehranou kariéru za <strong>{career?.gameName}</strong> (Věk {career?.age}, {career?.rank.tier}). Spuštěním nové kariéry se stará hra přepíše.
+              </p>
+
+              <div className="flex gap-3 pt-2">
+                <Button variant="secondary" fullWidth onClick={() => setConfirmResetOpen(false)}>
+                  Zrušit
+                </Button>
+                <Button variant="gold" fullWidth onClick={handleConfirmReset}>
+                  Ano, nová hra
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

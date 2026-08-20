@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '../store/gameStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
@@ -27,6 +28,9 @@ export function CareerHubScreen() {
   const advanceWeek = useGameStore(s => s.advanceWeek);
   const setPhase = useGameStore(s => s.setPhase);
   const currentEvent = useGameStore(s => s.currentEvent);
+  const retire = useGameStore(s => s.retire);
+
+  const [forfeitModalOpen, setForfeitModalOpen] = useState(false);
 
   if (!career) return null;
 
@@ -41,6 +45,11 @@ export function CareerHubScreen() {
     } else {
       advanceWeek();
     }
+  }
+
+  function handleConfirmForfeit() {
+    setForfeitModalOpen(false);
+    retire();
   }
 
   return (
@@ -74,8 +83,8 @@ export function CareerHubScreen() {
             </div>
           </div>
 
-          {/* Season Time, Energy & Money */}
-          <div className="flex items-center gap-4 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
+          {/* Season Time, Energy, Money & Forfeit Button */}
+          <div className="flex items-center gap-3 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
             {/* Energy */}
             <div className="bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-800/40 text-center">
               <p className="text-[10px] text-amber-300 font-bold uppercase">⚡ {t('hub.energy' as any) || 'Energie'}</p>
@@ -95,12 +104,21 @@ export function CareerHubScreen() {
             </div>
 
             {/* Bank Balance */}
-            <div className="border-l border-rift-border pl-4">
+            <div className="border-l border-rift-border pl-3">
               <p className="text-xs text-slate-400 font-medium">{t('hub.savings')}</p>
               <p className="text-sm font-black text-green-400 font-mono">
                 ${career.finances.savings.toLocaleString()}
               </p>
             </div>
+
+            {/* Forfeit / End Run Button */}
+            <button
+              onClick={() => setForfeitModalOpen(true)}
+              title="Vzdat běh a zobrazit statistiky"
+              className="text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-600 bg-rift-surface p-2 rounded-xl transition-all"
+            >
+              🏳️
+            </button>
           </div>
         </motion.div>
 
@@ -143,7 +161,7 @@ export function CareerHubScreen() {
                       <>
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: career.currentTeam.color }} />
                         <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
-                        <span className="text-xs text-slate-400">({career.lifestyle.rosterStatus.toUpperCase()})</span>
+                        <span className="text-xs text-slate-400 font-bold">({career.lifestyle.rosterStatus.toUpperCase()})</span>
                       </>
                     ) : (
                       <span className="font-bold text-amber-400 text-base">
@@ -222,6 +240,43 @@ export function CareerHubScreen() {
         {currentTab === 'transfers' && <TransferMarketScreen />}
 
       </div>
+
+      {/* FORFEIT CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {forfeitModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-rift-card border border-red-800/60 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-center"
+            >
+              <div className="text-5xl mb-2">🏳️</div>
+              <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+                Vzdat a ukončit tento RUN?
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Ukončíš aktuální kariéru. Zobrazí se kompletní statistiky tvého běhu, dosažené skóre, rank a získáš možnost začít novou kariéru od začátku.
+              </p>
+
+              <div className="flex gap-3 pt-2">
+                <Button variant="secondary" fullWidth onClick={() => setForfeitModalOpen(false)}>
+                  Zpět do hry
+                </Button>
+                <Button variant="danger" fullWidth onClick={handleConfirmForfeit}>
+                  Ano, ukončit běh
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

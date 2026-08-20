@@ -11,6 +11,7 @@ import { SeasonSummaryScreen } from './screens/SeasonSummaryScreen';
 import { WorldsBracketScreen } from './screens/WorldsBracketScreen';
 import { RetirementScreen } from './screens/RetirementScreen';
 import { DailyChallengeScreen } from './screens/DailyChallengeScreen';
+import { StatToast } from './components/ui/StatToast';
 
 const pageTransition = {
   initial: { opacity: 0 },
@@ -21,6 +22,7 @@ const pageTransition = {
 
 export default function App() {
   const phase = useGameStore(s => s.phase);
+  const notifications = useGameStore(s => s.notifications) || [];
 
   const renderScreen = () => {
     switch (phase) {
@@ -42,10 +44,15 @@ export default function App() {
   };
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div key={phase} {...pageTransition} className="min-h-screen">
-        {renderScreen()}
-      </motion.div>
-    </AnimatePresence>
+    <>
+      <AnimatePresence mode="wait">
+        <motion.div key={phase} {...pageTransition} className="min-h-screen">
+          {renderScreen()}
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Global Animated Stat & Notification Toasts */}
+      <StatToast notifications={notifications} />
+    </>
   );
 }

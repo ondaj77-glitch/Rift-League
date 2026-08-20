@@ -29,26 +29,38 @@ export function StatBar({ label, value, delta, showValue = true }: StatBarProps)
   const clampedValue = Math.max(0, Math.min(100, value));
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 group">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-slate-400 font-medium">{label}</span>
+        <span className="text-slate-300 font-medium group-hover:text-white transition-colors">{label}</span>
         <div className="flex items-center gap-2">
           {delta !== undefined && delta !== 0 && (
-            <span className={`font-bold text-xs ${delta > 0 ? 'text-green-400' : 'text-red-400'}`}>
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className={`font-black text-xs ${delta > 0 ? 'text-green-400' : 'text-red-400'}`}
+            >
               {delta > 0 ? `+${delta}` : delta}
-            </span>
+            </motion.span>
           )}
           {showValue && (
-            <span className="text-slate-200 font-semibold tabular-nums">{clampedValue}</span>
+            <motion.span
+              key={clampedValue}
+              initial={{ scale: 1.2, color: '#f59e0b' }}
+              animate={{ scale: 1, color: '#e2e8f0' }}
+              transition={{ duration: 0.3 }}
+              className="font-bold tabular-nums font-mono text-xs"
+            >
+              {clampedValue}
+            </motion.span>
           )}
         </div>
       </div>
-      <div className="stat-bar-bg">
+      <div className="stat-bar-bg relative overflow-hidden">
         <motion.div
-          className={`h-full rounded-full bg-gradient-to-r ${color}`}
+          className={`h-full rounded-full bg-gradient-to-r ${color} shadow-sm`}
           initial={{ width: 0 }}
           animate={{ width: `${clampedValue}%` }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
         />
       </div>
     </div>
