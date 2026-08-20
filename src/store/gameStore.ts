@@ -890,12 +890,29 @@ export const useGameStore = create<GameStore>()(
         }
 
         // Salary payout if on a team
-        const splitEarnings = Math.floor(career.finances.salary / 3);
-        const newSavings = career.finances.savings + splitEarnings;
+        const splitEarnings = Math.floor((career.finances?.salary ?? 0) / 3);
+        const currentSavings = career.finances?.savings ?? 300;
+        const newSavings = currentSavings + splitEarnings;
 
-        const winRate = career.wins / Math.max(1, career.wins + career.losses);
-        const qualifiedIntl = winRate >= 0.6 && career.stats.reputation >= 60 && career.currentTeam !== null;
-        const qualifiedPlayoffs = (winRate >= 0.5 || career.wins >= 5) && career.currentTeam !== null;
+        const currentLifestyle = career.lifestyle || {
+          energy: 100,
+          maxEnergy: 100,
+          housing: 'parents_home',
+          pcLevel: 1,
+          coachTrust: 50,
+          rosterStatus: career.currentTeam ? 'starter' : 'free_agent',
+        };
+        const refreshedLifestyle = {
+          ...currentLifestyle,
+          energy: currentLifestyle.maxEnergy ?? 100,
+        };
+
+        const totalMatches = (career.wins ?? 0) + (career.losses ?? 0);
+        const winRate = totalMatches > 0 ? (career.wins ?? 0) / totalMatches : 0;
+        const qualifiedIntl = winRate >= 0.6 && (career.stats?.reputation ?? 0) >= 60 && career.currentTeam !== null;
+        const qualifiedPlayoffs = (winRate >= 0.5 || (career.wins ?? 0) >= 5) && career.currentTeam !== null;
+
+        get().addNotification('Nový Split zahájen! Energie doplněna na 100⚡', 'gold', '🔄');
 
         if (qualifiedIntl && nextSplitNumber === 3) {
           set(state => ({
@@ -912,7 +929,8 @@ export const useGameStore = create<GameStore>()(
               internationalEvent: 'Worlds',
               currentPatch: newPatch,
               swapsRemainingThisSplit: 2,
-              finances: { ...state.career!.finances, savings: newSavings },
+              lifestyle: refreshedLifestyle,
+              finances: { ...(state.career!.finances || { salary: 0, savings: 300, monthlyExpenses: 0 }), savings: newSavings },
             },
             showPatchNotesModal: true,
             phase: 'WORLDS_BRACKET',
@@ -931,7 +949,8 @@ export const useGameStore = create<GameStore>()(
               inPlayoffs: true,
               currentPatch: newPatch,
               swapsRemainingThisSplit: 2,
-              finances: { ...state.career!.finances, savings: newSavings },
+              lifestyle: refreshedLifestyle,
+              finances: { ...(state.career!.finances || { salary: 0, savings: 300, monthlyExpenses: 0 }), savings: newSavings },
             },
             showPatchNotesModal: true,
             phase: 'PLAYOFF_BRACKET',
@@ -952,7 +971,8 @@ export const useGameStore = create<GameStore>()(
               internationalEvent: null,
               currentPatch: newPatch,
               swapsRemainingThisSplit: 2,
-              finances: { ...state.career!.finances, savings: newSavings },
+              lifestyle: refreshedLifestyle,
+              finances: { ...(state.career!.finances || { salary: 0, savings: 300, monthlyExpenses: 0 }), savings: newSavings },
             },
             showPatchNotesModal: true,
             phase: 'CAREER_HUB',

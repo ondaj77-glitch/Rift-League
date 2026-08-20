@@ -1599,7 +1599,45 @@ export function getWeeklyEvent(
   const isProdigy = career.age < 17 || isFreeAgent;
 
   const TEAM_CATEGORIES = ['team_dynamics', 'contract', 'match'];
-  const TEAM_ONLY_IDS = ['health_slump', 'training_vod_coach', 'training_scrim_analysis', 'training_scrim_review'];
+  const TEAM_ONLY_IDS = [
+    'training_vod_review',
+    'training_vod_coach',
+    'training_scrim_analysis',
+    'training_scrim_review',
+    'training_soloq_grind',
+    'training_korea_bootcamp',
+    'meta_new_op_champ',
+    'meta_shift_playstyle',
+    'team_shotcaller_role',
+    'team_rookie_mentor',
+    'team_toxic_adc',
+    'team_jungler_flame',
+    'team_synergy_breakthrough',
+    'team_gaming_house_drama',
+    'team_role_swap_demand',
+    'team_coach_conflict',
+    'team_sponsor_event',
+    'team_new_analyst',
+    'team_bench_rivalry',
+    'team_seoul',
+    'health_wrist_pain',
+    'health_slump',
+    'intl_scrim_top_team',
+    'match_0_2_deficit',
+    'match_regular_derby',
+    'match_playoff_game5',
+    'match_subbed_out',
+    'match_carry_performance',
+    'career_off_role_scrims',
+    'social_stream_flame',
+    'contract_extension',
+    'contract_renegotiation',
+    'contract_buyout_clause',
+    'contract_rival_offer',
+    'contract_streamer_clause',
+    'contract_bench_threat',
+    'contract_salary_delay',
+  ];
 
   const available = EVENTS.filter(e => {
     if (usedEventIds.includes(e.id)) return false;
@@ -1609,7 +1647,7 @@ export function getWeeklyEvent(
     if (e.maxReputation !== undefined && career.reputation > e.maxReputation) return false;
     if (e.requiresInternational && !career.inInternational) return false;
     
-    // Strict isolation for SoloQ Prodigy / Free Agent runs
+    // Strict isolation for SoloQ Prodigy / Free Agent runs (NO team / coach / scrim events)
     if (isFreeAgent) {
       if (e.requiresTeam) return false;
       if (TEAM_CATEGORIES.includes(e.category)) return false;
