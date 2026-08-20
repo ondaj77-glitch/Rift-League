@@ -1761,6 +1761,443 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // 10+ New SoloQ & Prodigy Events
+  {
+    id: 'soloq_onetrick_ban',
+    category: 'soloq',
+    titleKey: 'event.soloq_onetrick_ban.title',
+    descriptionKey: 'event.soloq_onetrick_ban.desc',
+    weight: 10,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_onetrick_ban.a',
+        effects: { adaptability: 10, mechanics: 6 },
+        nextTextKey: 'event.soloq_onetrick_ban.a.result',
+      },
+      {
+        textKey: 'event.soloq_onetrick_ban.b',
+        effects: { gameKnowledge: 8, mental: 6 },
+        nextTextKey: 'event.soloq_onetrick_ban.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_stream_sniper',
+    category: 'soloq',
+    titleKey: 'event.soloq_stream_sniper.title',
+    descriptionKey: 'event.soloq_stream_sniper.desc',
+    weight: 9,
+    minReputation: 25,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_stream_sniper.a',
+        effects: { gameKnowledge: 10, adaptability: 8 },
+        nextTextKey: 'event.soloq_stream_sniper.a.result',
+      },
+      {
+        textKey: 'event.soloq_stream_sniper.b',
+        effects: { reputation: 14, savings: 350, mechanics: 4 },
+        nextTextKey: 'event.soloq_stream_sniper.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_open_mid_rage',
+    category: 'soloq',
+    titleKey: 'event.soloq_open_mid_rage.title',
+    descriptionKey: 'event.soloq_open_mid_rage.desc',
+    weight: 11,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_open_mid_rage.a',
+        effects: { communication: 12, mental: 8, mechanics: 4 },
+        nextTextKey: 'event.soloq_open_mid_rage.a.result',
+      },
+      {
+        textKey: 'event.soloq_open_mid_rage.b',
+        effects: { mechanics: 8, adaptability: 8 },
+        nextTextKey: 'event.soloq_open_mid_rage.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_baron_smite_god',
+    category: 'soloq',
+    titleKey: 'event.soloq_baron_smite_god.title',
+    descriptionKey: 'event.soloq_baron_smite_god.desc',
+    weight: 8,
+    minReputation: 30,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_baron_smite_god.a',
+        effects: { mechanics: 14, reputation: 12, mental: 6 },
+        nextTextKey: 'event.soloq_baron_smite_god.a.result',
+      },
+      {
+        textKey: 'event.soloq_baron_smite_god.b',
+        effects: { gameKnowledge: 10, mental: 8 },
+        nextTextKey: 'event.soloq_baron_smite_god.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_tilt_queue_3am',
+    category: 'soloq',
+    titleKey: 'event.soloq_tilt_queue_3am.title',
+    descriptionKey: 'event.soloq_tilt_queue_3am.desc',
+    weight: 10,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_tilt_queue_3am.a',
+        effects: { mental: 14, energy: 30, mechanics: -2 },
+        nextTextKey: 'event.soloq_tilt_queue_3am.a.result',
+      },
+      {
+        textKey: 'event.soloq_tilt_queue_3am.b',
+        effects: { mechanics: 8, mental: -10, energy: -25 },
+        nextTextKey: 'event.soloq_tilt_queue_3am.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_pro_duo_offer',
+    category: 'soloq',
+    titleKey: 'event.soloq_pro_duo_offer.title',
+    descriptionKey: 'event.soloq_pro_duo_offer.desc',
+    weight: 8,
+    minReputation: 35,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_pro_duo_offer.a',
+        effects: { reputation: 16, communication: 10, mechanics: 6 },
+        nextTextKey: 'event.soloq_pro_duo_offer.a.result',
+      },
+      {
+        textKey: 'event.soloq_pro_duo_offer.b',
+        effects: { mental: 10, mechanics: 8 },
+        nextTextKey: 'event.soloq_pro_duo_offer.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_hardware_boost',
+    category: 'soloq',
+    titleKey: 'event.soloq_hardware_boost.title',
+    descriptionKey: 'event.soloq_hardware_boost.desc',
+    weight: 7,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_hardware_boost.a',
+        effects: { mechanics: 10, gameKnowledge: 6, savings: -350 },
+        nextTextKey: 'event.soloq_hardware_boost.a.result',
+      },
+      {
+        textKey: 'event.soloq_hardware_boost.b',
+        effects: { mechanics: 8, adaptability: 6, savings: -350 },
+        nextTextKey: 'event.soloq_hardware_boost.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_mental_breakthrough',
+    category: 'soloq',
+    titleKey: 'event.soloq_mental_breakthrough.title',
+    descriptionKey: 'event.soloq_mental_breakthrough.desc',
+    weight: 8,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_mental_breakthrough.a',
+        effects: { mechanics: 10, reputation: 12, mental: 8 },
+        nextTextKey: 'event.soloq_mental_breakthrough.a.result',
+      },
+      {
+        textKey: 'event.soloq_mental_breakthrough.b',
+        effects: { mental: 16, adaptability: 8 },
+        nextTextKey: 'event.soloq_mental_breakthrough.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_smurf_clash',
+    category: 'soloq',
+    titleKey: 'event.soloq_smurf_clash.title',
+    descriptionKey: 'event.soloq_smurf_clash.desc',
+    weight: 9,
+    minReputation: 30,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_smurf_clash.a',
+        effects: { mechanics: 12, reputation: 14 },
+        nextTextKey: 'event.soloq_smurf_clash.a.result',
+      },
+      {
+        textKey: 'event.soloq_smurf_clash.b',
+        effects: { gameKnowledge: 14, adaptability: 8 },
+        nextTextKey: 'event.soloq_smurf_clash.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_gatekeeper',
+    category: 'soloq',
+    titleKey: 'event.soloq_gatekeeper.title',
+    descriptionKey: 'event.soloq_gatekeeper.desc',
+    weight: 8,
+    minReputation: 45,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.soloq_gatekeeper.a',
+        effects: { mechanics: 14, reputation: 20 },
+        nextTextKey: 'event.soloq_gatekeeper.a.result',
+      },
+      {
+        textKey: 'event.soloq_gatekeeper.b',
+        effects: { gameKnowledge: 12, mental: 10, reputation: 14 },
+        nextTextKey: 'event.soloq_gatekeeper.b.result',
+      },
+    ],
+  },
+
+  // 10+ New Pro Team Events
+  {
+    id: 'team_korean_import',
+    category: 'team_dynamics',
+    titleKey: 'event.team_korean_import.title',
+    descriptionKey: 'event.team_korean_import.desc',
+    weight: 8,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_korean_import.a',
+        effects: { communication: 14, gameKnowledge: 6 },
+        nextTextKey: 'event.team_korean_import.a.result',
+      },
+      {
+        textKey: 'event.team_korean_import.b',
+        effects: { mental: 10, communication: 8 },
+        nextTextKey: 'event.team_korean_import.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_patch_meta_collapse',
+    category: 'team_dynamics',
+    titleKey: 'event.team_patch_meta_collapse.title',
+    descriptionKey: 'event.team_patch_meta_collapse.desc',
+    weight: 9,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_patch_meta_collapse.a',
+        effects: { adaptability: 16, mechanics: 6, mental: -4 },
+        nextTextKey: 'event.team_patch_meta_collapse.a.result',
+      },
+      {
+        textKey: 'event.team_patch_meta_collapse.b',
+        effects: { communication: 10, mental: 8 },
+        nextTextKey: 'event.team_patch_meta_collapse.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_rivalry_trashtalk',
+    category: 'team_dynamics',
+    titleKey: 'event.team_rivalry_trashtalk.title',
+    descriptionKey: 'event.team_rivalry_trashtalk.desc',
+    weight: 8,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_rivalry_trashtalk.a',
+        effects: { reputation: 18, mental: -4 },
+        nextTextKey: 'event.team_rivalry_trashtalk.a.result',
+      },
+      {
+        textKey: 'event.team_rivalry_trashtalk.b',
+        effects: { mental: 10, reputation: 8 },
+        nextTextKey: 'event.team_rivalry_trashtalk.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_substitute_pressure',
+    category: 'team_dynamics',
+    titleKey: 'event.team_substitute_pressure.title',
+    descriptionKey: 'event.team_substitute_pressure.desc',
+    weight: 9,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_substitute_pressure.a',
+        effects: { mechanics: 12, mental: 6 },
+        nextTextKey: 'event.team_substitute_pressure.a.result',
+      },
+      {
+        textKey: 'event.team_substitute_pressure.b',
+        effects: { communication: 10, gameKnowledge: 8 },
+        nextTextKey: 'event.team_substitute_pressure.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_shotcalling_crisis',
+    category: 'team_dynamics',
+    titleKey: 'event.team_shotcalling_crisis.title',
+    descriptionKey: 'event.team_shotcalling_crisis.desc',
+    weight: 8,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_shotcalling_crisis.a',
+        effects: { gameKnowledge: 14, communication: 12 },
+        nextTextKey: 'event.team_shotcalling_crisis.a.result',
+      },
+      {
+        textKey: 'event.team_shotcalling_crisis.b',
+        effects: { communication: 14, adaptability: 8 },
+        nextTextKey: 'event.team_shotcalling_crisis.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_gaming_house_chef',
+    category: 'team_dynamics',
+    titleKey: 'event.team_gaming_house_chef.title',
+    descriptionKey: 'event.team_gaming_house_chef.desc',
+    weight: 7,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_gaming_house_chef.a',
+        effects: { energy: 30, mechanics: 6 },
+        nextTextKey: 'event.team_gaming_house_chef.a.result',
+      },
+      {
+        textKey: 'event.team_gaming_house_chef.b',
+        effects: { mental: 14, communication: 8 },
+        nextTextKey: 'event.team_gaming_house_chef.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_fan_meet',
+    category: 'team_dynamics',
+    titleKey: 'event.team_fan_meet.title',
+    descriptionKey: 'event.team_fan_meet.desc',
+    weight: 8,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_fan_meet.a',
+        effects: { reputation: 18, savings: 600, energy: -20 },
+        nextTextKey: 'event.team_fan_meet.a.result',
+      },
+      {
+        textKey: 'event.team_fan_meet.b',
+        effects: { mental: 10, reputation: 6 },
+        nextTextKey: 'event.team_fan_meet.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_contract_bonus',
+    category: 'contract',
+    titleKey: 'event.team_contract_bonus.title',
+    descriptionKey: 'event.team_contract_bonus.desc',
+    weight: 7,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_contract_bonus.a',
+        effects: { mechanics: 10, reputation: 14, savings: 15000 },
+        nextTextKey: 'event.team_contract_bonus.a.result',
+      },
+      {
+        textKey: 'event.team_contract_bonus.b',
+        effects: { communication: 12, savings: 15000 },
+        nextTextKey: 'event.team_contract_bonus.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_analyst_secret_draft',
+    category: 'team_dynamics',
+    titleKey: 'event.team_analyst_secret_draft.title',
+    descriptionKey: 'event.team_analyst_secret_draft.desc',
+    weight: 8,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_analyst_secret_draft.a',
+        effects: { gameKnowledge: 14, adaptability: 10 },
+        nextTextKey: 'event.team_analyst_secret_draft.a.result',
+      },
+      {
+        textKey: 'event.team_analyst_secret_draft.b',
+        effects: { reputation: 16, mechanics: 8 },
+        nextTextKey: 'event.team_analyst_secret_draft.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'team_equipment_malfunction',
+    category: 'match',
+    titleKey: 'event.team_equipment_malfunction.title',
+    descriptionKey: 'event.team_equipment_malfunction.desc',
+    weight: 8,
+    requiresTeam: true,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.team_equipment_malfunction.a',
+        effects: { mechanics: 14, adaptability: 12, mental: 8 },
+        nextTextKey: 'event.team_equipment_malfunction.a.result',
+      },
+      {
+        textKey: 'event.team_equipment_malfunction.b',
+        effects: { mental: 10, communication: 8 },
+        nextTextKey: 'event.team_equipment_malfunction.b.result',
+      },
+    ],
+  },
 ];
 
 // Clean dual-pool event router based strictly on team contract status

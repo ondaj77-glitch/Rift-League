@@ -33,22 +33,22 @@ export function generateTacticalScenarios(
   const enemyChamp = ALL_CHAMPIONS.find(c => c.id === enemyChampId) || ALL_CHAMPIONS[1];
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 1. EARLY LANING SCENARIO
+  // 1. EARLY LANING SCENARIO (Strict on-lane coordinates, 0 overlap)
   // ═══════════════════════════════════════════════════════════════════════════
   const laningAllies: MapUnit[] = [
-    { id: allyTeam.top, name: allyTeam.top, role: 'top', team: 'blue', isPlayer: playerRole === 'top', isDead: false, xPercent: 12, yPercent: 24 },
-    { id: allyTeam.jungle, name: allyTeam.jungle, role: 'jungle', team: 'blue', isPlayer: playerRole === 'jungle', isDead: false, xPercent: 24, yPercent: 34 },
-    { id: allyTeam.mid, name: allyTeam.mid, role: 'mid', team: 'blue', isPlayer: playerRole === 'mid', isDead: false, xPercent: 44, yPercent: 54 },
-    { id: allyTeam.adc, name: allyTeam.adc, role: 'adc', team: 'blue', isPlayer: playerRole === 'adc', isDead: false, xPercent: 78, yPercent: 88 },
-    { id: allyTeam.support, name: allyTeam.support, role: 'support', team: 'blue', isPlayer: playerRole === 'support', isDead: false, xPercent: 84, yPercent: 92 },
+    { id: allyTeam.top, name: allyTeam.top, role: 'top', team: 'blue', isPlayer: playerRole === 'top', isDead: false, xPercent: 9, yPercent: 32 },
+    { id: allyTeam.jungle, name: allyTeam.jungle, role: 'jungle', team: 'blue', isPlayer: playerRole === 'jungle', isDead: false, xPercent: 24, yPercent: 30 },
+    { id: allyTeam.mid, name: allyTeam.mid, role: 'mid', team: 'blue', isPlayer: playerRole === 'mid', isDead: false, xPercent: 42, yPercent: 58 },
+    { id: allyTeam.adc, name: allyTeam.adc, role: 'adc', team: 'blue', isPlayer: playerRole === 'adc', isDead: false, xPercent: 68, yPercent: 91 },
+    { id: allyTeam.support, name: allyTeam.support, role: 'support', team: 'blue', isPlayer: playerRole === 'support', isDead: false, xPercent: 80, yPercent: 91 },
   ];
 
   const laningEnemies: MapUnit[] = [
-    { id: enemyTeam.top, name: enemyTeam.top, role: 'top', team: 'red', isEnemyLaner: playerRole === 'top', isDead: false, xPercent: 26, yPercent: 12 },
-    { id: enemyTeam.jungle, name: enemyTeam.jungle, role: 'jungle', team: 'red', isEnemyLaner: playerRole === 'jungle', isDead: false, xPercent: 68, yPercent: 42 },
-    { id: enemyTeam.mid, name: enemyTeam.mid, role: 'mid', team: 'red', isEnemyLaner: playerRole === 'mid', isDead: false, xPercent: 56, yPercent: 44 },
-    { id: enemyTeam.adc, name: enemyTeam.adc, role: 'adc', team: 'red', isEnemyLaner: playerRole === 'adc', isDead: false, xPercent: 88, yPercent: 78 },
-    { id: enemyTeam.support, name: enemyTeam.support, role: 'support', team: 'red', isEnemyLaner: playerRole === 'support', isDead: false, xPercent: 92, yPercent: 84 },
+    { id: enemyTeam.top, name: enemyTeam.top, role: 'top', team: 'red', isEnemyLaner: playerRole === 'top', isDead: false, xPercent: 9, yPercent: 16 },
+    { id: enemyTeam.jungle, name: enemyTeam.jungle, role: 'jungle', team: 'red', isEnemyLaner: playerRole === 'jungle', isDead: false, xPercent: 72, yPercent: 36 },
+    { id: enemyTeam.mid, name: enemyTeam.mid, role: 'mid', team: 'red', isEnemyLaner: playerRole === 'mid', isDead: false, xPercent: 58, yPercent: 42 },
+    { id: enemyTeam.adc, name: enemyTeam.adc, role: 'adc', team: 'red', isEnemyLaner: playerRole === 'adc', isDead: false, xPercent: 91, yPercent: 68 },
+    { id: enemyTeam.support, name: enemyTeam.support, role: 'support', team: 'red', isEnemyLaner: playerRole === 'support', isDead: false, xPercent: 91, yPercent: 80 },
   ];
 
   const laning: MapTacticalScenario = {
@@ -121,29 +121,29 @@ export function generateTacticalScenarios(
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // 2. MID GAME SCENARIO (4v5 Dragon Contest)
+  // 2. MID GAME SCENARIO (Dragon Contest, clean 5v4 spacing across River)
   // ═══════════════════════════════════════════════════════════════════════════
   const midAllies: MapUnit[] = [
-    { id: allyTeam.top, name: allyTeam.top, role: 'top', team: 'blue', isPlayer: playerRole === 'top', isDead: false, xPercent: 62, yPercent: 66 },
-    { id: allyTeam.jungle, name: allyTeam.jungle, role: 'jungle', team: 'blue', isPlayer: playerRole === 'jungle', isDead: false, xPercent: 68, yPercent: 72 },
-    { id: allyTeam.mid, name: allyTeam.mid, role: 'mid', team: 'blue', isPlayer: playerRole === 'mid', isDead: false, xPercent: 58, yPercent: 74 },
-    { id: allyTeam.adc, name: allyTeam.adc, role: 'adc', team: 'blue', isPlayer: playerRole === 'adc', isDead: false, xPercent: 62, yPercent: 80 },
-    { id: allyTeam.support, name: allyTeam.support, role: 'support', team: 'blue', isPlayer: playerRole === 'support', isDead: false, xPercent: 70, yPercent: 78 },
+    { id: allyTeam.top, name: allyTeam.top, role: 'top', team: 'blue', isPlayer: playerRole === 'top', isDead: false, xPercent: 54, yPercent: 62 },
+    { id: allyTeam.jungle, name: allyTeam.jungle, role: 'jungle', team: 'blue', isPlayer: playerRole === 'jungle', isDead: false, xPercent: 64, yPercent: 70 },
+    { id: allyTeam.mid, name: allyTeam.mid, role: 'mid', team: 'blue', isPlayer: playerRole === 'mid', isDead: false, xPercent: 46, yPercent: 74 },
+    { id: allyTeam.adc, name: allyTeam.adc, role: 'adc', team: 'blue', isPlayer: playerRole === 'adc', isDead: false, xPercent: 38, yPercent: 82 },
+    { id: allyTeam.support, name: allyTeam.support, role: 'support', team: 'blue', isPlayer: playerRole === 'support', isDead: false, xPercent: 52, yPercent: 82 },
   ];
 
   const midEnemies: MapUnit[] = [
-    { id: enemyTeam.top, name: enemyTeam.top, role: 'top', team: 'red', isEnemyLaner: playerRole === 'top', isDead: false, xPercent: 18, yPercent: 18 },
-    { id: enemyTeam.jungle, name: enemyTeam.jungle, role: 'jungle', team: 'red', isEnemyLaner: playerRole === 'jungle', isDead: false, xPercent: 78, yPercent: 68 },
-    { id: enemyTeam.mid, name: enemyTeam.mid, role: 'mid', team: 'red', isEnemyLaner: playerRole === 'mid', isDead: false, xPercent: 84, yPercent: 62 },
-    { id: enemyTeam.adc, name: enemyTeam.adc, role: 'adc', team: 'red', isEnemyLaner: playerRole === 'adc', isDead: true, respawnTime: 22, xPercent: 90, yPercent: 90 },
-    { id: enemyTeam.support, name: enemyTeam.support, role: 'support', team: 'red', isEnemyLaner: playerRole === 'support', isDead: false, xPercent: 80, yPercent: 76 },
+    { id: enemyTeam.top, name: enemyTeam.top, role: 'top', team: 'red', isEnemyLaner: playerRole === 'top', isDead: false, xPercent: 35, yPercent: 11 },
+    { id: enemyTeam.jungle, name: enemyTeam.jungle, role: 'jungle', team: 'red', isEnemyLaner: playerRole === 'jungle', isDead: false, xPercent: 78, yPercent: 66 },
+    { id: enemyTeam.mid, name: enemyTeam.mid, role: 'mid', team: 'red', isEnemyLaner: playerRole === 'mid', isDead: false, xPercent: 84, yPercent: 54 },
+    { id: enemyTeam.adc, name: enemyTeam.adc, role: 'adc', team: 'red', isEnemyLaner: playerRole === 'adc', isDead: true, respawnTime: 22, xPercent: 91, yPercent: 11 },
+    { id: enemyTeam.support, name: enemyTeam.support, role: 'support', team: 'red', isEnemyLaner: playerRole === 'support', isDead: false, xPercent: 84, yPercent: 76 },
   ];
 
   const midGame: MapTacticalScenario = {
     id: 'mid_dragon_powerplay',
     titleCs: `Mid Game: Souboj o Draka (4v5 Power Play)`,
     titleEn: `Mid Game: Soul Dragon Contest (4v5 Power Play)`,
-    contextCs: `Nepřátelské ADC (${enemyTeam.adc}) je MRTVÉ (💀 22s). Oponenti se ve 4 lidech pokouší o zoufalý steal draka, zatímco ${enemyChamp.name} overextenduje na horní lince bez teleportu.`,
+    contextCs: `Nepřátelské ADC (${enemyTeam.adc}) je MRTVÉ (💀 22s v bázi). Oponenti se ve 4 lidech pokouší o zoufalý steal draka, zatímco ${enemyChamp.name} overextenduje na horní lince bez teleportu.`,
     contextEn: `Enemy ADC (${enemyTeam.adc}) is DEAD (💀 22s). Enemies 4-man contesting Dragon while ${enemyChamp.name} splitpushes top without Teleport.`,
     stage: 'DRAGON_FIGHT',
     playerUltStatus: `👑 Ultimate [R] PŘIPRAVENA`,
@@ -212,19 +212,19 @@ export function generateTacticalScenarios(
   // 3. LATE GAME SCENARIO (Baron Nashor Standoff)
   // ═══════════════════════════════════════════════════════════════════════════
   const lateAllies: MapUnit[] = [
-    { id: allyTeam.top, name: allyTeam.top, role: 'top', team: 'blue', isPlayer: playerRole === 'top', isDead: false, xPercent: 32, yPercent: 32 },
-    { id: allyTeam.jungle, name: allyTeam.jungle, role: 'jungle', team: 'blue', isPlayer: playerRole === 'jungle', isDead: false, xPercent: 28, yPercent: 38 },
-    { id: allyTeam.mid, name: allyTeam.mid, role: 'mid', team: 'blue', isPlayer: playerRole === 'mid', isDead: false, xPercent: 38, yPercent: 36 },
-    { id: allyTeam.adc, name: allyTeam.adc, role: 'adc', team: 'blue', isPlayer: playerRole === 'adc', isDead: false, xPercent: 44, yPercent: 42 },
-    { id: allyTeam.support, name: allyTeam.support, role: 'support', team: 'blue', isPlayer: playerRole === 'support', isDead: false, xPercent: 36, yPercent: 46 },
+    { id: allyTeam.top, name: allyTeam.top, role: 'top', team: 'blue', isPlayer: playerRole === 'top', isDead: false, xPercent: 34, yPercent: 34 },
+    { id: allyTeam.jungle, name: allyTeam.jungle, role: 'jungle', team: 'blue', isPlayer: playerRole === 'jungle', isDead: false, xPercent: 28, yPercent: 42 },
+    { id: allyTeam.mid, name: allyTeam.mid, role: 'mid', team: 'blue', isPlayer: playerRole === 'mid', isDead: false, xPercent: 42, yPercent: 42 },
+    { id: allyTeam.adc, name: allyTeam.adc, role: 'adc', team: 'blue', isPlayer: playerRole === 'adc', isDead: false, xPercent: 48, yPercent: 50 },
+    { id: allyTeam.support, name: allyTeam.support, role: 'support', team: 'blue', isPlayer: playerRole === 'support', isDead: false, xPercent: 36, yPercent: 52 },
   ];
 
   const lateEnemies: MapUnit[] = [
-    { id: enemyTeam.top, name: enemyTeam.top, role: 'top', team: 'red', isEnemyLaner: playerRole === 'top', isDead: false, xPercent: 22, yPercent: 22 },
-    { id: enemyTeam.jungle, name: enemyTeam.jungle, role: 'jungle', team: 'red', isEnemyLaner: playerRole === 'jungle', isDead: false, xPercent: 25, yPercent: 25 },
-    { id: enemyTeam.mid, name: enemyTeam.mid, role: 'mid', team: 'red', isEnemyLaner: playerRole === 'mid', isDead: false, xPercent: 18, yPercent: 26 },
-    { id: enemyTeam.adc, name: enemyTeam.adc, role: 'adc', team: 'red', isEnemyLaner: playerRole === 'adc', isDead: false, xPercent: 16, yPercent: 20 },
-    { id: enemyTeam.support, name: enemyTeam.support, role: 'support', team: 'red', isEnemyLaner: playerRole === 'support', isDead: false, xPercent: 20, yPercent: 30 },
+    { id: enemyTeam.top, name: enemyTeam.top, role: 'top', team: 'red', isEnemyLaner: playerRole === 'top', isDead: false, xPercent: 20, yPercent: 20 },
+    { id: enemyTeam.jungle, name: enemyTeam.jungle, role: 'jungle', team: 'red', isEnemyLaner: playerRole === 'jungle', isDead: false, xPercent: 26, yPercent: 26 },
+    { id: enemyTeam.mid, name: enemyTeam.mid, role: 'mid', team: 'red', isEnemyLaner: playerRole === 'mid', isDead: false, xPercent: 14, yPercent: 26 },
+    { id: enemyTeam.adc, name: enemyTeam.adc, role: 'adc', team: 'red', isEnemyLaner: playerRole === 'adc', isDead: false, xPercent: 12, yPercent: 16 },
+    { id: enemyTeam.support, name: enemyTeam.support, role: 'support', team: 'red', isEnemyLaner: playerRole === 'support', isDead: false, xPercent: 22, yPercent: 32 },
   ];
 
   const lateGame: MapTacticalScenario = {
