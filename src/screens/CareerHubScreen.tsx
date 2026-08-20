@@ -34,12 +34,27 @@ export function CareerHubScreen() {
 
   const [forfeitModalOpen, setForfeitModalOpen] = useState(false);
 
-  if (!career) return null;
+  if (!career) {
+    return (
+      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
+        <Card className="p-6 text-center space-y-4 max-w-sm border-gold-600/30">
+          <p className="text-white font-bold text-base">Kariéra nebyla nalezena</p>
+          <Button variant="primary" fullWidth onClick={() => setPhase('MENU')}>
+            Založit novou kariéru / Menu
+          </Button>
+        </Card>
+      </div>
+    );
+  }
 
   const yearsLeft = Math.max(0, 30 - career.age);
-  const rankIcon = TIER_ICONS[career.rank.tier];
-  const energy = career.lifestyle.energy;
-  const maxEnergy = career.lifestyle.maxEnergy;
+  const rank = career.rank || { tier: 'BRONZE', division: 'IV', lp: 0, globalRank: 1500000 };
+  const rankIcon = TIER_ICONS[rank.tier] || '🥉';
+  const lifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+  const energy = lifestyle.energy ?? 100;
+  const maxEnergy = lifestyle.maxEnergy ?? 100;
+  const finances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
+  const currentPatch = career.currentPatch || { patchVersion: '15.1', season: 15, tiers: {} };
 
   function handleContinue() {
     if (currentEvent) {
@@ -80,7 +95,7 @@ export function CareerHubScreen() {
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5 font-medium">
-                {t('hub.age')} {career.age} · {career.rank.tier} {career.rank.division || ''} ({career.rank.lp} LP) · #{career.rank.globalRank?.toLocaleString() || '1.5M'} {t('soloq.global_ranking')}
+                {t('hub.age')} {career.age} · {rank.tier} {rank.division || ''} ({rank.lp} LP) · #{rank.globalRank?.toLocaleString() || '1.5M'} {t('soloq.global_ranking')}
               </p>
             </div>
           </div>
@@ -96,7 +111,7 @@ export function CareerHubScreen() {
               className="bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-600/40 px-2.5 py-1 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1 shadow-sm"
               title="Zobrazit aktuální Patch Notes a meta změny"
             >
-              📋 {career.currentPatch.patchVersion}
+              📋 {currentPatch.patchVersion}
             </button>
 
             {/* Energy */}
@@ -110,7 +125,7 @@ export function CareerHubScreen() {
             {/* Split & Week */}
             <div>
               <p className="text-xs text-slate-400 font-medium">
-                {SPLIT_ICONS[career.split]} {t(`hub.split.${career.split.toLowerCase()}` as any)} {career.year}
+                {SPLIT_ICONS[career.split || 'Spring']} {t(`hub.split.${(career.split || 'spring').toLowerCase()}` as any)} {career.year}
               </p>
               <p className="text-sm font-bold text-gold-400 font-mono">
                 {t('hub.week')} {career.week} / 9
@@ -121,7 +136,7 @@ export function CareerHubScreen() {
             <div className="border-l border-rift-border pl-3">
               <p className="text-xs text-slate-400 font-medium">{t('hub.savings')}</p>
               <p className="text-sm font-black text-green-400 font-mono">
-                ${career.finances.savings.toLocaleString()}
+                ${finances.savings.toLocaleString()}
               </p>
             </div>
 

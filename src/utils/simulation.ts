@@ -111,14 +111,25 @@ function generateHighlights(career: Career, won: boolean, mvp: boolean): string[
 
 // Calculate team standings for a full split
 export function generateStandings(
-  playerTeam: Team,
+  playerTeam: Team | null,
   region: string,
   wins: number,
   losses: number,
   allTeams: Team[]
 ): Array<{ team: Team; wins: number; losses: number; isPlayer: boolean }> {
-  const total = wins + losses;
-  const regionTeams = allTeams.filter(t => t.region === region && t.id !== playerTeam.id).slice(0, 7);
+  const total = Math.max(1, wins + losses);
+  const dummyTeam: Team = playerTeam || {
+    id: 'soloq_prodigy',
+    name: 'SoloQ Prodigy',
+    shortName: 'PROD',
+    region: region as any,
+    strength: 50,
+    prestige: 10,
+    salaryRange: [0, 0],
+    color: '#a855f7',
+  };
+
+  const regionTeams = allTeams.filter(t => t.region === region && t.id !== dummyTeam.id).slice(0, 7);
 
   const standings = regionTeams.map(team => {
     const strength = team.strength / 100;
@@ -131,7 +142,7 @@ export function generateStandings(
     };
   });
 
-  standings.push({ team: playerTeam, wins, losses, isPlayer: true });
+  standings.push({ team: dummyTeam, wins, losses, isPlayer: true });
   standings.sort((a, b) => b.wins - a.wins);
 
   return standings;

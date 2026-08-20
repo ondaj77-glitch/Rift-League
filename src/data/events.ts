@@ -1595,7 +1595,11 @@ export function getWeeklyEvent(
   usedEventIds: string[],
   seed?: number
 ): GameEvent {
-  const isFreeAgent = career.hasTeam === false;
+  const isFreeAgent = career.hasTeam === false || career.hasTeam === undefined;
+  const isProdigy = career.age < 17 || isFreeAgent;
+
+  const TEAM_CATEGORIES = ['team_dynamics', 'contract', 'match'];
+  const TEAM_ONLY_IDS = ['health_slump', 'training_vod_coach', 'training_scrim_analysis', 'training_scrim_review'];
 
   const available = EVENTS.filter(e => {
     if (usedEventIds.includes(e.id)) return false;
@@ -1604,13 +1608,25 @@ export function getWeeklyEvent(
     if (e.minReputation !== undefined && career.reputation < e.minReputation) return false;
     if (e.maxReputation !== undefined && career.reputation > e.maxReputation) return false;
     if (e.requiresInternational && !career.inInternational) return false;
-    if (e.requiresTeam && isFreeAgent) return false;
+    
+    // Strict isolation for SoloQ Prodigy / Free Agent runs
+    if (isFreeAgent) {
+      if (e.requiresTeam) return false;
+      if (TEAM_CATEGORIES.includes(e.category)) return false;
+      if (TEAM_ONLY_IDS.includes(e.id)) return false;
+    }
+
     if (e.requiresFreeAgent && !isFreeAgent) return false;
+    if (isProdigy && (e.category === 'contract' || (e.minAge !== undefined && e.minAge >= 17))) return false;
+
     return true;
   });
 
   if (available.length === 0) {
-    return EVENTS.find(e => !e.requiresTeam) || EVENTS[0];
+    const prodigyFallbacks = EVENTS.filter(e => e.category === 'prodigy' || e.category === 'soloq' || e.category === 'social');
+    return prodigyFallbacks.length > 0
+      ? prodigyFallbacks[Math.floor(Math.random() * prodigyFallbacks.length)]
+      : EVENTS[0];
   }
 
   // Weighted random selection

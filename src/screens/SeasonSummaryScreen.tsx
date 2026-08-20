@@ -12,16 +12,24 @@ export function SeasonSummaryScreen() {
   const { t } = useTranslation();
   const career = useGameStore(s => s.career);
   const nextSplit = useGameStore(s => s.nextSplit);
+  const setPhase = useGameStore(s => s.setPhase);
 
-  if (!career) return null;
+  if (!career) {
+    return (
+      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
+        <Button onClick={() => setPhase('MENU')}>Hlavní Menu</Button>
+      </div>
+    );
+  }
 
+  const isProdigy = !career.currentTeam;
   const total = career.wins + career.losses;
   const winRate = total > 0 ? Math.round(career.wins / total * 100) : 0;
-  const qualifiedPlayoffs = career.wins / Math.max(1, total) >= 0.5 || career.wins >= 5;
-  const qualifiedIntl = winRate >= 60 && career.stats.reputation >= 60 && career.splitNumber === 3;
+  const qualifiedPlayoffs = !isProdigy && (career.wins / Math.max(1, total) >= 0.5 || career.wins >= 5);
+  const qualifiedIntl = !isProdigy && winRate >= 60 && career.stats.reputation >= 60 && career.splitNumber === 3;
 
   const standings = generateStandings(
-    career.currentTeam!,
+    career.currentTeam,
     career.region,
     career.wins,
     career.losses,
