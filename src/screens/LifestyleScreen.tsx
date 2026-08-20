@@ -12,9 +12,10 @@ const HOUSING_NAMES: Record<string, { label: string; rent: number; desc: string 
 };
 
 const PC_NAMES = [
-  { level: 1, name: 'Potato 60Hz Setup (Starý PC)', cost: 0, bonus: 'Základní odezva, nedostačuje pro stream' },
-  { level: 2, name: 'Esports 144Hz Rig + Stream Webcam', cost: 1500, bonus: '+5 Mechanika · Odemkne možnost Streamování' },
-  { level: 3, name: 'Pro 360Hz Beast + Dual PC Streaming Rig', cost: 5000, bonus: '+10 Mechanika & Mentál · +50% Stream Výdělky' },
+  { level: 1, name: 'Potato 60Hz Setup (Starý rodinný PC)', cost: 0, bonus: 'Základní odezva, nedostačuje pro stream' },
+  { level: 2, name: 'Entry 144Hz Rig + Mikrofon', cost: 2500, bonus: '+3 Mechanika · Odemkne možnost Streamování' },
+  { level: 3, name: 'Esports 240Hz OLED + Stream Setup', cost: 6500, bonus: '+5 Mechanika & +4 Mentál · +25% Stream Diváci' },
+  { level: 4, name: 'Pro 360Hz Dual-PC Studio Monster', cost: 15000, bonus: '+8 Mechanika & +6 Mentál · +50% Stream Výdělky' },
 ];
 
 export function LifestyleScreen() {
@@ -32,18 +33,14 @@ export function LifestyleScreen() {
 
   const housingLabels: Record<string, { label: string; rent: number }> = {
     parents_home: { label: t('housing.parents' as any) || '🏠 Rodinný dům u rodičů', rent: 0 },
-    budget_room: { label: t('housing.budget' as any) || '🏢 Sdílený byt', rent: 600 },
+    budget_room: { label: t('housing.budget' as any) || '🏢 Sdílený byt', rent: 450 },
     gaming_house: { label: t('housing.gaming_house' as any) || '⚡ Týmový Gaming House', rent: 0 },
-    luxury_apt: { label: t('housing.penthouse' as any) || '🌆 Luxusní Penthouse', rent: 3500 },
+    luxury_apt: { label: t('housing.penthouse' as any) || '🌆 Luxusní Penthouse', rent: 2800 },
   };
 
   const housing = housingLabels[housingKey] || housingLabels.budget_room;
 
-  const pcNames = [
-    { level: 1, name: 'Potato 60Hz Setup (Starý PC)', cost: 0, bonus: 'Základní odezva, nedostačuje pro stream' },
-    { level: 2, name: 'Esports 144Hz Rig + Stream Webcam', cost: 1500, bonus: '+5 Mechanika · Odemkne možnost Streamování' },
-    { level: 3, name: 'Pro 360Hz Beast + Dual PC Streaming Rig', cost: 5000, bonus: '+10 Mechanika & Mentál · +50% Stream Výdělky' },
-  ];
+  const pcNames = PC_NAMES;
 
   const nextPC = pcNames.find(p => p.level === pcLevel + 1);
   const canStream = pcLevel >= 2;

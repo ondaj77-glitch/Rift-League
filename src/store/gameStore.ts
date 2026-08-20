@@ -518,23 +518,31 @@ export const useGameStore = create<GameStore>()(
         const currentStats = career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 };
 
         if (action === 'job' && currentLifestyle.energy >= 30) {
-          addNotification(`+$450 Výdělek z brigády (-30⚡)`, 'positive', '💼');
+          const earnings = 160;
+          addNotification(`+$${earnings} Výdělek z brigády (-30⚡ · -3 Mentál)`, 'positive', '💼');
           set(state => ({
             career: {
               ...state.career!,
               lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 30 },
-              finances: { ...currentFinances, savings: currentFinances.savings + 450 },
+              finances: { ...currentFinances, savings: currentFinances.savings + earnings },
               stats: { ...currentStats, mental: clamp(currentStats.mental - 3) },
             },
           }));
-        } else if (action === 'stream' && currentLifestyle.energy >= 25) {
-          const currentFollowers = career.streamFollowers ?? 100;
-          const gainedFollowers = 250 + Math.floor((currentStats.reputation ?? 20) * 15) + Math.floor(Math.random() * 100);
+        } else if (action === 'stream' && currentLifestyle.energy >= 25 && currentLifestyle.pcLevel >= 2) {
+          const currentFollowers = career.streamFollowers ?? 50;
+          // Realistic follower gain based on reputation & PC setup
+          const repBonus = Math.floor((currentStats.reputation ?? 10) * 0.4);
+          const gainedFollowers = Math.floor(18 + repBonus + Math.random() * 14);
           const newFollowers = currentFollowers + gainedFollowers;
-          const newViewers = Math.max(10, Math.floor(newFollowers * 0.08));
-          const streamCash = 200 + Math.floor(newViewers * 1.5) + Math.floor((currentStats.reputation ?? 20) * 4);
+          
+          // Realistic live viewership (3.5% of followers)
+          const newViewers = Math.max(3, Math.floor(newFollowers * 0.035));
+          
+          // Realistic stream donations & subs ($25-$180)
+          const pcBonus = currentLifestyle.pcLevel >= 4 ? 1.5 : currentLifestyle.pcLevel >= 3 ? 1.25 : 1.0;
+          const streamCash = Math.floor((25 + newViewers * 1.3 + (currentStats.reputation ?? 10) * 0.5) * pcBonus);
 
-          addNotification(`+${gainedFollowers} Followerů & +$${streamCash} z darů!`, 'gold', '🎥');
+          addNotification(`+${gainedFollowers} Followerů & +$${streamCash} z darů (-25⚡ · -2 Mentál)`, 'gold', '🎥');
 
           set(state => ({
             career: {
@@ -543,29 +551,37 @@ export const useGameStore = create<GameStore>()(
               streamViewers: newViewers,
               lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 25 },
               finances: { ...currentFinances, savings: currentFinances.savings + streamCash },
-              stats: { ...currentStats, reputation: clamp(currentStats.reputation + 2) },
+              stats: {
+                ...currentStats,
+                reputation: clamp(currentStats.reputation + 1),
+                mental: clamp(currentStats.mental - 2), // Stream fatigue
+              },
             },
           }));
         } else if (action === 'vod' && currentLifestyle.energy >= 20) {
-          addNotification(`+3 Znalost hry · +2 Přizpůsobivost (-20⚡)`, 'positive', '🧠');
+          addNotification(`+2 Znalost hry · +1 Přizpůsobivost (-20⚡)`, 'positive', '🧠');
           set(state => ({
             career: {
               ...state.career!,
               lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 20 },
               stats: {
                 ...currentStats,
-                gameKnowledge: clamp(currentStats.gameKnowledge + 3),
-                adaptability: clamp(currentStats.adaptability + 2),
+                gameKnowledge: clamp(currentStats.gameKnowledge + 2),
+                adaptability: clamp(currentStats.adaptability + 1),
               },
             },
           }));
         } else if (action === 'gym' && currentLifestyle.energy >= 20) {
-          addNotification(`+8 Mentál · Tilt vymazán (-20⚡)`, 'positive', '🏋️');
+          addNotification(`+6 Mentál · +1 Mechanika (-20⚡)`, 'positive', '🏋️');
           set(state => ({
             career: {
               ...state.career!,
               lifestyle: { ...currentLifestyle, energy: currentLifestyle.energy - 20 },
-              stats: { ...currentStats, mental: clamp(currentStats.mental + 8) },
+              stats: {
+                ...currentStats,
+                mental: clamp(currentStats.mental + 6),
+                mechanics: clamp(currentStats.mechanics + 1),
+              },
             },
           }));
         }
@@ -578,18 +594,23 @@ export const useGameStore = create<GameStore>()(
         const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
         const currentStats = career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 };
 
-        const costs = [0, 1500, 5000];
+        const costs = [0, 2500, 6500, 15000];
         const nextCost = costs[currentLifestyle.pcLevel] || 99999;
-        if (currentFinances.savings >= nextCost) {
-          addNotification(`🖥️ Nový PC Setup zakoupen! (+4 Mechanika)`, 'gold', '⚡');
+        if (currentFinances.savings >= nextCost && currentLifestyle.pcLevel < 4) {
+          const nextLevel = currentLifestyle.pcLevel + 1;
+          const mechGain = nextLevel === 2 ? 3 : nextLevel === 3 ? 5 : 8;
+          const mentalGain = nextLevel === 3 ? 4 : nextLevel === 4 ? 6 : 0;
+
+          addNotification(`🖥️ Level ${nextLevel} PC Setup zakoupen! (+${mechGain} Mechanika${mentalGain > 0 ? `, +${mentalGain} Mentál` : ''})`, 'gold', '⚡');
           set(state => ({
             career: {
               ...state.career!,
               finances: { ...currentFinances, savings: currentFinances.savings - nextCost },
-              lifestyle: { ...currentLifestyle, pcLevel: currentLifestyle.pcLevel + 1 },
+              lifestyle: { ...currentLifestyle, pcLevel: nextLevel },
               stats: {
                 ...currentStats,
-                mechanics: clamp(currentStats.mechanics + 4),
+                mechanics: clamp(currentStats.mechanics + mechGain),
+                mental: clamp(currentStats.mental + mentalGain),
               },
             },
           }));
@@ -678,16 +699,7 @@ export const useGameStore = create<GameStore>()(
 
         const WEEKS_PER_SPLIT = 9;
 
-        // Reset weekly energy
-        const newEnergy = 100;
-
-        // Charge weekly living costs
-        const expenses = career.finances?.monthlyExpenses ?? 0;
-        const currentSavings = career.finances?.savings ?? 300;
-        const weeklyRent = Math.floor(expenses / 4);
-        const newSavings = Math.max(0, currentSavings - weeklyRent);
-
-        // Check coach trust & benching (if in team)
+        // Reset weekly energy based on housing max energy
         const lifestyle = career.lifestyle || {
           energy: 100,
           maxEnergy: 100,
@@ -697,6 +709,43 @@ export const useGameStore = create<GameStore>()(
           rosterStatus: career.currentTeam ? 'starter' : 'free_agent',
         };
 
+        const housingMaxEnergy = lifestyle.housing === 'luxury_apt' ? 115 : 100;
+        const newEnergy = housingMaxEnergy;
+
+        // Charge weekly living costs
+        const currentSavings = career.finances?.savings ?? 300;
+        const housingRents: Record<string, number> = {
+          parents_home: 0,
+          budget_room: 450,
+          gaming_house: 0,
+          luxury_apt: 2800,
+        };
+        const monthlyRent = housingRents[lifestyle.housing ?? 'parents_home'] ?? 0;
+        const weeklyRent = Math.floor(monthlyRent / 4);
+
+        let newSavings = currentSavings;
+        let updatedHousing = lifestyle.housing;
+
+        if (weeklyRent > 0) {
+          if (currentSavings >= weeklyRent) {
+            newSavings = currentSavings - weeklyRent;
+          } else {
+            // Cannot afford rent! Downgrade to parents home
+            newSavings = 0;
+            updatedHousing = 'parents_home';
+            get().addNotification('⚠️ Nezaplatil jsi nájem! Přestěhoval ses zpět k rodičům.', 'negative', '🏠');
+          }
+        }
+
+        // Fatigue / Burnout check if player was at 0 energy or mental < 30
+        let newStats = { ...(career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 }) };
+        if (lifestyle.energy === 0 && newStats.mental < 35) {
+          newStats.mechanics = clamp(newStats.mechanics - 1);
+          newStats.mental = clamp(newStats.mental - 1);
+          get().addNotification('⚠️ Vyčerpání z přepracování! (-1 Mechanika, -1 Mentál)', 'negative', '💤');
+        }
+
+        // Check coach trust & benching (if in team)
         let rosterStatus = lifestyle.rosterStatus;
         let currentTeam = career.currentTeam;
 
@@ -705,6 +754,7 @@ export const useGameStore = create<GameStore>()(
             // Fired from team!
             rosterStatus = 'free_agent';
             currentTeam = null;
+            get().addNotification('⚠️ Byl jsi vyhozen z týmu pro ztrátu důvěry trenéra!', 'negative', '📋');
           } else if ((lifestyle.coachTrust ?? 50) < 25) {
             rosterStatus = 'benched';
           } else {
@@ -724,7 +774,7 @@ export const useGameStore = create<GameStore>()(
         const event = getWeeklyEvent(
           {
             age: career.age,
-            reputation: career.stats?.reputation ?? 10,
+            reputation: newStats.reputation ?? 10,
             inInternational: Boolean(career.inInternational),
             hasTeam: currentTeam !== null && career.age >= 17,
             currentTeam: currentTeam,
@@ -751,8 +801,9 @@ export const useGameStore = create<GameStore>()(
               ...state.career!,
               week: state.career!.week + 1,
               currentTeam,
+              stats: newStats,
               finances: { ...(state.career!.finances || { savings: 300, salary: 0, monthlyExpenses: 0 }), savings: newSavings },
-              lifestyle: { ...lifestyle, energy: newEnergy, rosterStatus },
+              lifestyle: { ...lifestyle, energy: newEnergy, maxEnergy: housingMaxEnergy, housing: updatedHousing, rosterStatus },
             },
             interactiveMatch: {
               opponentTeam: opponent,
@@ -773,8 +824,9 @@ export const useGameStore = create<GameStore>()(
               ...state.career!,
               week: state.career!.week + 1,
               currentTeam,
+              stats: newStats,
               finances: { ...(state.career!.finances || { savings: 300, salary: 0, monthlyExpenses: 0 }), savings: newSavings },
-              lifestyle: { ...lifestyle, energy: newEnergy, rosterStatus },
+              lifestyle: { ...lifestyle, energy: newEnergy, maxEnergy: housingMaxEnergy, housing: updatedHousing, rosterStatus },
             },
             currentEvent: event,
             phase: 'EVENT',
@@ -915,6 +967,23 @@ export const useGameStore = create<GameStore>()(
         const qualifiedIntl = winRate >= 0.6 && (career.stats?.reputation ?? 0) >= 60 && career.currentTeam !== null;
         const qualifiedPlayoffs = (winRate >= 0.5 || (career.wins ?? 0) >= 5) && career.currentTeam !== null;
 
+        // 1. Ageing reaction decay (Mechanics drop, Game Knowledge increase after age 23)
+        let statsAfterSplit = { ...(career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 }) };
+        if (nextAge >= 23 && nextSplitNumber === 1) { // Annual birthday effect
+          const mechLoss = nextAge >= 28 ? 3 : nextAge >= 25 ? 2 : 1;
+          const knowGain = nextAge >= 28 ? 3 : nextAge >= 25 ? 2 : 1;
+          statsAfterSplit.mechanics = clamp(statsAfterSplit.mechanics - mechLoss);
+          statsAfterSplit.gameKnowledge = clamp(statsAfterSplit.gameKnowledge + knowGain);
+          get().addNotification(`⏳ Věk ${nextAge} let: -${mechLoss} Mechanika, +${knowGain} Znalost hry`, 'negative', '⏳');
+        }
+
+        // 2. Meta Patch Shift Adaptability check
+        if (statsAfterSplit.adaptability < 48) {
+          statsAfterSplit.adaptability = clamp(statsAfterSplit.adaptability - 1);
+          statsAfterSplit.mechanics = clamp(statsAfterSplit.mechanics - 1);
+          get().addNotification(`🎮 Patch ${newPatchVersion}: Oslabený styl (-1 Mechanika, -1 Adaptabilita)`, 'negative', '⚠️');
+        }
+
         get().addNotification('Nový Split zahájen! Energie doplněna na 100⚡', 'gold', '🔄');
 
         if (qualifiedIntl && nextSplitNumber === 3) {
@@ -932,6 +1001,7 @@ export const useGameStore = create<GameStore>()(
               internationalEvent: 'Worlds',
               currentPatch: newPatch,
               swapsRemainingThisSplit: 2,
+              stats: statsAfterSplit,
               lifestyle: refreshedLifestyle,
               finances: { ...(state.career!.finances || { salary: 0, savings: 300, monthlyExpenses: 0 }), savings: newSavings },
             },
@@ -952,6 +1022,7 @@ export const useGameStore = create<GameStore>()(
               inPlayoffs: true,
               currentPatch: newPatch,
               swapsRemainingThisSplit: 2,
+              stats: statsAfterSplit,
               lifestyle: refreshedLifestyle,
               finances: { ...(state.career!.finances || { salary: 0, savings: 300, monthlyExpenses: 0 }), savings: newSavings },
             },
@@ -974,6 +1045,7 @@ export const useGameStore = create<GameStore>()(
               internationalEvent: null,
               currentPatch: newPatch,
               swapsRemainingThisSplit: 2,
+              stats: statsAfterSplit,
               lifestyle: refreshedLifestyle,
               finances: { ...(state.career!.finances || { salary: 0, savings: 300, monthlyExpenses: 0 }), savings: newSavings },
             },
