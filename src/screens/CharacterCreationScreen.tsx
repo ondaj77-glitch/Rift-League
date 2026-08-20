@@ -5,9 +5,9 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { StatBar } from '../components/ui/StatBar';
 import { Card } from '../components/ui/Card';
-import type { Role, Region, Playstyle, GameMode } from '../types/game';
+import type { Role, Region, Playstyle, GameMode, MetaPatch } from '../types/game';
 import { ROLE_STATS_PREVIEW } from '../utils/characterStats';
-import { getChampionsByRole, getChampIconUrl, TIER_PRIORITY } from '../data/champions';
+import { getChampionsByRole, getChampIconUrl, TIER_PRIORITY, generateMetaPatch } from '../data/champions';
 
 const ROLES: Role[] = ['top', 'jungle', 'mid', 'adc', 'support'];
 const REGIONS: Region[] = ['LCK', 'LPL', 'LEC', 'LTA_N', 'LTA_S', 'LCP'];
@@ -28,6 +28,12 @@ export function CharacterCreationScreen() {
   const startNewCareerExtended = useGameStore(s => s.startNewCareerExtended);
   const setPhase = useGameStore(s => s.setPhase);
 
+  // Dynamic patch generated for this career run so every new draft has fresh meta!
+  const [initialPatch] = useState<MetaPatch>(() => {
+    const randomMinor = Math.floor(Math.random() * 8) + 1;
+    return generateMetaPatch(`15.${randomMinor}`, 15);
+  });
+
   const [step, setStep] = useState<'mode' | 'basics' | 'role' | 'region' | 'playstyle' | 'champions'>('mode');
   const [mode, setMode] = useState<GameMode>('prodigy');
   const [name, setName] = useState('');
@@ -38,28 +44,42 @@ export function CharacterCreationScreen() {
   const [selectedChamps, setSelectedChamps] = useState<string[]>([]);
   const [tierError, setTierError] = useState<string | null>(null);
 
+  const getChampTier = (champId: string): 'S+' | 'S' | 'A' | 'B' | 'C' | 'D' => {
+    return initialPatch.tiers[champId]?.tier || 'A';
+  };
+
+  const getChampWinRate = (champId: string): number => {
+    return initialPatch.tiers[champId]?.winRate || 50.0;
+  };
+
+  // Get and sort role champions dynamically by their current patch tier
+  const roleChamps = getChampionsByRole(role).sort(
+    (a, b) => TIER_PRIORITY[getChampTier(a.id)] - TIER_PRIORITY[getChampTier(b.id)]
+  );
+
   // Auto-fill balanced 6 champions when role changes (max 2 S/S+ tiers, 4 A/B tiers)
   function handleSelectRole(r: Role) {
     setRole(r);
-    const sorted = getChampionsByRole(r);
-    const sChamps = sorted.filter(c => c.baseTier === 'S+' || c.baseTier === 'S').slice(0, 2);
-    const otherChamps = sorted.filter(c => c.baseTier !== 'S+' && c.baseTier !== 'S').slice(0, 4);
+    const sorted = getChampionsByRole(r).sort(
+      (a, b) => TIER_PRIORITY[getChampTier(a.id)] - TIER_PRIORITY[getChampTier(b.id)]
+    );
+    const sChamps = sorted.filter(c => getChampTier(c.id) === 'S+' || getChampTier(c.id) === 'S').slice(0, 2);
+    const otherChamps = sorted.filter(c => getChampTier(c.id) !== 'S+' && getChampTier(c.id) !== 'S').slice(0, 4);
     setSelectedChamps([...sChamps, ...otherChamps].map(c => c.id));
   }
 
-  const roleChamps = getChampionsByRole(role);
   const previewStats = ROLE_STATS_PREVIEW(role, playstyle);
 
-  // Check how many S/S+ tier champions are selected
+  // Check how many S/S+ tier champions are selected in current patch
   const sTierCount = selectedChamps.filter(id => {
-    const champ = roleChamps.find(c => c.id === id);
-    return champ && (champ.baseTier === 'S+' || champ.baseTier === 'S');
+    const tier = getChampTier(id);
+    return tier === 'S+' || tier === 'S';
   }).length;
 
   function toggleChampion(champId: string) {
     setTierError(null);
-    const targetChamp = roleChamps.find(c => c.id === champId);
-    const isSTier = targetChamp && (targetChamp.baseTier === 'S+' || targetChamp.baseTier === 'S');
+    const tier = getChampTier(champId);
+    const isSTier = tier === 'S+' || tier === 'S';
 
     if (selectedChamps.includes(champId)) {
       if (selectedChamps.length > 1) {
@@ -79,7 +99,16 @@ export function CharacterCreationScreen() {
   }
 
   function handleStart() {
-    startNewCareerExtended(mode, name.trim() || 'Player', gameName.trim() || 'Rookie', role, region, playstyle, selectedChamps);
+    startNewCareerExtended(
+      mode,
+      name.trim() || 'Player',
+      gameName.trim() || 'Rookie',
+      role,
+      region,
+      playstyle,
+      selectedChamps,
+      initialPatch
+    );
   }
 
   return (
@@ -296,10 +325,10 @@ export function CharacterCreationScreen() {
             </motion.div>
           )}
 
-          {/* STEP 6: CHAMPION POOL (6 MAINS - ORDERED BY TIER S+ DOWN TO D) */}
+          {/* STEP 6: CHAMPION POOL (6 MAINS - DYNAMICALLY ORDERED BY CURRENT PATCH META) */}
           {step === 'champions' && (
             <motion.div key="champions" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-rift-card p-3.5 rounded-xl border border-rift-border">
                 <div>
                   <h3 className="font-bold text-white text-base font-heading uppercase tracking-wide">
                     Vyber 6 Main Championů ({selectedChamps.length}/6)
@@ -307,6 +336,12 @@ export function CharacterCreationScreen() {
                   <p className="text-xs text-slate-400">
                     Seřazeno podle Tier Listu (Max 2 S/S+ tier pro startovní balanc: <strong className="text-gold-400">{sTierCount}/2</strong>)
                   </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400">Aktuální Meta:</span>
+                  <span className="text-xs font-black text-gold-400 bg-rift-surface px-2.5 py-1 rounded-lg border border-gold-600/30 font-mono">
+                    📋 Patch {initialPatch.patchVersion}
+                  </span>
                 </div>
               </div>
 
@@ -320,7 +355,8 @@ export function CharacterCreationScreen() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto pr-1">
                 {roleChamps.map((champ) => {
                   const isSelected = selectedChamps.includes(champ.id);
-                  const isSTier = champ.baseTier === 'S+' || champ.baseTier === 'S';
+                  const dynamicTier = getChampTier(champ.id);
+                  const winRate = getChampWinRate(champ.id);
 
                   return (
                     <div
@@ -328,34 +364,37 @@ export function CharacterCreationScreen() {
                       onClick={() => toggleChampion(champ.id)}
                       className={`relative overflow-hidden rounded-xl border p-3 cursor-pointer transition-all ${
                         isSelected
-                          ? 'border-gold-400 bg-gold-950/40 shadow-md shadow-gold-500/20'
-                          : 'border-rift-border bg-rift-card hover:border-slate-500 opacity-70'
+                          ? 'border-gold-400 bg-gold-950/40 shadow-md shadow-gold-500/20 ring-1 ring-gold-400/50'
+                          : 'border-rift-border bg-rift-card hover:border-slate-500 opacity-80 hover:opacity-100'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
                         <img
                           src={getChampIconUrl(champ.id)}
                           alt={champ.name}
-                          className="w-10 h-10 rounded-lg border border-slate-700 object-cover"
+                          className="w-10 h-10 rounded-lg border border-slate-700 object-cover shrink-0"
                           onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                         />
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-1">
                             <p className="font-bold text-white text-xs truncate">{champ.name}</p>
-                            <span className={`text-[10px] font-black px-1.5 py-0.2 rounded ${
-                              champ.baseTier === 'S+' ? 'bg-amber-400 text-black font-extrabold' :
-                              champ.baseTier === 'S' ? 'bg-purple-600 text-white font-bold' :
-                              champ.baseTier === 'A' ? 'bg-blue-600 text-white font-bold' :
-                              champ.baseTier === 'B' ? 'bg-slate-700 text-slate-300' : 'bg-red-950 text-red-400'
+                            <span className={`text-[10px] font-black px-1.5 py-0.2 rounded shrink-0 ${
+                              dynamicTier === 'S+' ? 'bg-amber-400 text-black font-extrabold shadow-sm shadow-amber-500/50' :
+                              dynamicTier === 'S' ? 'bg-purple-600 text-white font-bold' :
+                              dynamicTier === 'A' ? 'bg-blue-600 text-white font-bold' :
+                              dynamicTier === 'B' ? 'bg-slate-700 text-slate-300' : 'bg-red-950 text-red-400'
                             }`}>
-                              {champ.baseTier}
+                              {dynamicTier}
                             </span>
                           </div>
-                          <p className="text-[10px] text-slate-400">{champ.playstyle}</p>
+                          <div className="flex items-center justify-between text-[10px] text-slate-400 mt-0.5">
+                            <span>{champ.playstyle}</span>
+                            <span className="font-mono text-slate-300 font-semibold">{winRate}% WR</span>
+                          </div>
                         </div>
                       </div>
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-4 h-4 bg-gold-400 rounded-full flex items-center justify-center text-black font-extrabold text-[10px]">
+                        <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-gold-400 rounded-full flex items-center justify-center text-black font-extrabold text-[10px]">
                           ✓
                         </div>
                       )}

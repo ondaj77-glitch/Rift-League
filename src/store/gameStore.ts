@@ -41,7 +41,8 @@ interface GameStore extends GameState {
     role: Role,
     region: Region,
     playstyle: Playstyle,
-    championPool: string[]
+    championPool: string[],
+    customPatch?: MetaPatch
   ) => void;
 
   startDailyChallenge: () => void;
@@ -115,7 +116,7 @@ export const useGameStore = create<GameStore>()(
         set({ dailyChallenge: daily });
       },
 
-      startNewCareerExtended: (mode, name, gameName, role, region, playstyle, championPool) => {
+      startNewCareerExtended: (mode, name, gameName, role, region, playstyle, championPool, customPatch) => {
         const base = ROLE_STATS[role];
         const bonus = PLAYSTYLE_BONUS[playstyle];
 
@@ -138,7 +139,7 @@ export const useGameStore = create<GameStore>()(
         });
 
         // Patch init with full rich details
-        const initialPatch = generateMetaPatch('15.1', 15);
+        const initialPatch = customPatch || generateMetaPatch('15.1', 15);
 
         // Starting rank: Bronze IV (if Prodigy) or Diamond I / Master (if Pro Debut)
         const startTier: Tier = isProdigy ? 'BRONZE' : 'DIAMOND';

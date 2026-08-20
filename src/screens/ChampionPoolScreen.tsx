@@ -21,7 +21,11 @@ export function ChampionPoolScreen() {
 
   const currentPatch = career.currentPatch;
   const poolChamps = ALL_CHAMPIONS.filter(c => career.championPool.includes(c.id));
-  const roleChamps = getChampionsByRole(career.role);
+  const roleChamps = getChampionsByRole(career.role).sort(
+    (a, b) =>
+      TIER_PRIORITY[currentPatch.tiers[a.id]?.tier || 'A'] -
+      TIER_PRIORITY[currentPatch.tiers[b.id]?.tier || 'A']
+  );
   const energy = career.lifestyle.energy;
   const remainingSwaps = career.swapsRemainingThisSplit ?? 2;
 
