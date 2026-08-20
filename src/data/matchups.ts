@@ -6,7 +6,7 @@ export interface MatchupResult {
   type: MatchupType;
   scoreBonus: number;        // e.g. +15 or -15 to starting combat score
   difficultyDelta: number;   // e.g. -8 or +8 to tactical checks DC
-  winRateDelta: number;      // e.g. +10% or -10% in auto-simulations
+  winRateDelta: number;      // e.g. +12% or -12% in auto-simulations
   labelCs: string;
   labelEn: string;
   reasonCs: string;
@@ -14,209 +14,292 @@ export interface MatchupResult {
   advantageBadge: string;    // e.g. '🎯 HARD COUNTER (+15)'
 }
 
-// Explicit iconic LoL counter relationships
-// key: championId -> { counters: string[]; counteredBy: string[]; reasonCs: string; reasonEn: string }
+// Explicit statistical LoL counter matrix covering all champions
 export const DIRECT_COUNTERS: Record<string, { counters: string[]; counteredBy: string[]; tipCs: string; tipEn: string }> = {
   // ── TOP LANE ─────────────────────────────────────────────────────────────
   Aatrox: {
-    counters: ['Sion', 'Chogath', 'Nasus', 'DrMundo', 'Sett', 'Malphite'],
-    counteredBy: ['Fiora', 'Irelia', 'Riven', 'Camille', 'Kled', 'Gwen'],
+    counters: ['Sion', 'Chogath', 'Nasus', 'DrMundo', 'Sett', 'Malphite', 'Ornn', 'Singed'],
+    counteredBy: ['Fiora', 'Irelia', 'Riven', 'Camille', 'Kled', 'Gwen', 'Wukong'],
     tipCs: 'Drtí nepohyblivé tanky přes sweetspoty; ztrácí proti mobilním duelantům s vysokým DPS.',
     tipEn: 'Crushes immobile tanks with Q sweetspots; struggles against hyper-mobile duelists.',
   },
-  Fiora: {
-    counters: ['Aatrox', 'KSante', 'Ornn', 'Sion', 'Chogath', 'Mordekaiser', 'Urgot'],
-    counteredBy: ['Malphite', 'Jayce', 'Kennen', 'Renekton', 'Poppy'],
-    tipCs: 'Paríruje tvrdé CC a drtí tanky maximálním % true damage.',
-    tipEn: 'Ripostes hard CC and shreds high HP targets with max % true damage vitals.',
-  },
   Jax: {
-    counters: ['Camille', 'Tryndamere', 'Yorick', 'Sett', 'Urgot', 'Ambessa', 'Irelia'],
-    counteredBy: ['Malphite', 'Jayce', 'Gragas', 'Poppy', 'Kennen'],
+    counters: ['Camille', 'Tryndamere', 'Yorick', 'Sett', 'Urgot', 'Ambessa', 'Irelia', 'Kled'],
+    counteredBy: ['Malphite', 'Jayce', 'Gragas', 'Poppy', 'Kennen', 'Singed'],
     tipCs: 'Counter-Strike kompletně blokuje autoútoky a otáčí souboje na lince.',
     tipEn: 'Counter-Strike completely blocks auto-attacks and turns all-ins.',
   },
   KSante: {
-    counters: ['Malphite', 'Ornn', 'Sion', 'Shen', 'Sett'],
-    counteredBy: ['Fiora', 'Gwen', 'Vayne', 'Mordekaiser'],
+    counters: ['Malphite', 'Ornn', 'Sion', 'Shen', 'Sett', 'Chogath', 'DrMundo'],
+    counteredBy: ['Fiora', 'Gwen', 'Vayne', 'Mordekaiser', 'Kayle'],
     tipCs: 'Neúprosný tank s velkou kontrolou; ztrácí proti true damage a AP shredderům.',
     tipEn: 'Resilient warden with kidnap ult; falls to true damage and heavy AP shred.',
   },
   Mordekaiser: {
-    counters: ['Malphite', 'Ornn', 'Sion', 'Illaoi', 'Chogath', 'Nasus'],
-    counteredBy: ['Fiora', 'Olaf', 'Gangplank', 'Vayne', 'Jayce'],
+    counters: ['Malphite', 'Ornn', 'Sion', 'Illaoi', 'Chogath', 'Nasus', 'Sett', 'Shen'],
+    counteredBy: ['Fiora', 'Olaf', 'Gangplank', 'Vayne', 'Jayce', 'Kennen'],
     tipCs: 'Death Realm izoluje nepřátelské frontline tanky a krade jim atributy.',
     tipEn: 'Death Realm isolates frontliners and steals stats in 1v1 duels.',
   },
+  Fiora: {
+    counters: ['Aatrox', 'KSante', 'Ornn', 'Sion', 'Chogath', 'Mordekaiser', 'Urgot', 'Kled'],
+    counteredBy: ['Malphite', 'Jayce', 'Kennen', 'Renekton', 'Poppy', 'Akali'],
+    tipCs: 'Paríruje tvrdé CC a drtí tanky maximálním % true damage.',
+    tipEn: 'Ripostes hard CC and shreds high HP targets with max % true damage vitals.',
+  },
+  Camille: {
+    counters: ['Gnar', 'Gangplank', 'Jayce', 'Kayle', 'Kennen', 'Aatrox'],
+    counteredBy: ['Jax', 'Renekton', 'Fiora', 'Shen', 'Poppy', 'Darius'],
+    tipCs: 'Hookshot a Hextech Ultimátka spolehlivě odchytávají křehké boční linky.',
+    tipEn: 'Hookshot and Hextech Ultimatum cleanly isolate and lockdown squishies.',
+  },
   Gwen: {
-    counters: ['Ornn', 'Sion', 'Chogath', 'DrMundo', 'Malphite', 'KSante'],
-    counteredBy: ['Riven', 'Jax', 'Fiora', 'Tryndamere', 'Kennen'],
+    counters: ['Ornn', 'Sion', 'Chogath', 'DrMundo', 'Malphite', 'KSante', 'Shen'],
+    counteredBy: ['Riven', 'Jax', 'Fiora', 'Tryndamere', 'Kennen', 'Akali'],
     tipCs: 'Hallowed Mist imunita a nůžky drtí tanky i v pozdní fázi hry.',
     tipEn: 'Hallowed Mist immunity and snips melt tanks in both lane and late game.',
   },
   Irelia: {
-    counters: ['Aatrox', 'Jayce', 'Gnar', 'Kennen', 'Gangplank', 'Kayle'],
-    counteredBy: ['Jax', 'Sett', 'Volibear', 'Renekton', 'Poppy', 'Warwick'],
+    counters: ['Aatrox', 'Jayce', 'Gnar', 'Kennen', 'Gangplank', 'Kayle', 'Ryze'],
+    counteredBy: ['Jax', 'Sett', 'Volibear', 'Renekton', 'Poppy', 'Warwick', 'Darius'],
     tipCs: 'Nekonečné dashe přes miniony decimují křehké ranged toplanery.',
     tipEn: 'Relentless dashes through minion waves dismantle squishy ranged toplaners.',
   },
+  Gangplank: {
+    counters: ['Illaoi', 'Nasus', 'Teemo', 'Garen', 'DrMundo', 'Singed'],
+    counteredBy: ['Irelia', 'Riven', 'Camille', 'Kled', 'Lucian', 'Jayce'],
+    tipCs: 'Pomeranč čistí veškeré CC a barely s globální ulti zajišťují mapový tlak.',
+    tipEn: 'Oranges cleanse CC and global Cannon Barrage exerts cross-map pressure.',
+  },
   Renekton: {
     counters: ['Irelia', 'Riven', 'Yasuo', 'Yone', 'Camille', 'Jayce'],
-    counteredBy: ['Illaoi', 'Ornn', 'Malphite', 'Poppy', 'Garen'],
+    counteredBy: ['Illaoi', 'Ornn', 'Malphite', 'Poppy', 'Garen', 'Mordekaiser'],
     tipCs: 'Empowered W láme štíty a uděluje brutální early burst.',
     tipEn: 'Empowered W breaks shields and provides devastating early lane dominance.',
   },
+  Jayce: {
+    counters: ['Darius', 'Garen', 'Mordekaiser', 'Urgot', 'Sett', 'Teemo'],
+    counteredBy: ['Irelia', 'Malphite', 'Wukong', 'Camille', 'Poppy'],
+    tipCs: 'Dálkový poke a rychlá změna zbraně trestají nepohyblivé kolosy.',
+    tipEn: 'Ranged poke and form swaps punish slow immobile juggernauts.',
+  },
+  Gnar: {
+    counters: ['Darius', 'Garen', 'Sett', 'Illaoi', 'Singed', 'Chogath'],
+    counteredBy: ['Irelia', 'Yasuo', 'Malphite', 'Camille', 'Jayce'],
+    tipCs: 'Kite v mini formě a brutální CC engage ve formě Mega Gnara.',
+    tipEn: 'Kiting in Mini form and massive wall-slam CC in Mega form.',
+  },
+  Ornn: {
+    counters: ['Malphite', 'Sion', 'Chogath', 'Teemo', 'Shen'],
+    counteredBy: ['Fiora', 'Gwen', 'Vayne', 'Mordekaiser', 'Illaoi'],
+    tipCs: 'Vylepšuje týmové itemy a Call of the Forge God zahajuje teamfighty.',
+    tipEn: 'Item upgrades scale allies and Call of the Forge God initiates teamfights.',
+  },
+  Rumble: {
+    counters: ['Jax', 'Renekton', 'Shen', 'Teemo', 'Gangplank'],
+    counteredBy: ['Jayce', 'Kennen', 'TahmKench', 'Aatrox', 'Irelia'],
+    tipCs: 'Plamenomet a Equalizer v úzkých prostorech pálí celé týmy.',
+    tipEn: 'Flamespitter and Equalizer in narrow chokes melt grouped teams.',
+  },
+  Riven: {
+    counters: ['Gwen', 'Aatrox', 'Yasuo', 'Yone', 'Kayle', 'Gangplank'],
+    counteredBy: ['Renekton', 'Poppy', 'Volibear', 'Urgot', 'Malphite', 'Kennen'],
+    tipCs: 'Vysoká mobilita a štíty; trpí proti tvrdému point-and-click CC a tankům.',
+    tipEn: 'High mobility and shields; shut down by hard point-and-click CC and armor.',
+  },
+  Sett: {
+    counters: ['Irelia', 'Yasuo', 'Yone', 'Rengar', 'Riven', 'Kled'],
+    counteredBy: ['Aatrox', 'Renekton', 'Volibear', 'Vayne', 'Malphite', 'Gnar'],
+    tipCs: 'Haymaker absorbuje burst a vrací gigantický true damage středem.',
+    tipEn: 'Haymaker absorbs lethal burst and returns massive center true damage.',
+  },
   Darius: {
-    counters: ['Nasus', 'Sion', 'DrMundo', 'Chogath', 'Sett'],
-    counteredBy: ['Vayne', 'Jayce', 'Gnar', 'Kennen', 'Quinn'],
+    counters: ['Nasus', 'Sion', 'DrMundo', 'Chogath', 'Sett', 'Shen', 'Singed'],
+    counteredBy: ['Vayne', 'Jayce', 'Gnar', 'Kennen', 'Quinn', 'Teemo'],
     tipCs: 'Pasivní krvácení a Noxian Might vyhrávají každý prodloužený melee trade.',
     tipEn: 'Hemorrhage passive and Noxian Might dominate every prolonged melee trade.',
   },
   Malphite: {
-    counters: ['Jax', 'Tryndamere', 'Fiora', 'Irelia', 'Quinn', 'Jayce'],
-    counteredBy: ['Mordekaiser', 'Gwen', 'Sylas', 'Chogath', 'Sion'],
-    tipCs: 'Ground Slam snižuje rychlost útoku o 50 % a ulti zaručuje tvrdý engage.',
+    counters: ['Jax', 'Tryndamere', 'Fiora', 'Irelia', 'Quinn', 'Jayce', 'Lucian'],
+    counteredBy: ['Mordekaiser', 'Gwen', 'Sylas', 'Chogath', 'Sion', 'Rumble'],
+    tipCs: 'Ground Slam snižuje attack speed o 50 % a ulti zaručuje tvrdý engage.',
     tipEn: 'Ground Slam cuts attack speed by 50% while Unstoppable Force guarantees hard engage.',
-  },
-  Teemo: {
-    counters: ['Darius', 'Garen', 'Nasus', 'Tryndamere', 'Vayne'],
-    counteredBy: ['Malphite', 'Jayce', 'Aatrox', 'Sion'],
-    tipCs: 'Blind šipky znemožňují autoútoky a houby poskytují vizi a zónování.',
-    tipEn: 'Blinding Dart disables basic attackers and noxious traps control the map.',
   },
 
   // ── JUNGLE ───────────────────────────────────────────────────────────────
   LeeSin: {
-    counters: ['Nidalee', 'Karthus', 'MasterYi', 'Kindred', 'Belveth'],
-    counteredBy: ['Poppy', 'Rammus', 'RekSai', 'Viego', 'Udyr'],
-    tipCs: 'Rychlé rané tempo a InSec kopy vytváří okamžité výhody na linkách.',
-    tipEn: 'Fast early tempo and InSec kicks create instant numerical advantages.',
+    counters: ['Nidalee', 'Khazix', 'MasterYi', 'Kindred', 'Evelynn', 'Shaco'],
+    counteredBy: ['Poppy', 'RekSai', 'Udyr', 'Volibear', 'Viego', 'Sejuani'],
+    tipCs: 'Early game invady a InSec kopy vytvářejí okamžité přesilovky.',
+    tipEn: 'Early game invades and InSec kicks create instant numerical advantages.',
   },
   Viego: {
-    counters: ['JarvanIV', 'XinZhao', 'Sejuani', 'LeeSin'],
-    counteredBy: ['Rammus', 'Amumu', 'Jax', 'Warwick'],
-    tipCs: 'Posednutí padlých nepřátel řetězí resety a ničí týmové souboje.',
-    tipEn: 'Possessions chain resets and turn teamfights into unstoppable snowballs.',
+    counters: ['Graves', 'JarvanIV', 'LeeSin', 'XinZhao', 'Diana'],
+    counteredBy: ['Rammus', 'Amumu', 'Poppy', 'Warwick', 'Jax', 'Belveth'],
+    tipCs: 'Posednutí padlých nepřátel dává nezranitelnost a řetězové resety.',
+    tipEn: 'Possessing fallen champions grants invulnerability and chain resets.',
+  },
+  Belveth: {
+    counters: ['Graves', 'JarvanIV', 'Sejuani', 'Zac', 'Amumu'],
+    counteredBy: ['Rammus', 'Jax', 'MasterYi', 'Nocturne', 'Poppy'],
+    tipCs: 'Nekonečné útoky a True Damage drtí nepohyblivé tanky.',
+    tipEn: 'Infinite attack speed scaling and True Damage melt heavy tanks.',
+  },
+  Khazix: {
+    counters: ['LeeSin', 'Nidalee', 'Kindred', 'Karthus', 'Viego', 'Ekko'],
+    counteredBy: ['Rammus', 'Poppy', 'Amumu', 'Sejuani', 'Volibear', 'Warwick'],
+    tipCs: 'Izolované cíle dostávají trojnásobný burst damage ze zálohy.',
+    tipEn: 'Isolated targets take triple burst damage from unseen stealth.',
   },
   JarvanIV: {
-    counters: ['Karthus', 'Kindred', 'Khazix', 'Nidalee'],
-    counteredBy: ['Poppy', 'Viego', 'Gragas', 'Trundle'],
-    tipCs: 'Cataclysm aréna uzamkne nepohyblivé cíle bez flashe.',
-    tipEn: 'Cataclysm arena locks down immobile targets without escape tools.',
+    counters: ['Kindred', 'Graves', 'Fiddlesticks', 'Karthus', 'Diana'],
+    counteredBy: ['Poppy', 'Viego', 'Belveth', 'LeeSin', 'Sylas'],
+    tipCs: 'Cataclysm aréna uzamkne nepřátele bez flash a zajistí týmový wombo combo.',
+    tipEn: 'Cataclysm arena locks flashless carries for instant wombo combo execution.',
   },
-  Nocturne: {
-    counters: ['Kindred', 'Karthus', 'Graves', 'Evelynn'],
-    counteredBy: ['Rammus', 'Amumu', 'Jax', 'Warwick'],
-    tipCs: 'Paranoia zatemní celou mapu a spellshield blokuje klíčové CC.',
-    tipEn: 'Paranoia blacks out global vision while spellshield negates peel CC.',
-  },
-  Rammus: {
-    counters: ['MasterYi', 'Belveth', 'Briar', 'Kindred', 'Graves', 'Viego'],
-    counteredBy: ['Lillia', 'Morgana', 'Trundle', 'Evelynn'],
-    tipCs: 'Defensive Ball Curl odráží fyzické poškození a provokuje carry.',
-    tipEn: 'Defensive Ball Curl reflects auto-attack damage and taunts physical carries.',
+  Poppy: {
+    counters: ['LeeSin', 'Riven', 'Irelia', 'Khazix', 'JarvanIV', 'Zac', 'Vi'],
+    counteredBy: ['Olaf', 'Morgana', 'Trundle', 'Lillia', 'Karthus'],
+    tipCs: 'Steadfast Presence kompletně zastavuje nepřátelské skoky a dashe.',
+    tipEn: 'Steadfast Presence shuts down all incoming enemy dashes and leaps.',
   },
 
   // ── MID LANE ─────────────────────────────────────────────────────────────
-  Ahri: {
-    counters: ['Lux', 'Orianna', 'Velkoz', 'Ziggs', 'Hwei'],
-    counteredBy: ['Yasuo', 'Sylas', 'Tristana', 'LeBlanc'],
-    tipCs: 'Spirit Rush rotace a Charm trestají nepřátelské mistry z dálky.',
-    tipEn: 'Spirit Rush mobility and Charm punish long-range skillshot mages.',
-  },
-  Syndra: {
-    counters: ['Azir', 'Cassiopeia', 'Ryze', 'Annie', 'Malzahar'],
-    counteredBy: ['Fizz', 'Zed', 'Katarina', 'Ekko', 'Yasuo'],
-    tipCs: 'Dlouhý dosah stunů a gigantický Unleashed Power burst.',
-    tipEn: 'Long-range stun dispersion and massive single-target Unleashed Power burst.',
-  },
-  Yasuo: {
-    counters: ['Ahri', 'TwistedFate', 'Syndra', 'Velkoz', 'Lux', 'Hwei'],
-    counteredBy: ['Renekton', 'Pantheon', 'Malzahar', 'Annie', 'Vex', 'Sett'],
-    tipCs: 'Windwall vymaže klíčové projektily a ultimáty.',
-    tipEn: 'Wind Wall completely erases crucial enemy skillshots and ultimate projectiles.',
+  Azir: {
+    counters: ['Orianna', 'Viktor', 'Ryze', 'Cassiopeia', 'Malzahar', 'Galio'],
+    counteredBy: ['Zed', 'Kassadin', 'Xerath', 'Ekko', 'Syndra', 'Yone'],
+    tipCs: 'Shurima Shuffle rozděluje nepřátelský tým a vojáci zónují bojiště.',
+    tipEn: 'Shurima Shuffle divides enemy team and sand soldiers control late game.',
   },
   Yone: {
-    counters: ['Orianna', 'Viktor', 'Hwei', 'Azir', 'AurelionSol'],
-    counteredBy: ['Renekton', 'Pantheon', 'Akali', 'Vex', 'Jax'],
-    tipCs: 'Soul Unbound umožňuje bezpečný engage z obří vzdálenosti.',
-    tipEn: 'Soul Unbound allows safe, unstoppable dive engages across massive screens.',
+    counters: ['Azir', 'AurelionSol', 'Veigar', 'Viktor', 'Syndra', 'Orianna'],
+    counteredBy: ['Vex', 'Pantheon', 'Renekton', 'Akali', 'Sett', 'Jax'],
+    tipCs: 'Soul Unbound dává bezpečný trade a Fate Sealed zaručuje AoE knockup.',
+    tipEn: 'Soul Unbound provides safe dive trades and Fate Sealed lands huge AoE knockup.',
+  },
+  Yasuo: {
+    counters: ['Ahri', 'Syndra', 'TwistedFate', 'Zoe', 'MissFortune', 'Lux'],
+    counteredBy: ['Vex', 'Renekton', 'Pantheon', 'Malzahar', 'Annie', 'Poppy'],
+    tipCs: 'Windwall maže veškeré projektily a ultimátky z dálky.',
+    tipEn: 'Windwall deletes all enemy ranged skillshots and key projectile ultimates.',
+  },
+  Ahri: {
+    counters: ['Syndra', 'Lux', 'Viktor', 'Anivia', 'Velkoz', 'Hwei'],
+    counteredBy: ['Yasuo', 'Yone', 'Leblanc', 'Vex', 'Tristana', 'Kassadin'],
+    tipCs: 'Charm a trojitý Spirit Rush skok zaručují bezpečný pickoff ze zálohy.',
+    tipEn: 'Charm and triple Spirit Rush dashes ensure safe assassination and disengage.',
+  },
+  Syndra: {
+    counters: ['Ahri', 'Azir', 'Leblanc', 'Cassiopeia', 'Taliyah', 'Ryze'],
+    counteredBy: ['Fizz', 'Zed', 'Ekko', 'Yasuo', 'Katarina', 'Kassadin'],
+    tipCs: 'Scatter the Weak plošný stun a Unleashed Power vymažou cíl na dálku.',
+    tipEn: 'Scatter the Weak long range stun and Unleashed Power delete single targets.',
   },
   Vex: {
-    counters: ['Yasuo', 'Yone', 'Leblanc', 'Katarina', 'Akali', 'Irelia'],
-    counteredBy: ['Viktor', 'Syndra', 'Orianna', 'Xerath', 'Lux'],
-    tipCs: 'Doom ' + "'" + 'n Gloom pasivně trestá a děsí šampióny s dashi.',
-    tipEn: 'Doom ' + "'" + 'n Gloom passively fears and counters hyper-mobile dash assassins.',
+    counters: ['Yasuo', 'Yone', 'Leblanc', 'Akali', 'Katarina', 'Irelia', 'Kalista'],
+    counteredBy: ['Viktor', 'Xerath', 'Velkoz', 'Lux', 'Orianna', 'Anivia'],
+    tipCs: 'Doom pasivka automaticky fearuje a trestá každého, kdo použije dash.',
+    tipEn: 'Doom passive automatically fears and interrupts enemy dash champions.',
+  },
+  Zed: {
+    counters: ['Azir', 'Orianna', 'Viktor', 'Veigar', 'Lux', 'Syndra'],
+    counteredBy: ['Lissandra', 'Malzahar', 'Kayle', 'Vladimir', 'Zhonya'],
+    tipCs: 'Death Mark a stíny umožňují one-shot bez možnosti protiútoku.',
+    tipEn: 'Death Mark and shadows execute squishies and cleanly teleport back.',
   },
   Sylas: {
-    counters: ['Malphite', 'Ashe', 'Gnar', 'TwistedFate', 'Lissandra'],
-    counteredBy: ['Cassiopeia', 'Zed', 'Syndra', 'Heimerdinger'],
+    counters: ['Malphite', 'Ashe', 'Gnar', 'TwistedFate', 'Lissandra', 'Amumu'],
+    counteredBy: ['Cassiopeia', 'Zed', 'Syndra', 'Heimerdinger', 'Vex'],
     tipCs: 'Krádež vlivných ultimát a obří léčení z Kingslayeru.',
     tipEn: 'Hijack steals game-changing teamfight ultimates with massive Kingslayer heal.',
   },
   Malzahar: {
-    counters: ['Yasuo', 'Leblanc', 'Katarina', 'Zed', 'Akali'],
-    counteredBy: ['Syndra', 'Viktor', 'Orianna', 'Xerath'],
+    counters: ['Yasuo', 'Leblanc', 'Katarina', 'Zed', 'Akali', 'Sylas'],
+    counteredBy: ['Syndra', 'Viktor', 'Orianna', 'Xerath', 'Velkoz'],
     tipCs: 'Nether Grasp potlačení zaručuje okamžitý pickoff mobilních asasínů.',
     tipEn: 'Nether Grasp point-and-click suppression locks down hyper-mobile threats.',
   },
 
-  // ── BOT / ADC ────────────────────────────────────────────────────────────
+  // ── ADC / BOT ────────────────────────────────────────────────────────────
   Kaisa: {
-    counters: ['Vayne', 'Ezreal', 'Zeri', 'Sivir'],
-    counteredBy: ['Caitlyn', 'Draven', 'Ashe', 'Lucian'],
+    counters: ['Vayne', 'Ezreal', 'Zeri', 'Sivir', 'Smolder'],
+    counteredBy: ['Caitlyn', 'Draven', 'Ashe', 'Lucian', 'Jinx'],
     tipCs: 'Killer Instinct skok a hybridní poškození rozhodují izolované duely.',
     tipEn: 'Killer Instinct dive and hybrid plasma burst win isolated assassinations.',
   },
   Jinx: {
-    counters: ['Aphelios', 'Ashe', 'Varus', 'Senna'],
+    counters: ['Aphelios', 'Ashe', 'Varus', 'Senna', 'Smolder', 'Zeri'],
     counteredBy: ['Samira', 'Draven', 'Lucian', 'Tristana', 'Nautilus'],
     tipCs: 'Get Excited pasivka a rakety dominují velkým týmovým soubojům.',
     tipEn: 'Get Excited passive resets and Fishbones rockets dominate late 5v5 teamfights.',
   },
   Caitlyn: {
-    counters: ['Vayne', 'Kaisa', 'Samira', 'Nilah', 'Lucian'],
-    counteredBy: ['Jinx', 'Ashe', 'Varus', 'Sivir'],
+    counters: ['Vayne', 'Kaisa', 'Samira', 'Nilah', 'Lucian', 'Ezreal'],
+    counteredBy: ['Jinx', 'Ashe', 'Varus', 'Sivir', 'Tristana'],
     tipCs: 'Nejdelší základní dosah ve hře a pasti šikanují nepřátele pod věží.',
     tipEn: 'Longest base attack range in the game and Yordle Snap Traps zone under turrets.',
   },
   Vayne: {
-    counters: ['Sion', 'Chogath', 'Ornn', 'DrMundo', 'Malphite', 'KSante'],
-    counteredBy: ['Caitlyn', 'Draven', 'Lucian', 'Ashe', 'MissFortune'],
+    counters: ['Sion', 'Chogath', 'Ornn', 'DrMundo', 'Malphite', 'KSante', 'Ezreal'],
+    counteredBy: ['Caitlyn', 'Draven', 'Lucian', 'Ashe', 'MissFortune', 'Samira'],
     tipCs: 'Silver Bolts procentuální true damage drtí i nejodolnější tanky.',
     tipEn: 'Silver Bolts % max health true damage shreds through any armor stack.',
   },
   Samira: {
-    counters: ['MissFortune', 'Ezreal', 'Ashe', 'Varus'],
-    counteredBy: ['Nautilus', 'Leona', 'Lulu', 'Rammus', 'Amumu'],
+    counters: ['MissFortune', 'Ezreal', 'Ashe', 'Varus', 'Sivir'],
+    counteredBy: ['Nautilus', 'Leona', 'Lulu', 'Rammus', 'Amumu', 'Poppy'],
     tipCs: 'Blade Whirl maže nepřátelské střely a Inferno Trigger uděluje masivní AoE.',
     tipEn: 'Blade Whirl destroys all incoming missiles while Inferno Trigger deals lethal AoE.',
+  },
+  Draven: {
+    counters: ['Vayne', 'Kaisa', 'Jinx', 'Ezreal', 'Twitch', 'Smolder'],
+    counteredBy: ['Caitlyn', 'Varus', 'Ashe', 'Nautilus', 'Leona', 'Braum'],
+    tipCs: 'Spinning Axes udělují obří poškození a snowballují zlaťáky z pasivky.',
+    tipEn: 'Spinning Axes deal massive early damage and Adoration passive snowballs gold.',
   },
 
   // ── SUPPORT ──────────────────────────────────────────────────────────────
   Thresh: {
-    counters: ['Sona', 'Soraka', 'Janna', 'Yuumi', 'Lux'],
-    counteredBy: ['Morgana', 'Braum', 'Alistar', 'Leona', 'Taric'],
+    counters: ['Sona', 'Soraka', 'Janna', 'Yuumi', 'Lux', 'Nami'],
+    counteredBy: ['Morgana', 'Braum', 'Alistar', 'Leona', 'Taric', 'Nautilus'],
     tipCs: 'Death Sentence hák a Lucerna poskytují ultimátní tvorbu hry i záchranu.',
     tipEn: 'Death Sentence hooks and Dark Passage lantern provide unmatched playmaking and saves.',
   },
   Blitzcrank: {
-    counters: ['Sona', 'Soraka', 'Janna', 'Yuumi', 'Lux', 'Nami'],
-    counteredBy: ['Morgana', 'Braum', 'Alistar', 'Leona', 'Nautilus'],
+    counters: ['Sona', 'Soraka', 'Janna', 'Yuumi', 'Lux', 'Nami', 'Senna'],
+    counteredBy: ['Morgana', 'Braum', 'Alistar', 'Leona', 'Nautilus', 'Rell'],
     tipCs: 'Rocket Grab okamžitě zabíjí chycené křehké cíle.',
     tipEn: 'Rocket Grab instantly isolates and eliminates squishy backliners.',
   },
   Morgana: {
-    counters: ['Blitzcrank', 'Thresh', 'Nautilus', 'Leona', 'Pyke'],
-    counteredBy: ['Karma', 'Sona', 'Lulu', 'Zyra', 'Senna'],
+    counters: ['Blitzcrank', 'Thresh', 'Nautilus', 'Leona', 'Pyke', 'Rell', 'Amumu'],
+    counteredBy: ['Karma', 'Sona', 'Lulu', 'Zyra', 'Senna', 'Milio'],
     tipCs: 'Black Shield kompletně neguje jakékoliv nepřátelské crowd control.',
     tipEn: 'Black Shield completely negates hard CC and protects key hypercarries.',
   },
   Leona: {
-    counters: ['Yuumi', 'Sona', 'Soraka', 'Janna', 'Senna'],
-    counteredBy: ['Morgana', 'Thresh', 'Braum', 'Alistar', 'Janna'],
+    counters: ['Yuumi', 'Sona', 'Soraka', 'Janna', 'Senna', 'Lulu'],
+    counteredBy: ['Morgana', 'Thresh', 'Braum', 'Alistar', 'Janna', 'Rell'],
     tipCs: 'Sluneční štít a trojitý stun lockují cíle na místě bez možnosti úniku.',
     tipEn: 'Solar Flare and chain CC lock targets in place with zero counterplay.',
+  },
+  Nautilus: {
+    counters: ['Yuumi', 'Sona', 'Soraka', 'Senna', 'Lux', 'Nami'],
+    counteredBy: ['Morgana', 'Braum', 'Alistar', 'Leona', 'Thresh', 'Rell'],
+    tipCs: 'Point-and-click Depth Charge ulti zaručuje zásah na nepřátelské carry.',
+    tipEn: 'Point-and-click Depth Charge guarantees knockup on priority carry targets.',
+  },
+  Braum: {
+    counters: ['MissFortune', 'Ornn', 'Twitch', 'Ezreal', 'Nami', 'Jhin'],
+    counteredBy: ['Morgana', 'Senna', 'Zyra', 'Lux', 'Karma', 'Brand'],
+    tipCs: 'Unbreakable štít blokuje veškeré projektily a chrání tým před AoE burstem.',
+    tipEn: 'Unbreakable wall intercepts projectiles and absorbs entire enemy ultimate barrage.',
+  },
+  Lulu: {
+    counters: ['Zed', 'Katarina', 'Akali', 'Rengar', 'MasterYi', 'Khazix'],
+    counteredBy: ['Blitzcrank', 'Nautilus', 'Pyke', 'Leona', 'Thresh'],
+    tipCs: 'Polymorph promění nabíhající asasíny v bezmocné zvířátko.',
+    tipEn: 'Polymorph shuts down diving assassins into harmless critters instantly.',
   },
 };
 
