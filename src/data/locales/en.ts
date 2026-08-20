@@ -155,6 +155,22 @@ export const en = {
   'tab.lifestyle': 'Lifestyle & Focus',
   'tab.transfers': 'Team & Scouting',
 
+  // Housing
+  'housing.parents': "🏠 Parents' Home",
+  'housing.budget': '🏢 Shared Budget Apartment',
+  'housing.gaming_house': '⚡ Team Gaming House',
+  'housing.penthouse': '🌆 Luxury Penthouse Suite',
+
+  // Match Screen
+  'match.loading': 'Loading match...',
+  'match.vs': 'VS',
+  'match.won': 'VICTORY',
+  'match.lost': 'DEFEAT',
+  'match.mvp': 'Match MVP',
+  'match.performance': 'Match Performance',
+  'match.highlight': 'Key Highlight',
+  'match.continue': 'Continue Career',
+
   'create.champ_limit_6': 'You must select exactly 6 signature champions!',
   'create.s_tier_limit': 'For balance, you can select at most 2 S/S+ Tier champions at start! (The rest must be A/B/C tier)',
 

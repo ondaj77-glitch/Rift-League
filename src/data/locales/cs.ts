@@ -141,6 +141,25 @@ export const cs: Record<TranslationKey, string> = {
   'tab.lifestyle': 'Životní Styl & Energie',
   'tab.transfers': 'Tým & Skauti',
 
+  // Housing
+  'housing.parents': '🏠 Dětský pokoj u rodičů',
+  'housing.budget': '🏢 Pronajatý sdílený pokoj',
+  'housing.gaming_house': '⚡ Týmový Gaming House',
+  'housing.penthouse': '🌆 Luxusní Penthouse v centru',
+
+  // Match Screen
+  'match.loading': 'Načítám zápas...',
+  'match.vs': 'PROTI',
+  'match.won': 'VÍTĚZSTVÍ',
+  'match.lost': 'PORÁŽKA',
+  'match.mvp': 'Hráč Zápasu (MVP)',
+  'match.performance': 'Výkon v zápase',
+  'match.highlight': 'Klíčový Moment',
+  'match.continue': 'Pokračovat v kariéře',
+
+  // Daily
+  'daily.play': 'Hrát Denní Výzvu',
+
   'create.champ_limit_6': 'Musíš vybrat přesně 6 podpisových championů!',
   'create.s_tier_limit': 'Pro startovní balanc můžeš vybrat maximálně 2 S/S+ Tier championy! (Zbytek musí být A/B/C tier)',
 

@@ -51,18 +51,33 @@ export class ErrorBoundary extends Component<Props, State> {
                 {this.state.error.message}
               </pre>
             )}
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                onClick={() => {
+                  this.setState({ hasError: false, error: null });
+                  try {
+                    const store = (window as any).__zustand_store__;
+                    if (store) store.setState({ phase: 'CAREER_HUB' });
+                    else window.location.reload();
+                  } catch {
+                    window.location.reload();
+                  }
+                }}
+                className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-lg text-xs"
+              >
+                🏠 Zpět do Kariéry
+              </button>
               <button
                 onClick={this.handleReset}
-                className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 px-4 rounded-xl transition-all shadow-lg"
+                className="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 py-2.5 px-4 rounded-xl text-xs transition-all font-semibold"
               >
-                🔄 Obnovit Hru (Reload)
+                🔄 Obnovit Hru
               </button>
               <button
                 onClick={this.handleClearData}
-                className="bg-slate-800 hover:bg-red-950/80 text-slate-300 hover:text-red-400 border border-slate-700 py-2.5 px-4 rounded-xl text-xs transition-all font-semibold"
+                className="bg-slate-900 hover:bg-red-950/80 text-slate-400 hover:text-red-400 border border-slate-800 py-2.5 px-3 rounded-xl text-xs transition-all font-semibold"
               >
-                Nová Hra / Reset
+                Reset
               </button>
             </div>
           </div>

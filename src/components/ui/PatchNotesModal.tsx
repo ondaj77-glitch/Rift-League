@@ -5,18 +5,31 @@ import { Button } from './Button';
 import { getChampIconUrl, ALL_CHAMPIONS } from '../../data/champions';
 
 export function PatchNotesModal() {
-  const { t } = useTranslation();
+  const { language } = useTranslation();
+  const isCs = language === 'cs';
   const career = useGameStore(s => s.career);
   const showPatchNotesModal = useGameStore(s => s.showPatchNotesModal);
   const setShowPatchNotesModal = useGameStore(s => s.setShowPatchNotesModal);
 
   if (!career || !showPatchNotesModal) return null;
 
-  const patch = career.currentPatch;
-  const userPool = career.championPool;
+  const patch = career.currentPatch || {
+    patchVersion: '15.1',
+    season: 15,
+    headline: 'Nová sezóna a meta posuny',
+    systemChanges: ['Zvýšena odolnost věží', 'Zkrácen cooldown na vizi'],
+    buffs: [],
+    nerfs: [],
+    tiers: {},
+  };
+
+  const userPool = career.championPool || [];
+  const buffs = patch.buffs || [];
+  const nerfs = patch.nerfs || [];
+  const systemChanges = patch.systemChanges || [];
 
   // Check if player's mains are affected
-  const affectedMains = [...patch.buffs, ...patch.nerfs].filter(c => userPool.includes(c.championId));
+  const affectedMains = [...buffs, ...nerfs].filter(c => userPool.includes(c.championId));
 
   return (
     <AnimatePresence>
@@ -27,9 +40,9 @@ export function PatchNotesModal() {
         className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
       >
         <motion.div
-          initial={{ scale: 0.9, y: 20 }}
+          initial={{ scale: 0.95, y: 15 }}
           animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.9, y: 20 }}
+          exit={{ scale: 0.95, y: 15 }}
           className="bg-rift-card border-2 border-gold-500/50 rounded-2xl max-w-2xl w-full p-6 space-y-5 shadow-2xl relative my-8"
         >
           {/* Header */}
@@ -37,21 +50,21 @@ export function PatchNotesModal() {
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-bold font-mono">
-                  SEASON {patch.season} · SPLIT {career.split.toUpperCase()}
+                  SEASON {patch.season || 15} · SPLIT {(career.split || 'Winter').toUpperCase()}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">PATCH {patch.patchVersion}</span>
+                <span className="text-xs text-slate-400 font-mono">PATCH {patch.patchVersion || '15.1'}</span>
               </div>
               <h2 className="text-2xl font-black text-white mt-1 uppercase font-heading tracking-wide">
-                📋 Oficiální Riot Patch Notes
+                📋 {isCs ? 'Oficiální Riot Patch Notes' : 'Official Riot Patch Notes'}
               </h2>
               <p className="text-gold-400 text-xs font-semibold mt-0.5">
-                "{patch.headline}"
+                "{patch.headline || (isCs ? 'Balanční úpravy a posuny v metě' : 'Balance adjustments and meta shifts')}"
               </p>
             </div>
 
             <button
               onClick={() => setShowPatchNotesModal(false)}
-              className="text-slate-400 hover:text-white text-xl p-1"
+              className="text-slate-400 hover:text-white text-xl p-1 transition-colors"
             >
               ✕
             </button>
@@ -63,12 +76,12 @@ export function PatchNotesModal() {
               <span className="text-2xl">⭐</span>
               <div className="text-xs">
                 <p className="font-bold text-purple-200 uppercase tracking-wide">
-                  Změny ovlivňují tvůj Champion Pool!
+                  {isCs ? 'Změny ovlivňují tvůj Champion Pool!' : 'Changes directly impact your Champion Pool!'}
                 </p>
                 <p className="text-slate-300 mt-0.5">
                   {affectedMains.map(m => (
                     <span key={m.championId} className="mr-2 inline-block">
-                      <strong className="text-white">{m.championId}</strong>: {m.changeType === 'buff' ? '🟢 Buffnut' : '🔴 Nerfnut'} ({m.oldTier} ➔ <span className="text-gold-400 font-bold">{m.newTier}</span>)
+                      <strong className="text-white">{m.championId}</strong>: {m.changeType === 'buff' ? '🟢 Buff' : '🔴 Nerf'} ({m.oldTier} ➔ <span className="text-gold-400 font-bold">{m.newTier}</span>)
                     </span>
                   ))}
                 </p>
@@ -77,19 +90,21 @@ export function PatchNotesModal() {
           )}
 
           {/* System Changes */}
-          <div className="bg-rift-surface p-4 rounded-xl border border-rift-border space-y-2">
-            <h3 className="text-xs text-slate-400 uppercase font-bold tracking-wider">
-              🗺️ Systémové změny na mapě & v džungli
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              {patch.systemChanges.map((change, i) => (
-                <div key={i} className="flex items-start gap-2 text-slate-200">
-                  <span>•</span>
-                  <span>{change}</span>
-                </div>
-              ))}
+          {systemChanges.length > 0 && (
+            <div className="bg-rift-surface p-4 rounded-xl border border-rift-border space-y-2">
+              <h3 className="text-xs text-slate-400 uppercase font-bold tracking-wider">
+                🗺️ {isCs ? 'Systémové změny na mapě & v džungli' : 'Systemic Map & Objective Changes'}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                {systemChanges.map((change, i) => (
+                  <div key={i} className="flex items-start gap-2 text-slate-200">
+                    <span>•</span>
+                    <span>{change}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Buffs & Nerfs Columns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -98,11 +113,11 @@ export function PatchNotesModal() {
             <div className="space-y-2.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-green-400 uppercase tracking-wider">
                 <span>🟢</span>
-                <span>Posílení Šampióni (Buffs)</span>
+                <span>{isCs ? 'Posílení Šampióni (Buffs)' : 'Buffed Champions'}</span>
               </div>
 
               <div className="space-y-2">
-                {patch.buffs.map(buff => {
+                {buffs.map(buff => {
                   const champ = ALL_CHAMPIONS.find(c => c.id === buff.championId);
                   const isMain = userPool.includes(buff.championId);
 
@@ -142,11 +157,11 @@ export function PatchNotesModal() {
             <div className="space-y-2.5">
               <div className="flex items-center gap-1.5 text-xs font-bold text-red-400 uppercase tracking-wider">
                 <span>🔴</span>
-                <span>Oslabení Šampióni (Nerfs)</span>
+                <span>{isCs ? 'Oslabení Šampióni (Nerfs)' : 'Nerfed Champions'}</span>
               </div>
 
               <div className="space-y-2">
-                {patch.nerfs.map(nerf => {
+                {nerfs.map(nerf => {
                   const champ = ALL_CHAMPIONS.find(c => c.id === nerf.championId);
                   const isMain = userPool.includes(nerf.championId);
 
@@ -192,7 +207,7 @@ export function PatchNotesModal() {
               fullWidth
               onClick={() => setShowPatchNotesModal(false)}
             >
-              Rozumím, nastudovat novou metu (OK)
+              {isCs ? 'Rozumím, nastudovat novou metu (OK)' : 'Understood, analyze new meta (OK)'}
             </Button>
           </div>
         </motion.div>
