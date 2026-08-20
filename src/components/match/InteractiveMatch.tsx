@@ -21,10 +21,14 @@ export function InteractiveMatch() {
   const [selectedChamp, setSelectedChamp] = useState<string>(career?.championPool?.[0] || 'Aatrox');
   const [step, setStep] = useState<'champion_select' | 'laning' | 'mid_game' | 'late_game' | 'summary'>('champion_select');
   const [selectedChoiceIdx, setSelectedChoiceIdx] = useState<number | null>(null);
-  const [playerScore, setPlayerScore] = useState(50);
-  const [opponentScore, setOpponentScore] = useState(50);
+  
+  // Single unified 0-100% Tug-of-War momentum (Player vs Opponent always equals 100%)
+  const [momentum, setMomentum] = useState(50);
   const [logs, setLogs] = useState<Array<{ phase: string; text: string; success: boolean; scoreDelta: number }>>([]);
   const [resolving, setResolving] = useState(false);
+
+  // Dynamic presentation mode: switches dynamically or via user toggle
+  const [viewMode, setViewMode] = useState<'map' | 'cards'>(() => (Math.random() < 0.5 ? 'map' : 'cards'));
 
   const currentPatch = career?.currentPatch || { patchVersion: '15.1', season: 15, tiers: {} };
   const champPool = career?.championPool || [];
@@ -62,8 +66,7 @@ export function InteractiveMatch() {
     step === 'late_game' ? scenarios.lateGame : null;
 
   function handleConfirmChamp() {
-    setPlayerScore(Math.max(30, Math.min(70, 50 + matchup.scoreBonus)));
-    setOpponentScore(50);
+    setMomentum(Math.max(35, Math.min(65, 50 + matchup.scoreBonus)));
     setStep('laning');
     setSelectedChoiceIdx(null);
   }
@@ -96,12 +99,12 @@ export function InteractiveMatch() {
     const success = roll >= finalDC;
     const scoreDelta = success ? choice.scoreGain : choice.scoreLoss;
 
-    const newPScore = Math.max(0, Math.min(100, playerScore + (success ? scoreDelta : 0)));
-    const newOScore = Math.max(0, Math.min(100, opponentScore + (!success ? Math.abs(scoreDelta) : 0)));
+    // Shift unified 0-100% momentum
+    const shift = success ? Math.round(choice.scoreGain * 0.5) : Math.round(choice.scoreLoss * 0.5);
+    const newMomentum = Math.max(8, Math.min(92, momentum + shift));
 
     setTimeout(() => {
-      setPlayerScore(newPScore);
-      setOpponentScore(newOScore);
+      setMomentum(newMomentum);
       setLogs(prev => [
         ...prev,
         {
@@ -123,14 +126,36 @@ export function InteractiveMatch() {
     }, 600);
   }
 
-  const isWon = playerScore >= opponentScore;
+  const isWon = momentum >= 50;
 
   return (
     <div className="screen-bg min-h-screen py-8 px-4 flex items-center justify-center">
       <div className="w-full max-w-2xl space-y-5">
 
-        {/* Language Switcher Bar */}
-        <div className="flex justify-end">
+        {/* Top Controls: Mode Switcher & Language */}
+        <div className="flex justify-between items-center">
+          {/* Mode Switcher */}
+          {step !== 'champion_select' && step !== 'summary' ? (
+            <div className="flex bg-slate-900/90 border border-slate-700 p-1 rounded-xl gap-1 text-xs">
+              <button
+                onClick={() => setViewMode('map')}
+                className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                  viewMode === 'map' ? 'bg-cyan-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🗺️ {isCs ? 'Minimapa' : 'Map View'}
+              </button>
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                  viewMode === 'cards' ? 'bg-purple-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                🃏 {isCs ? 'Taktické Karty' : 'Card View'}
+              </button>
+            </div>
+          ) : <div />}
+
           <LanguageSwitcher size="sm" />
         </div>
 
@@ -155,22 +180,22 @@ export function InteractiveMatch() {
               </div>
             </div>
 
-            {/* Live Momentum / Advantage Bar */}
+            {/* Live Momentum / Advantage Bar (100% Balanced Tug-of-War) */}
             <div className="space-y-1">
               <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden flex border border-slate-700">
                 <div
                   className="bg-gradient-to-r from-blue-600 to-cyan-400 transition-all duration-500 ease-out rounded-l-full"
-                  style={{ width: `${playerScore}%` }}
+                  style={{ width: `${momentum}%` }}
                 />
                 <div
                   className="bg-gradient-to-r from-amber-500 to-red-600 transition-all duration-500 ease-out rounded-r-full"
-                  style={{ width: `${100 - playerScore}%` }}
+                  style={{ width: `${100 - momentum}%` }}
                 />
               </div>
 
               <div className="flex justify-between text-[10px] text-slate-400 font-mono">
-                <span className="text-cyan-400 font-bold">{playerScore}% {isCs ? 'Výhoda' : 'Advantage'}</span>
-                <span className="text-red-400 font-bold">{opponentScore}% {isCs ? 'Výhoda' : 'Advantage'}</span>
+                <span className="text-cyan-400 font-bold">{Math.round(momentum)}% {isCs ? 'Výhoda' : 'Advantage'}</span>
+                <span className="text-red-400 font-bold">{100 - Math.round(momentum)}% {isCs ? 'Výhoda' : 'Advantage'}</span>
               </div>
             </div>
           </Card>
@@ -261,20 +286,71 @@ export function InteractiveMatch() {
           </motion.div>
         )}
 
-        {/* STEP 2, 3, 4: MAP TACTICAL PHASES */}
+        {/* STEP 2, 3, 4: MAP OR CARDS TACTICAL PHASES */}
         {(step === 'laning' || step === 'mid_game' || step === 'late_game') && activeScenario && (
-          <motion.div key={step} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+          <motion.div key={step + viewMode} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
             <Card className="p-4 sm:p-5">
-              <TacticalMapBoard
-                playerChampId={selectedChamp}
-                enemyChampId={enemyChamp.id}
-                playerRole={career.role || 'top'}
-                scenario={activeScenario}
-                onSelectChoice={idx => setSelectedChoiceIdx(idx)}
-                selectedChoiceIdx={selectedChoiceIdx}
-                resolving={resolving}
-                lang={language}
-              />
+              
+              {/* MODE 1: TACTICAL MAP BOARD */}
+              {viewMode === 'map' ? (
+                <TacticalMapBoard
+                  playerChampId={selectedChamp}
+                  enemyChampId={enemyChamp.id}
+                  playerRole={career.role || 'top'}
+                  scenario={activeScenario}
+                  onSelectChoice={idx => setSelectedChoiceIdx(idx)}
+                  selectedChoiceIdx={selectedChoiceIdx}
+                  resolving={resolving}
+                  lang={language}
+                />
+              ) : (
+                /* MODE 2: CLASSIC TACTICAL DECISION CARDS */
+                <div className="space-y-4">
+                  <div className="bg-gradient-to-r from-purple-950/80 via-slate-900 to-indigo-950/80 p-4 rounded-2xl border border-purple-500/40 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-black uppercase text-purple-300 font-heading">
+                        ⚡ {isCs ? activeScenario.titleCs : activeScenario.titleEn}
+                      </span>
+                      <span className="text-[11px] font-mono bg-purple-950 px-2 py-0.5 rounded text-purple-200 border border-purple-700">
+                        {activeScenario.stage.replace('_', ' ')}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-200 leading-relaxed font-medium">
+                      {isCs ? activeScenario.contextCs : activeScenario.contextEn}
+                    </p>
+                  </div>
+
+                  {/* Tactical Option Cards */}
+                  <div className="space-y-2.5">
+                    {activeScenario.choices.map((choice, i) => {
+                      const isSelected = selectedChoiceIdx === i;
+                      return (
+                        <button
+                          key={choice.id}
+                          onClick={() => setSelectedChoiceIdx(i)}
+                          className={`w-full p-3.5 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? 'bg-purple-950/70 border-gold-400 ring-2 ring-gold-500/40 shadow-xl'
+                              : 'bg-rift-surface hover:bg-slate-800/80 border-rift-border'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start gap-2">
+                            <span className="font-bold text-xs text-white">
+                              {isCs ? choice.tagCs : choice.tagEn}
+                            </span>
+                            <span className="text-[10px] font-mono font-bold bg-slate-900 px-2 py-0.5 rounded text-gold-300 border border-slate-700">
+                              {choice.statKey.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-300 mt-1">
+                            {isCs ? choice.descCs : choice.descEn}
+                          </p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Action Button */}
               <div className="pt-4">
@@ -286,7 +362,7 @@ export function InteractiveMatch() {
                   onClick={handleConfirmTacticalChoice}
                 >
                   {resolving
-                    ? (isCs ? '⏳ Vyhodnocuji taktický souboj na mapě...' : '⏳ Resolving tactical play on map...')
+                    ? (isCs ? '⏳ Vyhodnocuji taktický souboj...' : '⏳ Resolving tactical play...')
                     : (isCs ? '⚡ Provést Taktický Tah' : '⚡ Execute Tactical Play')}
                 </Button>
               </div>

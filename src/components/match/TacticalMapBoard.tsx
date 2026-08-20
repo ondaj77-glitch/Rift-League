@@ -111,141 +111,35 @@ export function TacticalMapBoard({
       {/* AUTHENTIC SUMMONER'S RIFT MAP BOARD */}
       <div className="relative w-full aspect-square max-w-[460px] mx-auto bg-[#07131e] rounded-2xl border-2 border-cyan-800/70 overflow-hidden shadow-2xl select-none">
         
-        {/* Authentic Top-Down Summoner's Rift Map Vector */}
-        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 400">
-          <defs>
-            {/* River Gradient */}
-            <linearGradient id="riverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0369a1" stopOpacity="0.4" />
-              <stop offset="50%" stopColor="#0284c7" stopOpacity="0.7" />
-              <stop offset="100%" stopColor="#0369a1" stopOpacity="0.4" />
-            </linearGradient>
+        {/* 1. Official High-Resolution Summoner's Rift Minimap Image */}
+        <img
+          src="/minimap.png"
+          alt="Summoner's Rift"
+          className="absolute inset-0 w-full h-full object-cover select-none brightness-105 contrast-125"
+        />
 
-            {/* Jungle Quadrant Gradient */}
-            <radialGradient id="jungleGlow" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#064e3b" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#022c22" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-
-          {/* Map Base Background Texture */}
-          <rect width="400" height="400" fill="#06101e" />
-
-          {/* Jungle Zones */}
-          <rect x="50" y="50" width="130" height="130" rx="20" fill="url(#jungleGlow)" />
-          <rect x="220" y="220" width="130" height="130" rx="20" fill="url(#jungleGlow)" />
-          <rect x="220" y="50" width="130" height="130" rx="20" fill="url(#jungleGlow)" />
-          <rect x="50" y="220" width="130" height="130" rx="20" fill="url(#jungleGlow)" />
-
-          {/* 1. Diagonal River Path with Natural Curve */}
-          <path
-            d="M 5 110 Q 140 180 200 200 T 395 290"
-            stroke="url(#riverGrad)"
-            strokeWidth="38"
-            fill="none"
-            strokeLinecap="round"
-          />
-
-          {/* 2. Top Lane (Perimeter Top-Left) */}
-          <path
-            d="M 35 365 L 35 45 L 365 45"
-            stroke="#334155"
-            strokeWidth="14"
-            fill="none"
-            strokeLinecap="round"
-          />
-          {/* Top Lane Inner Path */}
-          <path
-            d="M 35 365 L 35 45 L 365 45"
-            stroke="#1e293b"
-            strokeWidth="8"
-            fill="none"
-            strokeLinecap="round"
-          />
-
-          {/* 3. Bot Lane (Perimeter Bottom-Right) */}
-          <path
-            d="M 35 365 L 365 365 L 365 45"
-            stroke="#334155"
-            strokeWidth="14"
-            fill="none"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 35 365 L 365 365 L 365 45"
-            stroke="#1e293b"
-            strokeWidth="8"
-            fill="none"
-            strokeLinecap="round"
-          />
-
-          {/* 4. Mid Lane (Diagonal Center) */}
-          <path
-            d="M 35 365 L 365 45"
-            stroke="#334155"
-            strokeWidth="16"
-            fill="none"
-            strokeLinecap="round"
-          />
-          <path
-            d="M 35 365 L 365 45"
-            stroke="#1e293b"
-            strokeWidth="10"
-            fill="none"
-            strokeLinecap="round"
-          />
-
-          {/* River Water Highlight Line */}
-          <path
-            d="M 10 110 Q 140 180 200 200 T 390 290"
-            stroke="#38bdf8"
-            strokeWidth="2"
-            fill="none"
-            strokeDasharray="4 6"
-            opacity="0.6"
-          />
-
-          {/* Turret Icon Positions */}
-          {/* Top Turrets */}
-          <circle cx="35" cy="240" r="4" fill="#3b82f6" opacity="0.8" />
-          <circle cx="35" cy="140" r="4" fill="#3b82f6" opacity="0.8" />
-          <circle cx="160" cy="45" r="4" fill="#ef4444" opacity="0.8" />
-          <circle cx="260" cy="45" r="4" fill="#ef4444" opacity="0.8" />
-
-          {/* Mid Turrets */}
-          <circle cx="130" cy="270" r="4" fill="#3b82f6" opacity="0.8" />
-          <circle cx="270" cy="130" r="4" fill="#ef4444" opacity="0.8" />
-
-          {/* Bot Turrets */}
-          <circle cx="140" cy="365" r="4" fill="#3b82f6" opacity="0.8" />
-          <circle cx="240" cy="365" r="4" fill="#3b82f6" opacity="0.8" />
-          <circle cx="365" cy="240" r="4" fill="#ef4444" opacity="0.8" />
-          <circle cx="365" cy="140" r="4" fill="#ef4444" opacity="0.8" />
-
-          {/* Bases Glows */}
-          <circle cx="35" cy="365" r="28" fill="#1d4ed8" opacity="0.3" />
-          <circle cx="365" cy="45" r="28" fill="#b91c1c" opacity="0.3" />
-        </svg>
+        {/* 2. Tactical Overlay Elements */}
+        <div className="absolute inset-0 bg-slate-950/20 pointer-events-none" />
 
         {/* Base Indicators */}
-        <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-blue-950/90 text-blue-300 border border-blue-500/60 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase font-mono shadow-md">
+        <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-blue-950/90 text-blue-300 border border-blue-500/60 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase font-mono shadow-md backdrop-blur-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
           BLUE BASE
         </div>
 
-        <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-950/90 text-red-300 border border-red-500/60 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase font-mono shadow-md">
+        <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-950/90 text-red-300 border border-red-500/60 px-2 py-0.5 rounded-lg text-[9px] font-black uppercase font-mono shadow-md backdrop-blur-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
           RED BASE
         </div>
 
         {/* Baron Nashor Pit Landmark */}
-        <div className="absolute top-[26%] left-[26%] -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 bg-purple-950/80 border border-purple-500/50 text-purple-300 px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shadow-sm">
+        <div className="absolute top-[26%] left-[26%] -translate-x-1/2 -translate-y-1/2 flex items-center gap-1 bg-purple-950/90 border border-purple-500/70 text-purple-200 px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shadow-lg backdrop-blur-sm">
           <span>👑</span>
           <span>BARON PIT</span>
         </div>
 
         {/* Dragon Pit Landmark */}
-        <div className="absolute bottom-[26%] right-[26%] translate-x-1/2 translate-y-1/2 flex items-center gap-1 bg-amber-950/80 border border-amber-500/50 text-amber-300 px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shadow-sm">
+        <div className="absolute bottom-[26%] right-[26%] translate-x-1/2 translate-y-1/2 flex items-center gap-1 bg-amber-950/90 border border-amber-500/70 text-amber-200 px-1.5 py-0.5 rounded-md text-[8px] font-bold uppercase shadow-lg backdrop-blur-sm">
           <span>🐉</span>
           <span>DRAGON PIT</span>
         </div>
