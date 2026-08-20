@@ -233,7 +233,8 @@ const LATE_CHOICES: RichTacticalChoice[] = [
 ];
 
 export function InteractiveMatch() {
-  const { t, lang } = useTranslation();
+  const { t, language } = useTranslation();
+  const isCs = language === 'cs';
   const career = useGameStore(s => s.career);
   const interactiveMatch = useGameStore(s => s.interactiveMatch);
   const finishInteractiveMatch = useGameStore(s => s.finishInteractiveMatch);
@@ -345,7 +346,7 @@ export function InteractiveMatch() {
         ...prev,
         {
           phase: step.toUpperCase().replace('_', ' '),
-          text: lang === 'cs'
+          text: isCs
             ? (success ? choice.successTextCs : choice.failTextCs)
             : (success ? choice.successTextEn : choice.failTextEn),
           success,
@@ -362,7 +363,6 @@ export function InteractiveMatch() {
   }
 
   const isWon = playerScore >= opponentScore;
-  const isCs = lang === 'cs';
 
   return (
     <div className="screen-bg min-h-screen py-8 px-4 flex items-center justify-center">

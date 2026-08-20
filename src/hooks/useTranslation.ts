@@ -17,5 +17,5 @@ export function useTranslation() {
     return text;
   }
 
-  return { t, language };
+  return { t, language, lang: language };
 }
