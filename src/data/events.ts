@@ -1152,6 +1152,16 @@ export const EVENTS: GameEvent[] = [
         effects: { gameKnowledge: 14, mental: 8, reputation: 10 },
         nextTextKey: 'event.soloq_faker.b.result',
       },
+      {
+        textKey: 'event.soloq_faker.c',
+        effects: { communication: 12, adaptability: 10, reputation: 12 },
+        nextTextKey: 'event.soloq_faker.c.result',
+      },
+      {
+        textKey: 'event.soloq_faker.d',
+        effects: { gameKnowledge: 16, mental: 8, adaptability: 8 },
+        nextTextKey: 'event.soloq_faker.d.result',
+      },
     ],
   },
 
@@ -1174,6 +1184,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_caps.b',
         effects: { gameKnowledge: 14, mental: 8, reputation: 10 },
         nextTextKey: 'event.soloq_caps.b.result',
+      },
+      {
+        textKey: 'event.soloq_caps.c',
+        effects: { adaptability: 12, mechanics: 10, reputation: 12 },
+        nextTextKey: 'event.soloq_caps.c.result',
+      },
+      {
+        textKey: 'event.soloq_caps.d',
+        effects: { gameKnowledge: 12, mental: 10, communication: 8 },
+        nextTextKey: 'event.soloq_caps.d.result',
       },
     ],
   },
@@ -1198,6 +1218,16 @@ export const EVENTS: GameEvent[] = [
         effects: { gameKnowledge: 16, mental: 10, reputation: 12 },
         nextTextKey: 'event.soloq_chovy.b.result',
       },
+      {
+        textKey: 'event.soloq_chovy.c',
+        effects: { gameKnowledge: 14, mental: 10, adaptability: 8 },
+        nextTextKey: 'event.soloq_chovy.c.result',
+      },
+      {
+        textKey: 'event.soloq_chovy.d',
+        effects: { communication: 14, mechanics: 12, reputation: 14 },
+        nextTextKey: 'event.soloq_chovy.d.result',
+      },
     ],
   },
 
@@ -1220,6 +1250,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_theshy.b',
         effects: { gameKnowledge: 14, adaptability: 8, reputation: 10 },
         nextTextKey: 'event.soloq_theshy.b.result',
+      },
+      {
+        textKey: 'event.soloq_theshy.c',
+        effects: { gameKnowledge: 14, communication: 12, mental: 8 },
+        nextTextKey: 'event.soloq_theshy.c.result',
+      },
+      {
+        textKey: 'event.soloq_theshy.d',
+        effects: { mental: 12, adaptability: 10, gameKnowledge: 8 },
+        nextTextKey: 'event.soloq_theshy.d.result',
       },
     ],
   },
@@ -1244,6 +1284,16 @@ export const EVENTS: GameEvent[] = [
         effects: { gameKnowledge: 12, mental: 10, reputation: 8 },
         nextTextKey: 'event.soloq_jojopyun.b.result',
       },
+      {
+        textKey: 'event.soloq_jojopyun.c',
+        effects: { gameKnowledge: 12, savings: 250, reputation: 10 },
+        nextTextKey: 'event.soloq_jojopyun.c.result',
+      },
+      {
+        textKey: 'event.soloq_jojopyun.d',
+        effects: { communication: 12, mental: 8, mechanics: 8 },
+        nextTextKey: 'event.soloq_jojopyun.d.result',
+      },
     ],
   },
 
@@ -1264,6 +1314,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_lowelo_hell.b',
         effects: { communication: 10, gameKnowledge: 6 },
         nextTextKey: 'event.soloq_lowelo_hell.b.result',
+      },
+      {
+        textKey: 'event.soloq_lowelo_hell.c',
+        effects: { mechanics: 10, gameKnowledge: 8, lpChange: 25 },
+        nextTextKey: 'event.soloq_lowelo_hell.c.result',
+      },
+      {
+        textKey: 'event.soloq_lowelo_hell.d',
+        effects: { mental: 10, communication: 8, lpChange: 20 },
+        nextTextKey: 'event.soloq_lowelo_hell.d.result',
       },
     ],
   },
@@ -1286,6 +1346,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_euw_toxic_flame.b',
         effects: { communication: 10, adaptability: 6 },
         nextTextKey: 'event.soloq_euw_toxic_flame.b.result',
+      },
+      {
+        textKey: 'event.soloq_euw_toxic_flame.c',
+        effects: { communication: 12, mental: 10, lpChange: 22 },
+        nextTextKey: 'event.soloq_euw_toxic_flame.c.result',
+      },
+      {
+        textKey: 'event.soloq_euw_toxic_flame.d',
+        effects: { mental: 14, adaptability: 8, lpChange: 18 },
+        nextTextKey: 'event.soloq_euw_toxic_flame.d.result',
       },
     ],
   },
@@ -2357,6 +2427,16 @@ export const EVENTS: GameEvent[] = [
         effects: { gameKnowledge: 6, adaptability: 4, lpChange: 15 },
         nextTextKey: 'event.soloq_winstreak_smurf.b.result',
       },
+      {
+        textKey: 'event.soloq_winstreak_smurf.c',
+        effects: { communication: 10, reputation: 12, lpChange: 20 },
+        nextTextKey: 'event.soloq_winstreak_smurf.c.result',
+      },
+      {
+        textKey: 'event.soloq_winstreak_smurf.d',
+        effects: { gameKnowledge: 12, adaptability: 10 },
+        nextTextKey: 'event.soloq_winstreak_smurf.d.result',
+      },
     ],
   },
 
@@ -2376,6 +2456,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_disco_nunu_troll.b',
         effects: { mental: 8, mechanics: 6, lpChange: 26 },
         nextTextKey: 'event.soloq_disco_nunu_troll.b.result',
+      },
+      {
+        textKey: 'event.soloq_disco_nunu_troll.c',
+        effects: { adaptability: 12, gameKnowledge: 8, lpChange: 22 },
+        nextTextKey: 'event.soloq_disco_nunu_troll.c.result',
+      },
+      {
+        textKey: 'event.soloq_disco_nunu_troll.d',
+        effects: { communication: 12, mental: 10 },
+        nextTextKey: 'event.soloq_disco_nunu_troll.d.result',
       },
     ],
   },
@@ -2397,6 +2487,16 @@ export const EVENTS: GameEvent[] = [
         effects: { gameKnowledge: 8, communication: 6, lpChange: 22 },
         nextTextKey: 'event.soloq_clutch_base_race.b.result',
       },
+      {
+        textKey: 'event.soloq_clutch_base_race.c',
+        effects: { communication: 12, gameKnowledge: 10, lpChange: 28 },
+        nextTextKey: 'event.soloq_clutch_base_race.c.result',
+      },
+      {
+        textKey: 'event.soloq_clutch_base_race.d',
+        effects: { mechanics: 14, mental: 8, lpChange: 30 },
+        nextTextKey: 'event.soloq_clutch_base_race.d.result',
+      },
     ],
   },
 
@@ -2416,6 +2516,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_blind_baron_steal.b',
         effects: { gameKnowledge: 6, mental: 4, lpChange: -14 },
         nextTextKey: 'event.soloq_blind_baron_steal.b.result',
+      },
+      {
+        textKey: 'event.soloq_blind_baron_steal.c',
+        effects: { communication: 12, gameKnowledge: 10, lpChange: 24 },
+        nextTextKey: 'event.soloq_blind_baron_steal.c.result',
+      },
+      {
+        textKey: 'event.soloq_blind_baron_steal.d',
+        effects: { adaptability: 12, gameKnowledge: 8, lpChange: 20 },
+        nextTextKey: 'event.soloq_blind_baron_steal.d.result',
       },
     ],
   },
@@ -2437,6 +2547,16 @@ export const EVENTS: GameEvent[] = [
         effects: { mental: 2, lpChange: -18 },
         nextTextKey: 'event.soloq_ff15_morale_test.b.result',
       },
+      {
+        textKey: 'event.soloq_ff15_morale_test.c',
+        effects: { communication: 14, mental: 10, lpChange: 26 },
+        nextTextKey: 'event.soloq_ff15_morale_test.c.result',
+      },
+      {
+        textKey: 'event.soloq_ff15_morale_test.d',
+        effects: { mechanics: 12, adaptability: 10, lpChange: 22 },
+        nextTextKey: 'event.soloq_ff15_morale_test.d.result',
+      },
     ],
   },
 
@@ -2456,6 +2576,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_meta_broken_build.b',
         effects: { reputation: 12, savings: 200 },
         nextTextKey: 'event.soloq_meta_broken_build.b.result',
+      },
+      {
+        textKey: 'event.soloq_meta_broken_build.c',
+        effects: { communication: 12, gameKnowledge: 10 },
+        nextTextKey: 'event.soloq_meta_broken_build.c.result',
+      },
+      {
+        textKey: 'event.soloq_meta_broken_build.d',
+        effects: { adaptability: 12, mechanics: 10, reputation: 8 },
+        nextTextKey: 'event.soloq_meta_broken_build.d.result',
       },
     ],
   },
@@ -2478,6 +2608,16 @@ export const EVENTS: GameEvent[] = [
         effects: { mental: 6, gameKnowledge: 6, lpChange: 20 },
         nextTextKey: 'event.soloq_scout_live_spectate.b.result',
       },
+      {
+        textKey: 'event.soloq_scout_live_spectate.c',
+        effects: { communication: 14, reputation: 14, lpChange: 24 },
+        nextTextKey: 'event.soloq_scout_live_spectate.c.result',
+      },
+      {
+        textKey: 'event.soloq_scout_live_spectate.d',
+        effects: { adaptability: 14, reputation: 12, lpChange: 22 },
+        nextTextKey: 'event.soloq_scout_live_spectate.d.result',
+      },
     ],
   },
 
@@ -2497,6 +2637,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_viral_reddit_clip.b',
         effects: { mechanics: 6, gameKnowledge: 6 },
         nextTextKey: 'event.soloq_viral_reddit_clip.b.result',
+      },
+      {
+        textKey: 'event.soloq_viral_reddit_clip.c',
+        effects: { reputation: 18, savings: 150 },
+        nextTextKey: 'event.soloq_viral_reddit_clip.c.result',
+      },
+      {
+        textKey: 'event.soloq_viral_reddit_clip.d',
+        effects: { reputation: 10, gameKnowledge: 8 },
+        nextTextKey: 'event.soloq_viral_reddit_clip.d.result',
       },
     ],
   },
@@ -2518,6 +2668,16 @@ export const EVENTS: GameEvent[] = [
         effects: { mental: 10, gameKnowledge: 6, lpChange: 22 },
         nextTextKey: 'event.soloq_toxic_rival_rematch.b.result',
       },
+      {
+        textKey: 'event.soloq_toxic_rival_rematch.c',
+        effects: { communication: 12, gameKnowledge: 10, lpChange: 26 },
+        nextTextKey: 'event.soloq_toxic_rival_rematch.c.result',
+      },
+      {
+        textKey: 'event.soloq_toxic_rival_rematch.d',
+        effects: { mental: 12, gameKnowledge: 10, lpChange: 24 },
+        nextTextKey: 'event.soloq_toxic_rival_rematch.d.result',
+      },
     ],
   },
 
@@ -2537,6 +2697,16 @@ export const EVENTS: GameEvent[] = [
         textKey: 'event.soloq_pro_coach_coaching.b',
         effects: { mechanics: 10, mental: 6 },
         nextTextKey: 'event.soloq_pro_coach_coaching.b.result',
+      },
+      {
+        textKey: 'event.soloq_pro_coach_coaching.c',
+        effects: { mental: 14, adaptability: 10 },
+        nextTextKey: 'event.soloq_pro_coach_coaching.c.result',
+      },
+      {
+        textKey: 'event.soloq_pro_coach_coaching.d',
+        effects: { gameKnowledge: 14, communication: 10 },
+        nextTextKey: 'event.soloq_pro_coach_coaching.d.result',
       },
     ],
   },
