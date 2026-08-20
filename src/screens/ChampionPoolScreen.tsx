@@ -14,14 +14,26 @@ export function ChampionPoolScreen() {
   const [selectedPoolChamp, setSelectedPoolChamp] = useState<string | null>(null);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [newChampToSelect, setNewChampToSelect] = useState<string | null>(null);
+  const [swapError, setSwapError] = useState<string | null>(null);
 
   if (!career) return null;
 
   const currentPatch = career.currentPatch;
   const poolChamps = ALL_CHAMPIONS.filter(c => career.championPool.includes(c.id));
   const roleChamps = getChampionsByRole(career.role);
+  const energy = career.lifestyle.energy;
+  const remainingSwaps = career.swapsRemainingThisSplit ?? 2;
 
   function handleOpenSwap(oldChampId: string) {
+    setSwapError(null);
+    if (remainingSwaps <= 0) {
+      setSwapError(t('champs.no_swaps_left' as any) || 'Vyčerpal jsi limit výměn (max 2x za split)!');
+      return;
+    }
+    if (energy < 30) {
+      setSwapError(t('champs.no_energy_swap' as any) || 'Nemáš dostatek energie! Výměna vyžaduje 30⚡.');
+      return;
+    }
     setSelectedPoolChamp(oldChampId);
     setNewChampToSelect(null);
     setSwapModalOpen(true);
@@ -39,26 +51,38 @@ export function ChampionPoolScreen() {
   return (
     <div className="space-y-6">
 
-      {/* Header with current patch info */}
+      {/* Header with current patch info and swap limits */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rift-card p-4 rounded-xl border border-rift-border">
         <div>
           <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
-            {t('champs.my_pool_title')} (6 Mains)
+            {t('champs.my_pool_title')} (6 Mainů)
           </h2>
           <p className="text-xs text-slate-400">
             {t('champs.my_pool_desc')}
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-rift-surface px-3 py-1.5 rounded-lg border border-rift-border">
-          <span className="text-xs text-slate-400">Current Patch:</span>
-          <span className="text-xs font-black text-gold-400 font-mono">v{currentPatch.patchVersion}</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="bg-amber-950/50 px-3 py-1.5 rounded-lg border border-amber-800/40 text-xs font-bold text-amber-300">
+            🔄 Výměny: {remainingSwaps}/2 tento split (30⚡)
+          </div>
+          <div className="flex items-center gap-2 bg-rift-surface px-3 py-1.5 rounded-lg border border-rift-border">
+            <span className="text-xs text-slate-400">Aktuální Patch:</span>
+            <span className="text-xs font-black text-gold-400 font-mono">v{currentPatch.patchVersion}</span>
+          </div>
         </div>
       </div>
+
+      {/* Error banner */}
+      {swapError && (
+        <div className="p-3 bg-red-950/80 border border-red-700 rounded-xl text-xs text-red-300 font-semibold">
+          ⚠️ {swapError}
+        </div>
+      )}
 
       {/* 6 Main Champions Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {poolChamps.map((champ) => {
-          const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Standard' };
+          const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stabilní pick' };
           const mastery = career.masteries[champ.id] || { masteryLevel: 1, gamesPlayed: 0, wins: 0 };
 
           return (
@@ -67,9 +91,9 @@ export function ChampionPoolScreen() {
               whileHover={{ y: -3 }}
               className="relative overflow-hidden rounded-xl border border-rift-border bg-rift-card p-4 space-y-3"
             >
-              {/* Background faint splash */}
+              {/* Background splash */}
               <div
-                className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
+                className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
                 style={{ backgroundImage: `url(${getChampSplashUrl(champ.id)})` }}
               />
 
@@ -84,16 +108,16 @@ export function ChampionPoolScreen() {
                   <div className="flex items-center justify-between">
                     <h3 className="font-bold text-white text-base truncate">{champ.name}</h3>
                     <span className={`text-xs font-black px-2 py-0.5 rounded ${
-                      meta.tier === 'S+' ? 'bg-amber-400 text-black' :
-                      meta.tier === 'S' ? 'bg-purple-600 text-white' :
-                      meta.tier === 'A' ? 'bg-blue-600 text-white' :
+                      meta.tier === 'S+' ? 'bg-amber-400 text-black font-extrabold' :
+                      meta.tier === 'S' ? 'bg-purple-600 text-white font-bold' :
+                      meta.tier === 'A' ? 'bg-blue-600 text-white font-bold' :
                       meta.tier === 'B' ? 'bg-slate-700 text-slate-300' : 'bg-red-900 text-red-300'
                     }`}>
                       {meta.tier} TIER
                     </span>
                   </div>
                   <p className="text-xs text-slate-400">{champ.title}</p>
-                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">{meta.winRate}% Patch WR</p>
+                  <p className="text-[11px] text-slate-400 font-mono mt-0.5">{meta.winRate}% Patch Win Rate</p>
                 </div>
               </div>
 
@@ -101,7 +125,7 @@ export function ChampionPoolScreen() {
               <div className="space-y-1 relative z-10">
                 <div className="flex justify-between text-xs font-semibold">
                   <span className="text-gold-400">Mastery Level {mastery.masteryLevel}</span>
-                  <span className="text-slate-400 font-mono">{mastery.gamesPlayed} games ({mastery.wins}W)</span>
+                  <span className="text-slate-400 font-mono">{mastery.gamesPlayed} her ({mastery.wins}V)</span>
                 </div>
                 <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
                   <div
@@ -112,7 +136,7 @@ export function ChampionPoolScreen() {
               </div>
 
               {/* Patch Note */}
-              <p className="text-[11px] text-slate-400 italic bg-rift-surface/80 p-2 rounded border border-rift-border/50 relative z-10">
+              <p className="text-[11px] text-slate-300 italic bg-rift-surface/90 p-2 rounded border border-rift-border/50 relative z-10">
                 "{meta.note}"
               </p>
 
@@ -121,10 +145,11 @@ export function ChampionPoolScreen() {
                 variant="secondary"
                 size="sm"
                 fullWidth
+                disabled={remainingSwaps <= 0 || energy < 30}
                 className="relative z-10"
                 onClick={() => handleOpenSwap(champ.id)}
               >
-                🔄 {t('champs.swap_champ_btn')}
+                🔄 {t('champs.swap_champ_btn')} (-30⚡)
               </Button>
             </motion.div>
           );
@@ -144,41 +169,42 @@ export function ChampionPoolScreen() {
 
         <div className="space-y-2">
           {roleChamps.map((champ) => {
-            const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stable' };
+            const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stabilní' };
             const isInPool = career.championPool.includes(champ.id);
 
             return (
               <div
                 key={champ.id}
                 className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
-                  isInPool ? 'bg-purple-950/20 border-purple-800/40' : 'bg-rift-surface border-rift-border'
+                  isInPool ? 'bg-purple-950/30 border-purple-700/50' : 'bg-rift-surface border-rift-border'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <span className={`w-8 text-center text-xs font-black px-1.5 py-0.5 rounded ${
-                    meta.tier === 'S+' ? 'bg-amber-400 text-black' :
-                    meta.tier === 'S' ? 'bg-purple-600 text-white' :
-                    meta.tier === 'A' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'
+                    meta.tier === 'S+' ? 'bg-amber-400 text-black font-extrabold' :
+                    meta.tier === 'S' ? 'bg-purple-600 text-white font-bold' :
+                    meta.tier === 'A' ? 'bg-blue-600 text-white font-bold' :
+                    meta.tier === 'B' ? 'bg-slate-700 text-slate-300' : 'bg-red-950 text-red-400'
                   }`}>
                     {meta.tier}
                   </span>
                   <img
                     src={getChampIconUrl(champ.id)}
                     alt=""
-                    className="w-8 h-8 rounded-lg border border-slate-700"
+                    className="w-8 h-8 rounded-lg border border-slate-700 object-cover"
                     onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                   />
                   <div>
                     <span className="font-bold text-white text-sm">{champ.name}</span>
-                    <span className="text-slate-500 text-xs ml-2">({champ.playstyle})</span>
+                    <span className="text-slate-400 text-xs ml-2 font-medium">({champ.playstyle})</span>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 text-right">
                   <span className="text-xs font-mono text-slate-300">{meta.winRate}% WR</span>
                   {isInPool && (
-                    <span className="text-[11px] bg-rift-purple/80 text-white px-2 py-0.5 rounded font-bold">
-                      IN POOL
+                    <span className="text-[11px] bg-rift-purple text-white px-2 py-0.5 rounded font-bold">
+                      V POOLU
                     </span>
                   )}
                 </div>
@@ -205,7 +231,7 @@ export function ChampionPoolScreen() {
             >
               <div className="flex items-center justify-between border-b border-rift-border pb-3">
                 <h3 className="font-bold text-white text-base">
-                  Swap {selectedPoolChamp} with a new Champion
+                  Vyměnit {selectedPoolChamp} za nového championa
                 </h3>
                 <button
                   onClick={() => setSwapModalOpen(false)}
@@ -215,8 +241,8 @@ export function ChampionPoolScreen() {
                 </button>
               </div>
 
-              <p className="text-xs text-slate-400">
-                Select the replacement champion from your role:
+              <p className="text-xs text-slate-300">
+                Vyber nového championa ze své linky. Stojí <strong>30⚡ energie</strong> (Zbývá {remainingSwaps}/2 výměn):
               </p>
 
               <div className="overflow-y-auto flex-1 space-y-2 pr-1">
@@ -232,7 +258,7 @@ export function ChampionPoolScreen() {
                         onClick={() => setNewChampToSelect(champ.id)}
                         className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                           isSelected
-                            ? 'border-gold-400 bg-gold-950/30'
+                            ? 'border-gold-400 bg-gold-950/40'
                             : 'border-rift-border bg-rift-surface hover:border-slate-500'
                         }`}
                       >
@@ -245,7 +271,7 @@ export function ChampionPoolScreen() {
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold font-mono text-slate-300">{meta.tier} Tier</span>
-                          {isSelected && <span className="text-gold-400 font-bold">✓</span>}
+                          {isSelected && <span className="text-gold-400 font-bold text-lg">✓</span>}
                         </div>
                       </div>
                     );
@@ -255,7 +281,7 @@ export function ChampionPoolScreen() {
               {/* Confirm Swap Button */}
               <div className="pt-3 border-t border-rift-border flex gap-3">
                 <Button variant="secondary" fullWidth onClick={() => setSwapModalOpen(false)}>
-                  Cancel
+                  Zrušit
                 </Button>
                 <Button
                   variant="gold"
@@ -263,7 +289,7 @@ export function ChampionPoolScreen() {
                   disabled={!newChampToSelect}
                   onClick={handleConfirmSwap}
                 >
-                  Confirm Swap
+                  Potvrdit Výměnu (-30⚡)
                 </Button>
               </div>
             </motion.div>

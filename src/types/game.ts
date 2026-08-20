@@ -120,6 +120,11 @@ export interface Career {
   championPool: string[];  // 6 champion IDs
   masteries: Record<string, ChampionMastery>;
   currentPatch: MetaPatch;
+  swapsRemainingThisSplit: number; // Max 2 swaps per split, costs 30 energy
+
+  // Stream & Social Audience
+  streamFollowers: number;
+  streamViewers: number;
 
   // Team & Organization
   currentTeam: Team | null;

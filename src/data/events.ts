@@ -1001,6 +1001,7 @@ export const EVENTS: GameEvent[] = [
     titleKey: 'event.career_off_role_scrims.title',
     descriptionKey: 'event.career_off_role_scrims.desc',
     weight: 5,
+    requiresTeam: true,
     choices: [
       {
         textKey: 'event.career_off_role_scrims.a',
@@ -1014,14 +1015,127 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // ══════════════════════════════════════════════════════
+  //  PRODIGY & AMATEUR SOLOQ (AGE 14-17 / FREE AGENTS)
+  // ══════════════════════════════════════════════════════
+
+  {
+    id: 'prodigy_parents_ultimatum',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_parents.title',
+    descriptionKey: 'event.prodigy_parents.desc',
+    weight: 12,
+    requiresFreeAgent: true,
+    maxAge: 17,
+    choices: [
+      {
+        textKey: 'event.prodigy_parents.a',
+        effects: { mechanics: 8, mental: -5, savings: -50 },
+        nextTextKey: 'event.prodigy_parents.a.result',
+      },
+      {
+        textKey: 'event.prodigy_parents.b',
+        effects: { mental: 8, gameKnowledge: 4, mechanics: -4 },
+        nextTextKey: 'event.prodigy_parents.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_local_lan_clash',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_lan.title',
+    descriptionKey: 'event.prodigy_lan.desc',
+    weight: 10,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_lan.a',
+        effects: { reputation: 8, savings: 350, mechanics: 5 },
+        nextTextKey: 'event.prodigy_lan.a.result',
+      },
+      {
+        textKey: 'event.prodigy_lan.b',
+        effects: { gameKnowledge: 6, mental: 4 },
+        nextTextKey: 'event.prodigy_lan.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_stream_highlight_viral',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_viral.title',
+    descriptionKey: 'event.prodigy_viral.desc',
+    weight: 9,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_viral.a',
+        effects: { reputation: 12, savings: 400 },
+        nextTextKey: 'event.prodigy_viral.a.result',
+      },
+      {
+        textKey: 'event.prodigy_viral.b',
+        effects: { mechanics: 6, reputation: 5 },
+        nextTextKey: 'event.prodigy_viral.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_discord_academy_inquiry',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_scout.title',
+    descriptionKey: 'event.prodigy_scout.desc',
+    weight: 8,
+    minAge: 15,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_scout.a',
+        effects: { reputation: 10, gameKnowledge: 6 },
+        nextTextKey: 'event.prodigy_scout.a.result',
+      },
+      {
+        textKey: 'event.prodigy_scout.b',
+        effects: { mental: 6, mechanics: 6 },
+        nextTextKey: 'event.prodigy_scout.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_internet_lag_rage',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_lag.title',
+    descriptionKey: 'event.prodigy_lag.desc',
+    weight: 10,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_lag.a',
+        effects: { savings: -120, mental: 4 },
+        nextTextKey: 'event.prodigy_lag.a.result',
+      },
+      {
+        textKey: 'event.prodigy_lag.b',
+        effects: { gameKnowledge: 8, mental: -4 },
+        nextTextKey: 'event.prodigy_lag.b.result',
+      },
+    ],
+  },
 ];
 
 // Get a random set of events for a week, filtered by career state
 export function getWeeklyEvent(
-  career: { age: number; reputation: number; inInternational: boolean },
+  career: { age: number; reputation: number; inInternational: boolean; hasTeam?: boolean },
   usedEventIds: string[],
   seed?: number
 ): GameEvent {
+  const isFreeAgent = career.hasTeam === false;
+
   const available = EVENTS.filter(e => {
     if (usedEventIds.includes(e.id)) return false;
     if (e.minAge !== undefined && career.age < e.minAge) return false;
@@ -1029,8 +1143,14 @@ export function getWeeklyEvent(
     if (e.minReputation !== undefined && career.reputation < e.minReputation) return false;
     if (e.maxReputation !== undefined && career.reputation > e.maxReputation) return false;
     if (e.requiresInternational && !career.inInternational) return false;
+    if (e.requiresTeam && isFreeAgent) return false;
+    if (e.requiresFreeAgent && !isFreeAgent) return false;
     return true;
   });
+
+  if (available.length === 0) {
+    return EVENTS.find(e => !e.requiresTeam) || EVENTS[0];
+  }
 
   // Weighted random selection
   const totalWeight = available.reduce((sum, e) => sum + e.weight, 0);
@@ -1041,7 +1161,7 @@ export function getWeeklyEvent(
     if (rand <= 0) return event;
   }
 
-  return available[available.length - 1] || EVENTS[0];
+  return available[available.length - 1];
 }
 
 function seededRand(seed: number): number {

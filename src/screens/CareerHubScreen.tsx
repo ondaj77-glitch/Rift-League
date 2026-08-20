@@ -32,6 +32,8 @@ export function CareerHubScreen() {
 
   const yearsLeft = Math.max(0, 30 - career.age);
   const rankIcon = TIER_ICONS[career.rank.tier];
+  const energy = career.lifestyle.energy;
+  const maxEnergy = career.lifestyle.maxEnergy;
 
   function handleContinue() {
     if (currentEvent) {
@@ -45,13 +47,13 @@ export function CareerHubScreen() {
     <div className="screen-bg min-h-screen py-6 px-4 pb-16">
       <div className="max-w-4xl mx-auto space-y-5">
 
-        {/* Top Hextech Nav Bar */}
+        {/* Top Hextech Nav Bar with Energy, Bank Balance & Time */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-rift-card border border-gold-600/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl"
         >
-          {/* Identity */}
+          {/* Identity & Rank */}
           <div className="flex items-center gap-3">
             <div className="text-3xl bg-rift-surface p-2 rounded-xl border border-rift-border">
               {rankIcon}
@@ -62,28 +64,39 @@ export function CareerHubScreen() {
                   {career.gameName}
                 </h1>
                 <RoleBadge role={career.role} size="sm" />
-                <span className="text-xs text-slate-400 font-bold">
+                <span className="text-xs text-slate-300 font-bold">
                   {REGION_FLAGS[career.region]} {career.region}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Age {career.age} · {career.rank.tier} {career.rank.division || ''} ({career.rank.lp} LP) · #{career.rank.globalRank?.toLocaleString() || '1.5M'} World
+              <p className="text-xs text-slate-400 mt-0.5 font-medium">
+                {t('hub.age')} {career.age} · {career.rank.tier} {career.rank.division || ''} ({career.rank.lp} LP) · #{career.rank.globalRank?.toLocaleString() || '1.5M'} {t('soloq.global_ranking')}
               </p>
             </div>
           </div>
 
-          {/* Season Time & Money */}
+          {/* Season Time, Energy & Money */}
           <div className="flex items-center gap-4 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
-            <div>
-              <p className="text-xs text-slate-400 font-medium">
-                {SPLIT_ICONS[career.split]} {career.split} {career.year}
-              </p>
-              <p className="text-sm font-bold text-gold-400">
-                Week {career.week} / 9
+            {/* Energy */}
+            <div className="bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-800/40 text-center">
+              <p className="text-[10px] text-amber-300 font-bold uppercase">⚡ {t('hub.energy' as any) || 'Energie'}</p>
+              <p className="text-sm font-black text-amber-400 font-mono">
+                {energy} <span className="text-[11px] text-amber-600">/ {maxEnergy}</span>
               </p>
             </div>
+
+            {/* Split & Week */}
+            <div>
+              <p className="text-xs text-slate-400 font-medium">
+                {SPLIT_ICONS[career.split]} {t(`hub.split.${career.split.toLowerCase()}` as any)} {career.year}
+              </p>
+              <p className="text-sm font-bold text-gold-400 font-mono">
+                {t('hub.week')} {career.week} / 9
+              </p>
+            </div>
+
+            {/* Bank Balance */}
             <div className="border-l border-rift-border pl-4">
-              <p className="text-xs text-slate-400 font-medium">Bank Balance</p>
+              <p className="text-xs text-slate-400 font-medium">{t('hub.savings')}</p>
               <p className="text-sm font-black text-green-400 font-mono">
                 ${career.finances.savings.toLocaleString()}
               </p>
@@ -94,11 +107,11 @@ export function CareerHubScreen() {
         {/* Tab Navigation Menu */}
         <div className="flex overflow-x-auto gap-2 border-b border-rift-border pb-2 text-sm font-bold scrollbar-none">
           {[
-            { id: 'overview', label: '🏠 Overview & Career', icon: '' },
-            { id: 'soloq', label: '⚔️ SoloQ Ladder', icon: '' },
-            { id: 'champions', label: '🧙 Champion Pool', icon: '' },
-            { id: 'lifestyle', label: '⚡ Lifestyle & Energy', icon: '' },
-            { id: 'transfers', label: '🤝 Team & Scouting', icon: '' },
+            { id: 'overview', label: `🏠 ${t('tab.overview' as any) || 'Přehled & Kariéra'}` },
+            { id: 'soloq', label: `⚔️ ${t('tab.soloq' as any) || 'SoloQ Žebříček'}` },
+            { id: 'champions', label: `🧙 ${t('tab.champions' as any) || 'Champion Pool'}` },
+            { id: 'lifestyle', label: `⚡ ${t('tab.lifestyle' as any) || 'Životní Styl & Energie'}` },
+            { id: 'transfers', label: `🤝 ${t('tab.transfers' as any) || 'Tým & Skauti'}` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -122,7 +135,9 @@ export function CareerHubScreen() {
             <Card className="p-4 border-gold-600/30">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <div>
-                  <span className="text-xs text-slate-400 uppercase font-semibold">Active Status</span>
+                  <span className="text-xs text-slate-400 uppercase font-semibold">
+                    {t('hub.status_title' as any) || 'Aktuální status'}
+                  </span>
                   <div className="flex items-center gap-2 mt-0.5">
                     {career.currentTeam ? (
                       <>
@@ -132,7 +147,7 @@ export function CareerHubScreen() {
                       </>
                     ) : (
                       <span className="font-bold text-amber-400 text-base">
-                        Unsigned SoloQ Grinder {career.age < 18 ? `(Age ${career.age} Prodigy)` : '(Free Agent)'}
+                        {career.age < 18 ? `Neupsaný SoloQ Talent (${career.age} Let)` : 'Volný Hráč (Free Agent)'}
                       </span>
                     )}
                   </div>
@@ -140,9 +155,9 @@ export function CareerHubScreen() {
 
                 {career.currentTeam && (
                   <div className="flex items-center gap-4 text-xs font-semibold">
-                    <span className="text-green-400">{career.wins} Wins</span>
-                    <span className="text-red-400">{career.losses} Losses</span>
-                    <span className="text-gold-400">Strength {career.teamStrength}</span>
+                    <span className="text-green-400">{career.wins} {t('season.wins')}</span>
+                    <span className="text-red-400">{career.losses} {t('season.losses')}</span>
+                    <span className="text-gold-400">Síla týmu {career.teamStrength}</span>
                   </div>
                 )}
               </div>
@@ -150,7 +165,7 @@ export function CareerHubScreen() {
 
             {/* Player Stats */}
             <Card>
-              <CardHeader title={t('hub.stats')} icon="📊" subtitle="Attributes affect your performance in SoloQ and pro matches" />
+              <CardHeader title={t('hub.stats')} icon="📊" subtitle="Atributy přímo ovlivňují výhry v SoloQ i oficiálních zápasech" />
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {STATS.map(stat => (
                   <StatBar
@@ -168,7 +183,7 @@ export function CareerHubScreen() {
                 <div>
                   <p className="text-xs text-slate-400 mb-1">{t('hub.career_goal')}</p>
                   <p className="text-gold-400 font-bold text-sm">
-                    {career.worldsWins > 0 ? `🏆 ${career.worldsWins}x World Champion` : t('hub.goal.worlds')}
+                    {career.worldsWins > 0 ? `🏆 ${career.worldsWins}x Mistr Světa (Worlds Champion)` : t('hub.goal.worlds')}
                   </p>
                 </div>
                 <div className="text-right">
@@ -187,8 +202,8 @@ export function CareerHubScreen() {
                 onClick={handleContinue}
               >
                 {currentEvent
-                  ? `📋 ${t('event.week')} ${career.week} Event →`
-                  : `📅 ${t('hub.continue')} (Advance to Week ${career.week + 1})`}
+                  ? `📋 ${t('event.week')} ${career.week} Událost →`
+                  : `📅 ${t('hub.continue')} (Posunout na Týden ${career.week + 1})`}
               </Button>
             </div>
           </div>

@@ -165,6 +165,9 @@ export const useGameStore = create<GameStore>()(
           championPool,
           masteries,
           currentPatch: initialPatch,
+          swapsRemainingThisSplit: 2,
+          streamFollowers: isProdigy ? 120 : 3500,
+          streamViewers: isProdigy ? 12 : 240,
           currentTeam: startTeam,
           region,
           stats,
@@ -408,6 +411,8 @@ export const useGameStore = create<GameStore>()(
       swapPoolChampion: (oldChampId, newChampId) => {
         const { career } = get();
         if (!career) return;
+        const remaining = career.swapsRemainingThisSplit ?? 2;
+        if (remaining <= 0 || career.lifestyle.energy < 30) return;
 
         const newPool = career.championPool.map(id => id === oldChampId ? newChampId : id);
         const masteries = { ...career.masteries };
@@ -416,7 +421,16 @@ export const useGameStore = create<GameStore>()(
         }
 
         set(state => ({
-          career: { ...state.career!, championPool: newPool, masteries },
+          career: {
+            ...state.career!,
+            championPool: newPool,
+            masteries,
+            swapsRemainingThisSplit: remaining - 1,
+            lifestyle: {
+              ...state.career!.lifestyle,
+              energy: state.career!.lifestyle.energy - 30,
+            },
+          },
         }));
       },
 
@@ -434,10 +448,16 @@ export const useGameStore = create<GameStore>()(
             },
           }));
         } else if (action === 'stream' && career.lifestyle.energy >= 25) {
-          const streamCash = 200 + Math.floor(career.stats.reputation * 5);
+          const currentFollowers = career.streamFollowers ?? 100;
+          const newFollowers = currentFollowers + 250 + Math.floor(career.stats.reputation * 15) + Math.floor(Math.random() * 100);
+          const newViewers = Math.max(10, Math.floor(newFollowers * 0.08));
+          const streamCash = 200 + Math.floor(newViewers * 1.5) + Math.floor(career.stats.reputation * 4);
+
           set(state => ({
             career: {
               ...state.career!,
+              streamFollowers: newFollowers,
+              streamViewers: newViewers,
               lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 25 },
               finances: { ...state.career!.finances, savings: state.career!.finances.savings + streamCash },
               stats: { ...state.career!.stats, reputation: clamp(state.career!.stats.reputation + 2) },
@@ -592,10 +612,15 @@ export const useGameStore = create<GameStore>()(
           return;
         }
 
-        // Pick next event
+        // Pick next event with proper hasTeam filter
         const usedIds = career.eventHistory.map(e => e.eventId);
         const event = getWeeklyEvent(
-          { age: career.age, reputation: career.stats.reputation, inInternational: career.inInternational },
+          {
+            age: career.age,
+            reputation: career.stats.reputation,
+            inInternational: career.inInternational,
+            hasTeam: currentTeam !== null,
+          },
           usedIds,
         );
 
@@ -795,6 +820,7 @@ export const useGameStore = create<GameStore>()(
               inInternational: false,
               internationalEvent: null,
               currentPatch: newPatch,
+              swapsRemainingThisSplit: 2,
               finances: { ...state.career!.finances, savings: newSavings },
             },
             phase: 'CAREER_HUB',

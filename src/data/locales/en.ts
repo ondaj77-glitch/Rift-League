@@ -98,6 +98,17 @@ export const en = {
   'hub.goal.worlds': '🏆 Win the World Championship',
   'hub.until_retirement': 'years until retirement',
 
+  'hub.energy': 'Energy Focus',
+  'hub.status_title': 'Current Roster Status',
+  'tab.overview': 'Overview & Career',
+  'tab.soloq': 'SoloQ Ladder',
+  'tab.champions': 'Champion Pool',
+  'tab.lifestyle': 'Lifestyle & Focus',
+  'tab.transfers': 'Team & Scouting',
+
+  'create.champ_limit_6': 'You must select exactly 6 signature champions!',
+  'create.s_tier_limit': 'For balance, you can select at most 2 S/S+ Tier champions at start! (The rest must be A/B/C tier)',
+
   // ── Event Screen ──────────────────────────────────────────────────────────
   'event.choose': 'Select your response:',
   'event.confirm_choice_btn': 'Confirm Decision',
@@ -118,6 +129,8 @@ export const en = {
   'champs.my_pool_title': 'Active Champion Pool',
   'champs.my_pool_desc': 'Your 6 signature champions used in games and draft',
   'champs.swap_champ_btn': 'Swap Champion',
+  'champs.no_swaps_left': 'No champion swaps remaining this split! (Max 2 per split)',
+  'champs.no_energy_swap': 'Not enough energy to swap champion! (Requires 30⚡)',
   'champs.meta_tier_list_title': 'Meta Tier List',
   'champs.meta_tier_list_desc': 'Dynamic balance tier list for the current patch',
 
@@ -163,6 +176,19 @@ export const en = {
   'match.mid_cross_map.win': 'Smart macro play! You took Tier 2 tower and 1,000 gold bounty.',
   'match.mid_cross_map.loss': 'Enemy took Dragon and immediately collapsed to kill you.',
 
+  'match.map_push_mid.title': 'Fast Mid Push for Inhibitor & Base',
+  'match.map_push_mid.desc': 'Ignore objectives and rush directly into enemy base for the game end.',
+  'match.map_push_mid.win': 'Base race won! You shattered the Nexus before enemy respawned.',
+  'match.map_push_mid.loss': 'Enemy respawned with homeguards and wiped your team under towers.',
+  'match.map_baron.title': 'Secure Baron Nashor Buff',
+  'match.map_baron.desc': 'Take Baron safely and use empowered minions to siege all 3 lanes.',
+  'match.map_baron.win': 'Clean Baron capture. Unstoppable siege leads to victory.',
+  'match.map_baron.loss': 'Baron damage got too high, enemy jungler spawned and stole it.',
+  'match.map_dragon_soul.title': 'Claim Dragon Soul Buff',
+  'match.map_dragon_soul.desc': 'Stack permanent elemental dragon soul buff for unstoppable scaling.',
+  'match.map_dragon_soul.win': 'Dragon Soul claimed! Your team is now unkillable.',
+  'match.map_dragon_soul.loss': 'Contested and lost in a messy river fight.',
+
   'match.late_flash_engage.title': 'Heroic Flash Combo on Enemy ADC',
   'match.late_flash_engage.desc': 'Risk everything for a split-second outplay to end the game.',
   'match.late_flash_engage.win': 'Clutch outplay! Enemy ADC deleted before using Zhonyas. Game over!',
@@ -175,6 +201,42 @@ export const en = {
   'match.late_baron_bait.desc': 'Start Baron to force enemy team into narrow choke point.',
   'match.late_baron_bait.win': 'Baron secured and 4 enemy kills! Pushing mid for the win.',
   'match.late_baron_bait.loss': 'Baron steals by enemy jungler! Total disaster.',
+
+  // ── Prodigy Events ────────────────────────────────────────────────────────
+  'event.prodigy_parents.title': 'Parental Ultimatum',
+  'event.prodigy_parents.desc': 'Your parents threaten to unplug your PC if your school grades drop below average.',
+  'event.prodigy_parents.a': 'Sneak late-night soloqueue sessions anyway',
+  'event.prodigy_parents.b': 'Balance study hours with high-intensity practice',
+  'event.prodigy_parents.a.result': 'Grades suffer, but mechanics skyrocket into Grandmaster territory.',
+  'event.prodigy_parents.b.result': 'Smart schedule management proves you are mature enough for esports.',
+
+  'event.prodigy_lan.title': 'Local PC Bang LAN Cup',
+  'event.prodigy_lan.desc': 'A local gaming cafe organizes a 5v5 tournament with a $500 prize pool.',
+  'event.prodigy_lan.a': 'Form a stack with high-elo friends and hard-smurf',
+  'event.prodigy_lan.b': 'Play calmly and practice communication',
+  'event.prodigy_lan.a.result': 'You win the tournament easily and take the cash prize.',
+  'event.prodigy_lan.b.result': 'Local players admire your leadership and game sense.',
+
+  'event.prodigy_viral.title': 'Viral TikTok & Reddit Highlight',
+  'event.prodigy_viral.desc': 'Your 1v3 outplay on the Korean server hits #1 on Reddit League subreddit.',
+  'event.prodigy_viral.a': 'Plug your Twitch stream in the comments',
+  'event.prodigy_viral.b': 'Stay humble and keep grinding silently',
+  'event.prodigy_viral.a.result': 'A wave of new followers and donations floods your channel.',
+  'event.prodigy_viral.b.result': 'Pros and high-elo players respect your quiet work ethic.',
+
+  'event.prodigy_scout.title': 'Academy Scout Discord DM',
+  'event.prodigy_scout.desc': 'An official Tier 2 Academy scout messages you after seeing your 70% winrate in Master tier.',
+  'event.prodigy_scout.a': 'Send your VODs and ask about tryouts for when you turn 16',
+  'event.prodigy_scout.b': 'Thank him and stay focused on hitting Challenger first',
+  'event.prodigy_scout.a.result': 'The scout marks you as a top prospect on their scouting board.',
+  'event.prodigy_scout.b.result': 'Your hunger for Rank 1 impresses the scouting staff.',
+
+  'event.prodigy_lag.title': 'Internet ISP Outage',
+  'event.prodigy_lag.desc': 'Your home internet goes down right during a crucial promotion series.',
+  'event.prodigy_lag.a': 'Rush to the nearest gaming cafe to finish the game',
+  'event.prodigy_lag.b': 'Accept the loss and take a mental walk outside',
+  'event.prodigy_lag.a.result': 'You make it just in time and carry the game from a public PC.',
+  'event.prodigy_lag.b.result': 'Fresh air resets your mental state after a stressful week.',
 
   // ── Season Summary ────────────────────────────────────────────────────────
   'season.title': 'Split Concluded',

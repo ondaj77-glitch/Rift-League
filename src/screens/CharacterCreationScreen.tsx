@@ -7,7 +7,7 @@ import { StatBar } from '../components/ui/StatBar';
 import { Card } from '../components/ui/Card';
 import type { Role, Region, Playstyle, GameMode } from '../types/game';
 import { ROLE_STATS_PREVIEW } from '../utils/characterStats';
-import { getChampionsByRole, getChampIconUrl, getChampSplashUrl } from '../data/champions';
+import { getChampionsByRole, getChampIconUrl, TIER_PRIORITY } from '../data/champions';
 
 const ROLES: Role[] = ['top', 'jungle', 'mid', 'adc', 'support'];
 const REGIONS: Region[] = ['LCK', 'LPL', 'LEC', 'LTA_N', 'LTA_S', 'LCP'];
@@ -34,32 +34,51 @@ export function CharacterCreationScreen() {
   const [region, setRegion] = useState<Region>('LCK');
   const [playstyle, setPlaystyle] = useState<Playstyle>('mechanical');
   const [selectedChamps, setSelectedChamps] = useState<string[]>([]);
+  const [tierError, setTierError] = useState<string | null>(null);
 
-  // Auto-fill first 6 champions when role changes
+  // Auto-fill balanced 6 champions when role changes (max 2 S/S+ tiers, 4 A/B tiers)
   function handleSelectRole(r: Role) {
     setRole(r);
-    const champs = getChampionsByRole(r).slice(0, 6).map(c => c.id);
-    setSelectedChamps(champs);
+    const sorted = getChampionsByRole(r);
+    const sChamps = sorted.filter(c => c.baseTier === 'S+' || c.baseTier === 'S').slice(0, 2);
+    const otherChamps = sorted.filter(c => c.baseTier !== 'S+' && c.baseTier !== 'S').slice(0, 4);
+    setSelectedChamps([...sChamps, ...otherChamps].map(c => c.id));
   }
 
+  const roleChamps = getChampionsByRole(role);
+  const previewStats = ROLE_STATS_PREVIEW(role, playstyle);
+
+  // Check how many S/S+ tier champions are selected
+  const sTierCount = selectedChamps.filter(id => {
+    const champ = roleChamps.find(c => c.id === id);
+    return champ && (champ.baseTier === 'S+' || champ.baseTier === 'S');
+  }).length;
+
   function toggleChampion(champId: string) {
+    setTierError(null);
+    const targetChamp = roleChamps.find(c => c.id === champId);
+    const isSTier = targetChamp && (targetChamp.baseTier === 'S+' || targetChamp.baseTier === 'S');
+
     if (selectedChamps.includes(champId)) {
       if (selectedChamps.length > 1) {
         setSelectedChamps(prev => prev.filter(id => id !== champId));
       }
     } else {
-      if (selectedChamps.length < 6) {
-        setSelectedChamps(prev => [...prev, champId]);
+      if (selectedChamps.length >= 6) {
+        setTierError(t('create.champ_limit_6' as any) || 'You can only choose 6 main champions!');
+        return;
       }
+      if (isSTier && sTierCount >= 2) {
+        setTierError(t('create.s_tier_limit' as any) || 'Starting pool allows max 2 S/S+ tier champions for balance! (Rest must be A/B/C tier)');
+        return;
+      }
+      setSelectedChamps(prev => [...prev, champId]);
     }
   }
 
   function handleStart() {
     startNewCareerExtended(mode, name.trim() || 'Player', gameName.trim() || 'Rookie', role, region, playstyle, selectedChamps);
   }
-
-  const roleChamps = getChampionsByRole(role);
-  const previewStats = ROLE_STATS_PREVIEW(role, playstyle);
 
   return (
     <div className="screen-bg min-h-screen py-10 px-4">
@@ -69,7 +88,7 @@ export function CharacterCreationScreen() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
           <button onClick={() => setPhase('MENU')} className="text-slate-400 hover:text-white text-xl">←</button>
           <div>
-            <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+            <h1 className="text-2xl font-bold text-white tracking-wide" style={{ fontFamily: 'Cinzel, serif' }}>
               {t('create.title')}
             </h1>
             <p className="text-xs text-slate-400">Step: {step.toUpperCase()}</p>
@@ -95,14 +114,14 @@ export function CharacterCreationScreen() {
                     <div className="flex items-center gap-3">
                       <span className="text-4xl">👶</span>
                       <div>
-                        <h3 className="font-bold text-white text-base">Prodigy Journey (Recommended)</h3>
-                        <p className="text-xs text-gold-400 font-semibold">Start at Age 14 in Bronze IV Elo</p>
+                        <h3 className="font-bold text-white text-base">Prodigy Journey (Doporučeno)</h3>
+                        <p className="text-xs text-gold-400 font-semibold">Start ve 14 letech v Bronze IV bez týmu</p>
                       </div>
                     </div>
                     {mode === 'prodigy' && <span className="text-gold-400 font-black text-xl">✓</span>}
                   </div>
                   <p className="text-xs text-slate-300 mt-3 leading-relaxed">
-                    Begin as an unknown teenager in your bedroom with no salary. Grind SoloQ, work part-time jobs, build your champion pool, and get scouted by Academy/Pro teams as you reach 16–18 years old!
+                    Začni jako neznámý kluk ve svém pokoji. Grinduj SoloQ, choď na brigády pro peníze, sestav si champion pool a počkej na nabídky od skautů v 16–18 letech!
                   </p>
                 </div>
 
@@ -119,20 +138,20 @@ export function CharacterCreationScreen() {
                     <div className="flex items-center gap-3">
                       <span className="text-4xl">🏆</span>
                       <div>
-                        <h3 className="font-bold text-white text-base">Tier 1 Pro Debut</h3>
-                        <p className="text-xs text-purple-400 font-semibold">Start at Age 18 Signed with a Pro Team</p>
+                        <h3 className="font-bold text-white text-base">Tier 1 Profi Debut</h3>
+                        <p className="text-xs text-purple-400 font-semibold">Start v 18 letech přímo s týmovou smlouvou</p>
                       </div>
                     </div>
                     {mode === 'pro_debut' && <span className="text-gold-400 font-black text-xl">✓</span>}
                   </div>
                   <p className="text-xs text-slate-300 mt-3 leading-relaxed">
-                    Skip the early amateur grind and jump directly into the pro league (LCK, LPL, LEC, LTA) with a full starting contract.
+                    Přeskoč amatérskou SoloQ dráhu a skoč rovnou do oficiální ligy (LCK, LPL, LEC, LTA) jako podepsaný rookie.
                   </p>
                 </div>
               </div>
 
               <Button variant="gold" size="lg" fullWidth onClick={() => setStep('basics')}>
-                Continue →
+                Pokračovat →
               </Button>
             </motion.div>
           )}
@@ -146,7 +165,7 @@ export function CharacterCreationScreen() {
                   <input
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="e.g. Jan Novák"
+                    placeholder={t('create.name.placeholder')}
                     className="w-full bg-rift-surface border border-rift-border rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold-400 font-medium"
                   />
                 </div>
@@ -155,16 +174,16 @@ export function CharacterCreationScreen() {
                   <input
                     value={gameName}
                     onChange={e => setGameName(e.target.value)}
-                    placeholder="e.g. Faker / Chovy / Viper"
+                    placeholder={t('create.gamename.placeholder')}
                     className="w-full bg-rift-surface border border-rift-border rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-gold-400 font-mono font-bold"
                   />
                 </div>
               </Card>
 
               <div className="flex gap-3">
-                <Button variant="secondary" size="lg" onClick={() => setStep('mode')}>← Back</Button>
+                <Button variant="secondary" size="lg" onClick={() => setStep('mode')}>← Zpět</Button>
                 <Button variant="gold" size="lg" fullWidth disabled={name.trim().length < 2 || gameName.trim().length < 2} onClick={() => setStep('role')}>
-                  Continue →
+                  Pokračovat →
                 </Button>
               </div>
             </motion.div>
@@ -195,8 +214,8 @@ export function CharacterCreationScreen() {
               </div>
 
               <div className="flex gap-3">
-                <Button variant="secondary" size="lg" onClick={() => setStep('basics')}>← Back</Button>
-                <Button variant="gold" size="lg" fullWidth onClick={() => setStep('region')}>Continue →</Button>
+                <Button variant="secondary" size="lg" onClick={() => setStep('basics')}>← Zpět</Button>
+                <Button variant="gold" size="lg" fullWidth onClick={() => setStep('region')}>Pokračovat →</Button>
               </div>
             </motion.div>
           )}
@@ -222,8 +241,8 @@ export function CharacterCreationScreen() {
               </div>
 
               <div className="flex gap-3">
-                <Button variant="secondary" size="lg" onClick={() => setStep('role')}>← Back</Button>
-                <Button variant="gold" size="lg" fullWidth onClick={() => setStep('playstyle')}>Continue →</Button>
+                <Button variant="secondary" size="lg" onClick={() => setStep('role')}>← Zpět</Button>
+                <Button variant="gold" size="lg" fullWidth onClick={() => setStep('playstyle')}>Pokračovat →</Button>
               </div>
             </motion.div>
           )}
@@ -264,29 +283,40 @@ export function CharacterCreationScreen() {
               </Card>
 
               <div className="flex gap-3">
-                <Button variant="secondary" size="lg" onClick={() => setStep('region')}>← Back</Button>
+                <Button variant="secondary" size="lg" onClick={() => setStep('region')}>← Zpět</Button>
                 <Button variant="gold" size="lg" fullWidth onClick={() => setStep('champions')}>
-                  Pick 6 Main Champions →
+                  Vybrat 6 Main Championů →
                 </Button>
               </div>
             </motion.div>
           )}
 
-          {/* STEP 6: CHAMPION POOL (6 MAINS) */}
+          {/* STEP 6: CHAMPION POOL (6 MAINS - ORDERED BY TIER S+ DOWN TO D) */}
           {step === 'champions' && (
             <motion.div key="champions" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h3 className="font-bold text-white text-base" style={{ fontFamily: 'Cinzel, serif' }}>
-                    Select Your 6 Signature Mains ({selectedChamps.length}/6)
+                    Vyber 6 Main Championů ({selectedChamps.length}/6)
                   </h3>
-                  <p className="text-xs text-slate-400">These will be your go-to champions in SoloQ and matches</p>
+                  <p className="text-xs text-slate-400">
+                    Seřazeno podle Tier Listu (Max 2 S/S+ tier pro startovní balanc: <strong className="text-gold-400">{sTierCount}/2</strong>)
+                  </p>
                 </div>
               </div>
+
+              {/* Error banner */}
+              {tierError && (
+                <div className="p-3 bg-red-950/70 border border-red-700 rounded-xl text-xs text-red-300 font-semibold">
+                  ⚠️ {tierError}
+                </div>
+              )}
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto pr-1">
                 {roleChamps.map((champ) => {
                   const isSelected = selectedChamps.includes(champ.id);
+                  const isSTier = champ.baseTier === 'S+' || champ.baseTier === 'S';
+
                   return (
                     <div
                       key={champ.id}
@@ -294,7 +324,7 @@ export function CharacterCreationScreen() {
                       className={`relative overflow-hidden rounded-xl border p-3 cursor-pointer transition-all ${
                         isSelected
                           ? 'border-gold-400 bg-gold-950/40 shadow-md shadow-gold-500/20'
-                          : 'border-rift-border bg-rift-card hover:border-slate-500 opacity-60'
+                          : 'border-rift-border bg-rift-card hover:border-slate-500 opacity-70'
                       }`}
                     >
                       <div className="flex items-center gap-2.5">
@@ -305,7 +335,17 @@ export function CharacterCreationScreen() {
                           onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                         />
                         <div className="min-w-0 flex-1">
-                          <p className="font-bold text-white text-xs truncate">{champ.name}</p>
+                          <div className="flex items-center justify-between">
+                            <p className="font-bold text-white text-xs truncate">{champ.name}</p>
+                            <span className={`text-[10px] font-black px-1.5 py-0.2 rounded ${
+                              champ.baseTier === 'S+' ? 'bg-amber-400 text-black font-extrabold' :
+                              champ.baseTier === 'S' ? 'bg-purple-600 text-white font-bold' :
+                              champ.baseTier === 'A' ? 'bg-blue-600 text-white font-bold' :
+                              champ.baseTier === 'B' ? 'bg-slate-700 text-slate-300' : 'bg-red-950 text-red-400'
+                            }`}>
+                              {champ.baseTier}
+                            </span>
+                          </div>
                           <p className="text-[10px] text-slate-400">{champ.playstyle}</p>
                         </div>
                       </div>
@@ -320,7 +360,7 @@ export function CharacterCreationScreen() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button variant="secondary" size="lg" onClick={() => setStep('playstyle')}>← Back</Button>
+                <Button variant="secondary" size="lg" onClick={() => setStep('playstyle')}>← Zpět</Button>
                 <Button
                   variant="gold"
                   size="lg"
@@ -328,7 +368,7 @@ export function CharacterCreationScreen() {
                   disabled={selectedChamps.length !== 6}
                   onClick={handleStart}
                 >
-                  🚀 Launch Career ({mode === 'prodigy' ? 'Age 14 Prodigy' : 'Age 18 Pro'})
+                  🚀 {mode === 'prodigy' ? 'Spustit Prodigy Cestu (14 Let)' : 'Spustit Profi Kariéru (18 Let)'}
                 </Button>
               </div>
             </motion.div>

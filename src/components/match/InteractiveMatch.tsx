@@ -4,10 +4,8 @@ import { useGameStore } from '../../store/gameStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { getChampIconUrl, getChampSplashUrl } from '../../data/champions';
-import type { ChampionData } from '../../data/champions';
-import { ALL_CHAMPIONS } from '../../data/champions';
-import type { TacticalChoice, MatchPhaseStep, StatKey } from '../../types/game';
+import { getChampIconUrl, ALL_CHAMPIONS, getChampionsByRole } from '../../data/champions';
+import type { TacticalChoice, MatchPhaseStep } from '../../types/game';
 
 const LANING_CHOICES: TacticalChoice[] = [
   {
@@ -75,6 +73,39 @@ const MID_CHOICES: TacticalChoice[] = [
   },
 ];
 
+const MAP_MACRO_CHOICES: TacticalChoice[] = [
+  {
+    id: 'map_push_mid',
+    titleKey: 'match.map_push_mid.title',
+    descriptionKey: 'match.map_push_mid.desc',
+    statKey: 'mechanics',
+    difficulty: 62,
+    risk: 'High',
+    successEffect: { scoreDelta: 35, textKey: 'match.map_push_mid.win' },
+    failEffect: { scoreDelta: -25, textKey: 'match.map_push_mid.loss' },
+  },
+  {
+    id: 'map_baron',
+    titleKey: 'match.map_baron.title',
+    descriptionKey: 'match.map_baron.desc',
+    statKey: 'gameKnowledge',
+    difficulty: 55,
+    risk: 'Medium',
+    successEffect: { scoreDelta: 28, textKey: 'match.map_baron.win' },
+    failEffect: { scoreDelta: -18, textKey: 'match.map_baron.loss' },
+  },
+  {
+    id: 'map_dragon_soul',
+    titleKey: 'match.map_dragon_soul.title',
+    descriptionKey: 'match.map_dragon_soul.desc',
+    statKey: 'communication',
+    difficulty: 54,
+    risk: 'Low',
+    successEffect: { scoreDelta: 22, textKey: 'match.map_dragon_soul.win' },
+    failEffect: { scoreDelta: -12, textKey: 'match.map_dragon_soul.loss' },
+  },
+];
+
 const LATE_CHOICES: TacticalChoice[] = [
   {
     id: 'late_flash_engage',
@@ -115,7 +146,7 @@ export function InteractiveMatch() {
   const finishInteractiveMatch = useGameStore(s => s.finishInteractiveMatch);
 
   const [selectedChamp, setSelectedChamp] = useState<string>(career?.championPool[0] || 'Aatrox');
-  const [step, setStep] = useState<MatchPhaseStep>('champion_select');
+  const [step, setStep] = useState<MatchPhaseStep | 'map_macro'>('champion_select');
   const [selectedChoiceIdx, setSelectedChoiceIdx] = useState<number | null>(null);
   const [playerScore, setPlayerScore] = useState(50);
   const [opponentScore, setOpponentScore] = useState(50);
@@ -126,11 +157,14 @@ export function InteractiveMatch() {
 
   const currentPatch = career.currentPatch;
   const poolChamps = ALL_CHAMPIONS.filter(c => career.championPool.includes(c.id));
+  const roleChamps = getChampionsByRole(career.role);
+  // Pick opponent champion for the lane
+  const enemyChamp = roleChamps.find(c => !career.championPool.includes(c.id)) || roleChamps[0];
 
-  // Determine current choices
   const currentChoices =
     step === 'laning' ? LANING_CHOICES :
     step === 'mid_game' ? MID_CHOICES :
+    step === 'map_macro' ? MAP_MACRO_CHOICES :
     step === 'late_game' ? LATE_CHOICES : [];
 
   function handleConfirmChamp() {
@@ -143,7 +177,6 @@ export function InteractiveMatch() {
     const choice = currentChoices[selectedChoiceIdx];
     setResolving(true);
 
-    // Roll based on stat + champion mastery + meta tier
     const statVal = career!.stats[choice.statKey];
     const champTier = currentPatch.tiers[selectedChamp]?.tier || 'A';
     const tierBonus = champTier === 'S+' ? 12 : champTier === 'S' ? 8 : champTier === 'A' ? 4 : champTier === 'B' ? 0 : -6;
@@ -163,7 +196,7 @@ export function InteractiveMatch() {
       setLogs(prev => [
         ...prev,
         {
-          phase: step.toUpperCase().replace('_', ' '),
+          phase: step === 'map_macro' ? 'MAP MACRO' : step.toUpperCase().replace('_', ' '),
           text: t(effect.textKey as any),
           success,
           scoreDelta: effect.scoreDelta,
@@ -172,9 +205,9 @@ export function InteractiveMatch() {
       setResolving(false);
       setSelectedChoiceIdx(null);
 
-      // Advance to next step
       if (step === 'laning') setStep('mid_game');
-      else if (step === 'mid_game') setStep('late_game');
+      else if (step === 'mid_game') setStep('map_macro');
+      else if (step === 'map_macro') setStep('late_game');
       else if (step === 'late_game') setStep('summary');
     }, 600);
   }
@@ -191,12 +224,16 @@ export function InteractiveMatch() {
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="font-bold text-white text-base">{career.gameName}</span>
-                <span className="text-xs text-rift-purple bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40">
+                <span className="text-xs text-rift-purple bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40 font-mono font-bold">
                   {selectedChamp}
                 </span>
               </div>
               <div className="text-xs font-bold text-slate-400">
-                {step === 'champion_select' ? 'DRAFT PHASE' : step.toUpperCase().replace('_', ' ')}
+                {step === 'champion_select' ? 'FÁZE DRAFTU' :
+                 step === 'laning' ? 'EARLY GAME' :
+                 step === 'mid_game' ? 'MID GAME' :
+                 step === 'map_macro' ? '🗺️ MAPA ROZHODNUTÍ' :
+                 step === 'late_game' ? 'LATE GAME' : 'VÝSLEDEK'}
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-200 text-sm">{interactiveMatch.opponentTeam.shortName}</span>
@@ -204,12 +241,12 @@ export function InteractiveMatch() {
               </div>
             </div>
 
-            {/* Tug-of-war Advantage Bar */}
+            {/* Advantage Bar */}
             {step !== 'champion_select' && (
               <div className="space-y-1">
                 <div className="flex justify-between text-xs text-slate-400 font-medium">
-                  <span className="text-blue-400">{playerScore}% Advantage</span>
-                  <span className="text-red-400">{opponentScore}% Advantage</span>
+                  <span className="text-blue-400 font-bold">{playerScore}% Výhoda</span>
+                  <span className="text-red-400 font-bold">{opponentScore}% Výhoda</span>
                 </div>
                 <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden flex border border-rift-border">
                   <motion.div
@@ -230,7 +267,7 @@ export function InteractiveMatch() {
 
         <AnimatePresence mode="wait">
 
-          {/* STEP 1: CHAMPION SELECT */}
+          {/* STEP 1: CHAMPION SELECT & ENEMY MATCHUP */}
           {step === 'champion_select' && (
             <motion.div
               key="champ_select"
@@ -239,8 +276,23 @@ export function InteractiveMatch() {
               exit={{ opacity: 0, y: -15 }}
               className="space-y-4"
             >
+              {/* Enemy Lock-In Banner */}
+              <div className="bg-red-950/40 border border-red-800/40 p-4 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img src={getChampIconUrl(enemyChamp.id)} className="w-12 h-12 rounded-lg border border-red-700" alt="" />
+                  <div>
+                    <span className="text-xs text-red-400 font-bold uppercase">Soupeř zamknul:</span>
+                    <h3 className="text-white font-black text-base">{enemyChamp.name}</h3>
+                    <p className="text-[11px] text-slate-400">Styl: {enemyChamp.playstyle} · {enemyChamp.counterTags.join(', ')}</p>
+                  </div>
+                </div>
+                <span className="text-xs bg-red-900/60 text-red-200 px-2.5 py-1 rounded font-bold">
+                  MATCHUP
+                </span>
+              </div>
+
               <div className="text-center space-y-1">
-                <h2 className="text-xl font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+                <h2 className="text-lg font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>
                   {t('match.select_champ_title')}
                 </h2>
                 <p className="text-xs text-slate-400">
@@ -271,9 +323,7 @@ export function InteractiveMatch() {
                           src={getChampIconUrl(champ.id)}
                           alt={champ.name}
                           className="w-12 h-12 rounded-lg border border-slate-700 object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = 'none';
-                          }}
+                          onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                         />
                         <div className="flex-1 min-w-0">
                           <p className="font-bold text-white text-sm truncate">{champ.name}</p>
@@ -314,8 +364,8 @@ export function InteractiveMatch() {
             </motion.div>
           )}
 
-          {/* STEP 2, 3, 4: TACTICAL PHASES */}
-          {(step === 'laning' || step === 'mid_game' || step === 'late_game') && (
+          {/* STEP 2, 3, 4, 5: TACTICAL PHASES & MAP SITUATION */}
+          {(step === 'laning' || step === 'mid_game' || step === 'map_macro' || step === 'late_game') && (
             <motion.div
               key={step}
               initial={{ opacity: 0, x: 20 }}
@@ -327,9 +377,14 @@ export function InteractiveMatch() {
                 <div>
                   <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
                     {step === 'laning' ? t('match.phase_laning') :
-                     step === 'mid_game' ? t('match.phase_mid') : t('match.phase_late')}
+                     step === 'mid_game' ? t('match.phase_mid') :
+                     step === 'map_macro' ? '🗺️ LoL Mapa: Rozhodující Makro Situace' : t('match.phase_late')}
                   </h3>
-                  <p className="text-xs text-slate-400">{t('match.select_tactical_action')}</p>
+                  <p className="text-xs text-slate-400">
+                    {step === 'map_macro'
+                      ? 'Nepřátelský tým je oslaben po boji! Zvol další postup na mapě:'
+                      : t('match.select_tactical_action')}
+                  </p>
                 </div>
                 <div className="flex items-center gap-1.5 bg-rift-card px-3 py-1.5 rounded-lg border border-rift-border">
                   <img src={getChampIconUrl(selectedChamp)} className="w-5 h-5 rounded" alt="" />
@@ -337,6 +392,7 @@ export function InteractiveMatch() {
                 </div>
               </div>
 
+              {/* Tactical Choices */}
               <div className="space-y-3">
                 {currentChoices.map((choice, i) => {
                   const isSelected = selectedChoiceIdx === i;
@@ -349,8 +405,8 @@ export function InteractiveMatch() {
                       onClick={() => !resolving && setSelectedChoiceIdx(i)}
                       className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 ${
                         isSelected
-                          ? 'border-rift-purple bg-purple-950/40 shadow-lg shadow-purple-900/30'
-                          : 'border-rift-border bg-rift-card hover:border-slate-500'
+                          ? 'border-gold-400 bg-gold-950/40 shadow-lg shadow-gold-500/20'
+                          : 'border-rift-border bg-rift-card hover:border-slate-400'
                       }`}
                     >
                       <div className="flex items-start justify-between">
@@ -358,19 +414,19 @@ export function InteractiveMatch() {
                           <p className="text-sm font-bold text-white">{t(choice.titleKey as any)}</p>
                           <p className="text-xs text-slate-300">{t(choice.descriptionKey as any)}</p>
                         </div>
-                        {isSelected && <span className="text-rift-purple font-black text-base">✓</span>}
+                        {isSelected && <span className="text-gold-400 font-black text-base">✓</span>}
                       </div>
 
                       <div className="flex items-center gap-3 mt-3 pt-2 border-t border-rift-border/60 text-xs">
                         <span className="text-slate-400 font-medium">
-                          Tests: <strong className="text-slate-200">{t(`stat.${choice.statKey}` as any)} ({statValue})</strong>
+                          Testuje: <strong className="text-slate-200">{t(`stat.${choice.statKey}` as any)} ({statValue})</strong>
                         </span>
-                        <span className={`px-1.5 py-0.5 rounded font-bold text-[10px] ${
+                        <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
                           choice.risk === 'High' ? 'bg-red-950/70 text-red-400 border border-red-800' :
                           choice.risk === 'Medium' ? 'bg-yellow-950/70 text-yellow-400 border border-yellow-800' :
                           'bg-green-950/70 text-green-400 border border-green-800'
                         }`}>
-                          {choice.risk} Risk
+                          {choice.risk} Riziko
                         </span>
                       </div>
                     </motion.div>
@@ -378,7 +434,7 @@ export function InteractiveMatch() {
                 })}
               </div>
 
-              {/* Logs */}
+              {/* Live Combat Logs */}
               {logs.length > 0 && (
                 <div className="bg-rift-surface rounded-lg p-3 border border-rift-border space-y-1 text-xs">
                   {logs.map((log, idx) => (
@@ -392,19 +448,19 @@ export function InteractiveMatch() {
               {/* Confirm Decision Button */}
               <div className="pt-2">
                 <Button
-                  variant="primary"
+                  variant="gold"
                   size="lg"
                   fullWidth
                   disabled={selectedChoiceIdx === null || resolving}
                   onClick={handleConfirmTacticalChoice}
                 >
-                  {resolving ? '⚔️ Executing Play...' : `⚡ ${t('match.confirm_decision')}`}
+                  {resolving ? '⚔️ Vyhodnocuji tah...' : `⚡ ${t('match.confirm_decision')}`}
                 </Button>
               </div>
             </motion.div>
           )}
 
-          {/* STEP 5: MATCH SUMMARY */}
+          {/* STEP 6: MATCH SUMMARY */}
           {step === 'summary' && (
             <motion.div
               key="summary"
@@ -430,19 +486,19 @@ export function InteractiveMatch() {
 
                 <div className="mt-4 pt-4 border-t border-rift-border grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-slate-400">Played Champion</span>
+                    <span className="text-slate-400">Odehraný Champion</span>
                     <p className="text-white font-bold">{selectedChamp}</p>
                   </div>
                   <div>
-                    <span className="text-slate-400">Mastery EXP</span>
-                    <p className="text-gold-400 font-bold">+250 PTS</p>
+                    <span className="text-slate-400">Mastery Zkušenosti</span>
+                    <p className="text-gold-400 font-bold">+250 Bodů</p>
                   </div>
                 </div>
               </div>
 
               {/* Combat Recap */}
               <Card className="p-4 text-left space-y-2">
-                <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Match Breakdown</p>
+                <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Průběh Zápasu</p>
                 <div className="space-y-1 text-xs">
                   {logs.map((log, i) => (
                     <div key={i} className="flex items-start gap-2">
