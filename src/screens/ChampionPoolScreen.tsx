@@ -1,0 +1,275 @@
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useGameStore } from '../store/gameStore';
+import { useTranslation } from '../hooks/useTranslation';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { ALL_CHAMPIONS, getChampIconUrl, getChampSplashUrl, getChampionsByRole } from '../data/champions';
+
+export function ChampionPoolScreen() {
+  const { t } = useTranslation();
+  const career = useGameStore(s => s.career);
+  const swapPoolChampion = useGameStore(s => s.swapPoolChampion);
+
+  const [selectedPoolChamp, setSelectedPoolChamp] = useState<string | null>(null);
+  const [swapModalOpen, setSwapModalOpen] = useState(false);
+  const [newChampToSelect, setNewChampToSelect] = useState<string | null>(null);
+
+  if (!career) return null;
+
+  const currentPatch = career.currentPatch;
+  const poolChamps = ALL_CHAMPIONS.filter(c => career.championPool.includes(c.id));
+  const roleChamps = getChampionsByRole(career.role);
+
+  function handleOpenSwap(oldChampId: string) {
+    setSelectedPoolChamp(oldChampId);
+    setNewChampToSelect(null);
+    setSwapModalOpen(true);
+  }
+
+  function handleConfirmSwap() {
+    if (selectedPoolChamp && newChampToSelect) {
+      swapPoolChampion(selectedPoolChamp, newChampToSelect);
+      setSwapModalOpen(false);
+      setSelectedPoolChamp(null);
+      setNewChampToSelect(null);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+
+      {/* Header with current patch info */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rift-card p-4 rounded-xl border border-rift-border">
+        <div>
+          <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+            {t('champs.my_pool_title')} (6 Mains)
+          </h2>
+          <p className="text-xs text-slate-400">
+            {t('champs.my_pool_desc')}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 bg-rift-surface px-3 py-1.5 rounded-lg border border-rift-border">
+          <span className="text-xs text-slate-400">Current Patch:</span>
+          <span className="text-xs font-black text-gold-400 font-mono">v{currentPatch.patchVersion}</span>
+        </div>
+      </div>
+
+      {/* 6 Main Champions Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {poolChamps.map((champ) => {
+          const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Standard' };
+          const mastery = career.masteries[champ.id] || { masteryLevel: 1, gamesPlayed: 0, wins: 0 };
+
+          return (
+            <motion.div
+              key={champ.id}
+              whileHover={{ y: -3 }}
+              className="relative overflow-hidden rounded-xl border border-rift-border bg-rift-card p-4 space-y-3"
+            >
+              {/* Background faint splash */}
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
+                style={{ backgroundImage: `url(${getChampSplashUrl(champ.id)})` }}
+              />
+
+              <div className="flex items-center gap-3 relative z-10">
+                <img
+                  src={getChampIconUrl(champ.id)}
+                  alt={champ.name}
+                  className="w-14 h-14 rounded-xl border-2 border-slate-700 object-cover shadow-md"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-white text-base truncate">{champ.name}</h3>
+                    <span className={`text-xs font-black px-2 py-0.5 rounded ${
+                      meta.tier === 'S+' ? 'bg-amber-400 text-black' :
+                      meta.tier === 'S' ? 'bg-purple-600 text-white' :
+                      meta.tier === 'A' ? 'bg-blue-600 text-white' :
+                      meta.tier === 'B' ? 'bg-slate-700 text-slate-300' : 'bg-red-900 text-red-300'
+                    }`}>
+                      {meta.tier} TIER
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">{champ.title}</p>
+                  <p className="text-[11px] text-slate-500 font-mono mt-0.5">{meta.winRate}% Patch WR</p>
+                </div>
+              </div>
+
+              {/* Mastery Level */}
+              <div className="space-y-1 relative z-10">
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-gold-400">Mastery Level {mastery.masteryLevel}</span>
+                  <span className="text-slate-400 font-mono">{mastery.gamesPlayed} games ({mastery.wins}W)</span>
+                </div>
+                <div className="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-yellow-500 to-amber-400 rounded-full"
+                    style={{ width: `${(mastery.masteryLevel / 7) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Patch Note */}
+              <p className="text-[11px] text-slate-400 italic bg-rift-surface/80 p-2 rounded border border-rift-border/50 relative z-10">
+                "{meta.note}"
+              </p>
+
+              {/* Swap Button */}
+              <Button
+                variant="secondary"
+                size="sm"
+                fullWidth
+                className="relative z-10"
+                onClick={() => handleOpenSwap(champ.id)}
+              >
+                🔄 {t('champs.swap_champ_btn')}
+              </Button>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Role Meta Tier List */}
+      <Card className="p-5 space-y-4">
+        <div className="border-b border-rift-border pb-3">
+          <h3 className="text-base font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+            📊 {career.role.toUpperCase()} {t('champs.meta_tier_list_title')} (Patch {currentPatch.patchVersion})
+          </h3>
+          <p className="text-xs text-slate-400">
+            {t('champs.meta_tier_list_desc')}
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          {roleChamps.map((champ) => {
+            const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0, note: 'Stable' };
+            const isInPool = career.championPool.includes(champ.id);
+
+            return (
+              <div
+                key={champ.id}
+                className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
+                  isInPool ? 'bg-purple-950/20 border-purple-800/40' : 'bg-rift-surface border-rift-border'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={`w-8 text-center text-xs font-black px-1.5 py-0.5 rounded ${
+                    meta.tier === 'S+' ? 'bg-amber-400 text-black' :
+                    meta.tier === 'S' ? 'bg-purple-600 text-white' :
+                    meta.tier === 'A' ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    {meta.tier}
+                  </span>
+                  <img
+                    src={getChampIconUrl(champ.id)}
+                    alt=""
+                    className="w-8 h-8 rounded-lg border border-slate-700"
+                    onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                  />
+                  <div>
+                    <span className="font-bold text-white text-sm">{champ.name}</span>
+                    <span className="text-slate-500 text-xs ml-2">({champ.playstyle})</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 text-right">
+                  <span className="text-xs font-mono text-slate-300">{meta.winRate}% WR</span>
+                  {isInPool && (
+                    <span className="text-[11px] bg-rift-purple/80 text-white px-2 py-0.5 rounded font-bold">
+                      IN POOL
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      {/* SWAP CHAMPION MODAL */}
+      <AnimatePresence>
+        {swapModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="bg-rift-card border border-rift-border rounded-2xl p-6 max-w-lg w-full max-h-[85vh] flex flex-col space-y-4 shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-rift-border pb-3">
+                <h3 className="font-bold text-white text-base">
+                  Swap {selectedPoolChamp} with a new Champion
+                </h3>
+                <button
+                  onClick={() => setSwapModalOpen(false)}
+                  className="text-slate-400 hover:text-white text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <p className="text-xs text-slate-400">
+                Select the replacement champion from your role:
+              </p>
+
+              <div className="overflow-y-auto flex-1 space-y-2 pr-1">
+                {roleChamps
+                  .filter(c => !career.championPool.includes(c.id))
+                  .map((champ) => {
+                    const isSelected = newChampToSelect === champ.id;
+                    const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0 };
+
+                    return (
+                      <div
+                        key={champ.id}
+                        onClick={() => setNewChampToSelect(champ.id)}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
+                          isSelected
+                            ? 'border-gold-400 bg-gold-950/30'
+                            : 'border-rift-border bg-rift-surface hover:border-slate-500'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <img src={getChampIconUrl(champ.id)} className="w-10 h-10 rounded-lg border border-slate-700" alt="" />
+                          <div>
+                            <p className="font-bold text-white text-sm">{champ.name}</p>
+                            <p className="text-xs text-slate-400">{champ.title}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold font-mono text-slate-300">{meta.tier} Tier</span>
+                          {isSelected && <span className="text-gold-400 font-bold">✓</span>}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+
+              {/* Confirm Swap Button */}
+              <div className="pt-3 border-t border-rift-border flex gap-3">
+                <Button variant="secondary" fullWidth onClick={() => setSwapModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  variant="gold"
+                  fullWidth
+                  disabled={!newChampToSelect}
+                  onClick={handleConfirmSwap}
+                >
+                  Confirm Swap
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

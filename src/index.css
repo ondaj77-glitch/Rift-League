@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background-color: #0a0a12;
+    color: #e2e8f0;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #12121e;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a42;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7c3aed;
+  }
+}
+
+@layer components {
+  .stat-bar-bg {
+    @apply w-full h-2 bg-rift-border rounded-full overflow-hidden;
+  }
+
+  .gold-text {
+    @apply text-gold-400;
+    font-family: 'Cinzel', serif;
+  }
+
+  .card-glow {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .trophy-glow {
+    filter: drop-shadow(0 0 20px rgba(197, 155, 60, 0.6)) drop-shadow(0 0 40px rgba(197, 155, 60, 0.3));
+  }
+}
+
+/* Gradient background for screens */
+.screen-bg {
+  background: 
+    radial-gradient(ellipse at top center, rgba(124, 58, 237, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at bottom center, rgba(197, 155, 60, 0.04) 0%, transparent 60%),
+    #0a0a12;
+  min-height: 100vh;
+}
+
+/* Animated border */
+.animated-border {
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+
+.animated-border::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(197,155,60,0.2), rgba(124,58,237,0.1));
+  z-index: -1;
+}
