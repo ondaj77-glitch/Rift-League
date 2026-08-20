@@ -1,4 +1,5 @@
-import type { GameEvent } from '../types/game';
+import type { GameEvent, Region, Tier } from '../types/game';
+import { TIER_ORDER } from './ranks';
 
 // ─── ALL GAME EVENTS ──────────────────────────────────────────────────────────
 // Each event has a unique ID, category, title/description keys (for i18n),
@@ -1136,18 +1137,155 @@ export const EVENTS: GameEvent[] = [
     category: 'soloq',
     titleKey: 'event.soloq_faker.title',
     descriptionKey: 'event.soloq_faker.desc',
-    weight: 8,
+    weight: 10,
+    regions: ['LCK'],
+    minTier: 'GRANDMASTER',
     minReputation: 25,
     choices: [
       {
         textKey: 'event.soloq_faker.a',
-        effects: { mechanics: 10, reputation: 12, mental: 6 },
+        effects: { mechanics: 14, reputation: 16, mental: 6 },
         nextTextKey: 'event.soloq_faker.a.result',
       },
       {
         textKey: 'event.soloq_faker.b',
-        effects: { gameKnowledge: 10, mental: 4, reputation: 6 },
+        effects: { gameKnowledge: 14, mental: 8, reputation: 10 },
         nextTextKey: 'event.soloq_faker.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_caps_matchup',
+    category: 'soloq',
+    titleKey: 'event.soloq_caps.title',
+    descriptionKey: 'event.soloq_caps.desc',
+    weight: 10,
+    regions: ['LEC'],
+    minTier: 'GRANDMASTER',
+    minReputation: 25,
+    choices: [
+      {
+        textKey: 'event.soloq_caps.a',
+        effects: { mechanics: 14, reputation: 16, mental: 6 },
+        nextTextKey: 'event.soloq_caps.a.result',
+      },
+      {
+        textKey: 'event.soloq_caps.b',
+        effects: { gameKnowledge: 14, mental: 8, reputation: 10 },
+        nextTextKey: 'event.soloq_caps.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_chovy_matchup',
+    category: 'soloq',
+    titleKey: 'event.soloq_chovy.title',
+    descriptionKey: 'event.soloq_chovy.desc',
+    weight: 9,
+    regions: ['LCK'],
+    minTier: 'CHALLENGER',
+    minReputation: 35,
+    choices: [
+      {
+        textKey: 'event.soloq_chovy.a',
+        effects: { mechanics: 16, adaptability: 10, reputation: 18 },
+        nextTextKey: 'event.soloq_chovy.a.result',
+      },
+      {
+        textKey: 'event.soloq_chovy.b',
+        effects: { gameKnowledge: 16, mental: 10, reputation: 12 },
+        nextTextKey: 'event.soloq_chovy.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_theshy_matchup',
+    category: 'soloq',
+    titleKey: 'event.soloq_theshy.title',
+    descriptionKey: 'event.soloq_theshy.desc',
+    weight: 9,
+    regions: ['LPL'],
+    minTier: 'GRANDMASTER',
+    minReputation: 25,
+    choices: [
+      {
+        textKey: 'event.soloq_theshy.a',
+        effects: { mechanics: 16, mental: 6, reputation: 16 },
+        nextTextKey: 'event.soloq_theshy.a.result',
+      },
+      {
+        textKey: 'event.soloq_theshy.b',
+        effects: { gameKnowledge: 14, adaptability: 8, reputation: 10 },
+        nextTextKey: 'event.soloq_theshy.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_jojopyun_matchup',
+    category: 'soloq',
+    titleKey: 'event.soloq_jojopyun.title',
+    descriptionKey: 'event.soloq_jojopyun.desc',
+    weight: 9,
+    regions: ['LTA_N'],
+    minTier: 'GRANDMASTER',
+    minReputation: 25,
+    choices: [
+      {
+        textKey: 'event.soloq_jojopyun.a',
+        effects: { mechanics: 14, reputation: 14, mental: 6 },
+        nextTextKey: 'event.soloq_jojopyun.a.result',
+      },
+      {
+        textKey: 'event.soloq_jojopyun.b',
+        effects: { gameKnowledge: 12, mental: 10, reputation: 8 },
+        nextTextKey: 'event.soloq_jojopyun.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_lowelo_hell',
+    category: 'soloq',
+    titleKey: 'event.soloq_lowelo_hell.title',
+    descriptionKey: 'event.soloq_lowelo_hell.desc',
+    weight: 12,
+    maxTier: 'GOLD',
+    choices: [
+      {
+        textKey: 'event.soloq_lowelo_hell.a',
+        effects: { mechanics: 8, mental: 4 },
+        nextTextKey: 'event.soloq_lowelo_hell.a.result',
+      },
+      {
+        textKey: 'event.soloq_lowelo_hell.b',
+        effects: { communication: 10, gameKnowledge: 6 },
+        nextTextKey: 'event.soloq_lowelo_hell.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_euw_toxic_flame',
+    category: 'soloq',
+    titleKey: 'event.soloq_euw_toxic_flame.title',
+    descriptionKey: 'event.soloq_euw_toxic_flame.desc',
+    weight: 11,
+    regions: ['LEC'],
+    maxTier: 'EMERALD',
+    choices: [
+      {
+        textKey: 'event.soloq_euw_toxic_flame.a',
+        effects: { mental: 10, mechanics: 6 },
+        nextTextKey: 'event.soloq_euw_toxic_flame.a.result',
+      },
+      {
+        textKey: 'event.soloq_euw_toxic_flame.b',
+        effects: { communication: 10, adaptability: 6 },
+        nextTextKey: 'event.soloq_euw_toxic_flame.b.result',
       },
     ],
   },
@@ -2202,12 +2340,22 @@ export const EVENTS: GameEvent[] = [
 
 // Clean dual-pool event router based strictly on team contract status
 export function getWeeklyEvent(
-  career: { age: number; reputation: number; inInternational: boolean; hasTeam?: boolean; currentTeam?: any },
+  career: {
+    age: number;
+    reputation: number;
+    inInternational: boolean;
+    hasTeam?: boolean;
+    currentTeam?: any;
+    region?: Region;
+    rank?: { tier: Tier };
+  },
   usedEventIds: string[],
   seed?: number
 ): GameEvent {
   const isFreeAgent = career.hasTeam === false || career.hasTeam === undefined || career.currentTeam === null;
   const isProdigy = career.age < 17 || isFreeAgent;
+
+  const playerTierIndex = career.rank?.tier ? TIER_ORDER.indexOf(career.rank.tier) : 1; // default bronze
 
   const TEAM_CATEGORIES = ['team_dynamics', 'contract', 'match'];
   const TEAM_ONLY_IDS = new Set([
@@ -2262,6 +2410,19 @@ export function getWeeklyEvent(
     if (e.minReputation !== undefined && career.reputation < e.minReputation) return false;
     if (e.maxReputation !== undefined && career.reputation > e.maxReputation) return false;
     if (e.requiresInternational && !career.inInternational) return false;
+
+    // 0. Region filter (only show region-specific events to matching region)
+    if (e.regions && career.region && !e.regions.includes(career.region)) {
+      return false;
+    }
+
+    // 0.5. Rank Tier filter (never show Faker/Caps GM matchups to Bronze/Gold players)
+    if (e.minTier && playerTierIndex < TIER_ORDER.indexOf(e.minTier)) {
+      return false;
+    }
+    if (e.maxTier && playerTierIndex > TIER_ORDER.indexOf(e.maxTier)) {
+      return false;
+    }
     
     // 1. When player is NOT in a pro team (Free Agent / Prodigy):
     if (isFreeAgent) {

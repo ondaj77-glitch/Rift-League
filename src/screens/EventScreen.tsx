@@ -46,30 +46,21 @@ export function EventScreen() {
   const [showResult, setShowResult] = useState(false);
   const [appliedIdx, setAppliedIdx] = useState<number | null>(null);
 
-  if (!career) {
-    return (
-      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
-        <Button onClick={() => setPhase('MENU')}>Menu</Button>
-      </div>
-    );
+  // Keep last event in state so during AnimatePresence exit transitions it doesn't flash
+  const [cachedEvent, setCachedEvent] = useState(currentEvent);
+  if (currentEvent && currentEvent !== cachedEvent) {
+    setCachedEvent(currentEvent);
   }
 
-  if (!currentEvent) {
-    return (
-      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
-        <Card className="p-6 text-center space-y-4 max-w-sm border-gold-600/30">
-          <p className="text-white font-bold text-base">Pokračovat do dalšího týdne</p>
-          <Button variant="primary" fullWidth onClick={() => setPhase('CAREER_HUB')}>
-            Kariérní Centrum
-          </Button>
-        </Card>
-      </div>
-    );
+  const eventToRender = currentEvent || cachedEvent;
+
+  if (!career || !eventToRender) {
+    return null;
   }
 
   function handleSelectOption(index: number) {
     if (showResult) return;
-    const choice = currentEvent!.choices[index];
+    const choice = eventToRender!.choices[index];
     if (choice.requiresStat) {
       if (career!.stats[choice.requiresStat.stat] < choice.requiresStat.min) return; // locked
     }
@@ -83,15 +74,15 @@ export function EventScreen() {
   }
 
   function handleContinue() {
-    if (appliedIdx !== null) {
-      resolveEvent(currentEvent!, appliedIdx);
+    if (appliedIdx !== null && eventToRender) {
+      resolveEvent(eventToRender, appliedIdx);
       setSelectedIdx(null);
       setAppliedIdx(null);
       setShowResult(false);
     }
   }
 
-  const appliedChoice = appliedIdx !== null ? currentEvent.choices[appliedIdx] : null;
+  const appliedChoice = appliedIdx !== null ? eventToRender.choices[appliedIdx] : null;
   const effects = appliedChoice?.effects || {};
   const significantEffects = Object.entries(effects).filter(([, v]) => v !== 0 && v !== undefined);
 

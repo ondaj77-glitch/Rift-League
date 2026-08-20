@@ -264,6 +264,9 @@ export interface GameEvent {
   requiresInternational?: boolean;
   requiresFreeAgent?: boolean;
   requiresTeam?: boolean;
+  regions?: Region[];
+  minTier?: Tier;
+  maxTier?: Tier;
   weight: number;
 }
 
