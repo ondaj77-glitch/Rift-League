@@ -64,7 +64,7 @@ export function SoloQScreen() {
                     <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold">
                       Current Ranked Tier
                     </span>
-                    <h2 className={`text-2xl sm:text-3xl font-black ${colors.text}`} style={{ fontFamily: 'Cinzel, serif' }}>
+                    <h2 className={`text-2xl sm:text-3xl font-black uppercase font-heading tracking-wide ${colors.text}`}>
                       {rank.tier} {rank.division || ''}
                     </h2>
                     <p className="text-slate-300 text-sm font-bold mt-0.5">
@@ -146,10 +146,10 @@ export function SoloQScreen() {
         <Card className="overflow-hidden">
           <div className="px-5 py-4 border-b border-rift-border flex items-center justify-between">
             <div>
-              <h3 className="font-bold text-white text-base" style={{ fontFamily: 'Cinzel, serif' }}>
-                {t('soloq.leaderboard_title')}
+              <h3 className="font-bold text-white text-base font-heading uppercase tracking-wide">
+                👑 {t('soloq.leaderboard_title')}
               </h3>
-              <p className="text-xs text-slate-500">Korea / Global Top Tier 1 Ladder</p>
+              <p className="text-xs text-slate-400">Korea / Global Top Tier 1 Ladder</p>
             </div>
             <span className="text-xs bg-gold-950/60 text-gold-400 border border-gold-700/50 px-2.5 py-1 rounded-full font-bold">
               Season 15

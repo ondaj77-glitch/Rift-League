@@ -286,17 +286,17 @@ export const en = {
   'daily.play': 'Play Daily',
 
   // ── Career Names (score-based) ────────────────────────────────────────────
-  'career_name.0': 'The Forgotten One',
-  'career_name.10': 'The Bench Warmer',
-  'career_name.20': 'The Journeyman',
-  'career_name.30': 'The Veteran',
-  'career_name.40': 'The Playoff Regular',
-  'career_name.50': 'The International',
-  'career_name.60': 'The Finals Contender',
-  'career_name.70': 'The Champion',
-  'career_name.80': 'The Legend',
-  'career_name.90': 'The Greatest of All Time',
-  'career_name.100': 'The Immortal',
+  'career_name.0': 'Novice SoloQ Grinder',
+  'career_name.10': 'Amateur SoloQ Grinder',
+  'career_name.20': 'Promising SoloQ Prodigy',
+  'career_name.30': 'Feared High-Elo Grinder',
+  'career_name.40': 'Academy Rookie',
+  'career_name.50': 'Tier 1 Pro Starter',
+  'career_name.60': 'Playoffs Finalist',
+  'career_name.70': 'Regional League Champion',
+  'career_name.80': 'International Superstar',
+  'career_name.90': 'World Champion Legend',
+  'career_name.100': 'Immortal LoL Legend',
 
   // ── Achievements ──────────────────────────────────────────────────────────
   'achievement.first_win': 'First Victory',

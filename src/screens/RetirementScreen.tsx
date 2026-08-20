@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { StatBar } from '../components/ui/StatBar';
 import { RoleBadge } from '../components/ui/RoleBadge';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { TIER_ICONS } from '../data/ranks';
 import { REGION_FLAGS } from '../data/teams';
 import type { StatKey } from '../types/game';
@@ -42,8 +43,6 @@ export function RetirementScreen() {
   const titleKey = getCareerTitle(score);
   const totalSoloQGames = career.soloqWins + career.soloqLosses;
   const soloQWinrate = totalSoloQGames > 0 ? Math.round((career.soloqWins / totalSoloQGames) * 100) : 0;
-  const totalProGames = career.wins + career.losses;
-  const proWinrate = totalProGames > 0 ? Math.round((career.wins / totalProGames) * 100) : 0;
   const isChampion = career.worldsWins > 0;
   const rankIcon = TIER_ICONS[career.rank.tier] || '🏆';
 
@@ -51,12 +50,17 @@ export function RetirementScreen() {
     <div className="screen-bg min-h-screen py-8 px-4 pb-16">
       <div className="max-w-xl mx-auto space-y-6">
 
+        {/* Top Header with Language Switcher */}
+        <div className="flex justify-end">
+          <LanguageSwitcher size="sm" />
+        </div>
+
         {/* Trophy / Memorial Header */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 150 }}
-          className="text-center py-6"
+          className="text-center py-4"
         >
           <motion.div
             animate={isChampion ? { rotate: [0, -6, 6, 0] } : {}}
@@ -72,16 +76,18 @@ export function RetirementScreen() {
             transition={{ delay: 0.2 }}
             className="mt-4 space-y-1"
           >
-            <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+            <h1 className="text-3xl font-black text-white uppercase font-heading tracking-wide">
               {career.gameName}
             </h1>
-            <p className="text-gold-400 font-bold text-lg">{t(titleKey as any)}</p>
+            <p className="text-gold-400 font-bold text-lg font-heading">{t(titleKey as any)}</p>
             <div className="flex items-center justify-center gap-2 mt-2">
               <RoleBadge role={career.role} size="md" />
               <span className="text-slate-400 text-sm">•</span>
               <span className="text-slate-300 text-sm font-semibold">{REGION_FLAGS[career.region]} {career.region}</span>
               <span className="text-slate-400 text-sm">•</span>
-              <span className="text-slate-400 text-sm">Věk {career.age}</span>
+              <span className="text-slate-400 text-sm">
+                {career.currentTeam ? career.currentTeam.name : 'SoloQ Talent (Bez týmu)'} · Věk {career.age}
+              </span>
             </div>
           </motion.div>
         </motion.div>
@@ -100,8 +106,7 @@ export function RetirementScreen() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
-              className="text-7xl font-black text-gold-400 font-mono tracking-tight"
-              style={{ fontFamily: 'Cinzel, serif' }}
+              className="text-7xl font-black text-gold-400 font-mono tracking-tight font-heading"
             >
               {score}
             </motion.p>
@@ -145,15 +150,15 @@ export function RetirementScreen() {
             {/* Pro Titles */}
             <div className="grid grid-cols-3 gap-3 text-center pt-2">
               <div className="bg-gold-950/30 p-2.5 rounded-xl border border-gold-600/30">
-                <p className="text-2xl font-black text-gold-400">{career.worldsWins}</p>
+                <p className="text-2xl font-black text-gold-400 font-mono">{career.worldsWins}</p>
                 <p className="text-[11px] text-slate-300 font-bold">🏆 Worlds</p>
               </div>
               <div className="bg-blue-950/30 p-2.5 rounded-xl border border-blue-600/30">
-                <p className="text-2xl font-black text-blue-400">{career.msiWins}</p>
+                <p className="text-2xl font-black text-blue-400 font-mono">{career.msiWins}</p>
                 <p className="text-[11px] text-slate-300 font-bold">🌍 MSI</p>
               </div>
               <div className="bg-purple-950/30 p-2.5 rounded-xl border border-purple-600/30">
-                <p className="text-2xl font-black text-purple-400">{career.splitTitles}</p>
+                <p className="text-2xl font-black text-purple-400 font-mono">{career.splitTitles}</p>
                 <p className="text-[11px] text-slate-300 font-bold">🥇 Splity</p>
               </div>
             </div>

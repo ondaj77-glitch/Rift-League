@@ -4,6 +4,7 @@ import { useGameStore } from '../store/gameStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { RoleBadge } from '../components/ui/RoleBadge';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { REGION_FLAGS } from '../data/teams';
 import { TIER_ICONS } from '../data/ranks';
 
@@ -14,8 +15,6 @@ export function MenuScreen() {
   const setPhase = useGameStore(s => s.setPhase);
   const resetGame = useGameStore(s => s.resetGame);
   const loadDailyChallenge = useGameStore(s => s.loadDailyChallenge);
-  const setLanguage = useGameStore(s => s.setLanguage);
-  const language = useGameStore(s => s.language);
 
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
@@ -52,14 +51,10 @@ export function MenuScreen() {
     <div className="screen-bg min-h-screen flex items-center justify-center py-12">
       <div className="w-full max-w-lg px-4 space-y-6">
 
-        {/* Language Toggle */}
-        <div className="flex justify-end">
-          <button
-            onClick={() => setLanguage(language === 'en' ? 'cs' : 'en')}
-            className="text-xs text-slate-400 hover:text-white border border-rift-border bg-rift-card px-3 py-1.5 rounded-lg transition-colors font-bold"
-          >
-            {language === 'en' ? '🇨🇿 Čeština' : '🇬🇧 English'}
-          </button>
+        {/* Top Header with Side-by-Side Glowing Language Switcher */}
+        <div className="flex justify-between items-center">
+          <span className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider">v15.2 · League Esports Simulator</span>
+          <LanguageSwitcher />
         </div>
 
         {/* Hero */}
@@ -77,7 +72,7 @@ export function MenuScreen() {
           </motion.div>
 
           <div>
-            <h1 className="text-5xl font-black tracking-tight leading-none" style={{ fontFamily: 'Cinzel, serif' }}>
+            <h1 className="text-5xl font-black tracking-tight leading-none uppercase font-heading">
               <span className="text-white">RIFT </span>
               <span className="text-gold-400 animate-glow">LEGACY</span>
             </h1>
@@ -101,7 +96,7 @@ export function MenuScreen() {
           </div>
         </motion.div>
 
-        {/* Main Buttons */}
+        {/* Main Action Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -127,18 +122,9 @@ export function MenuScreen() {
           >
             🚀 {career ? 'Začít novou kariéru' : t('menu.new')}
           </Button>
-
-          <Button
-            variant="ghost"
-            size="lg"
-            fullWidth
-            onClick={() => setPhase('DAILY_CHALLENGE')}
-          >
-            📅 {t('menu.daily')}
-          </Button>
         </motion.div>
 
-        {/* Current / Best Career Preview */}
+        {/* Current Saved Run Card */}
         {career && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -156,7 +142,7 @@ export function MenuScreen() {
                     resetGame();
                   }
                 }}
-                className="text-[11px] text-red-400 hover:text-red-300 font-semibold"
+                className="text-[11px] text-red-400 hover:text-red-300 font-semibold transition-colors"
               >
                 🗑️ Smazat save
               </button>
@@ -185,7 +171,7 @@ export function MenuScreen() {
           </motion.div>
         )}
 
-        {/* Daily Challenge Preview */}
+        {/* Daily Challenge Card (Single, Non-Duplicated) */}
         {dailyChallenge && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -194,8 +180,8 @@ export function MenuScreen() {
             className="bg-rift-card border border-rift-border rounded-xl p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
-              <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">
-                {t('daily.title')}
+              <p className="text-xs text-slate-300 uppercase tracking-widest font-bold flex items-center gap-1.5">
+                📅 {t('daily.title')}
               </p>
               <span className="text-xs bg-purple-900/60 text-purple-300 border border-purple-700/40 px-2 py-0.5 rounded-full font-semibold">
                 {t('daily.new')}
@@ -217,7 +203,7 @@ export function MenuScreen() {
 
             <div>
               <p className="text-xs text-slate-400 mb-1">{t('menu.daily.objective')}</p>
-              <p className="text-white text-sm font-medium">
+              <p className="text-white text-sm font-bold">
                 {t(dailyChallenge.objectiveKey as any, dailyChallenge.objectiveTarget)}
               </p>
             </div>
@@ -247,7 +233,7 @@ export function MenuScreen() {
               className="bg-rift-card border border-gold-600/40 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-center"
             >
               <div className="text-5xl mb-2">🚀</div>
-              <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+              <h3 className="text-xl font-bold text-white font-heading">
                 Začít zbrusu novou kariéru?
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">

@@ -6,6 +6,8 @@ import { RoleBadge } from '../components/ui/RoleBadge';
 import { REGION_FLAGS } from '../data/teams';
 import { motion } from 'framer-motion';
 
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+
 export function DailyChallengeScreen() {
   const { t } = useTranslation();
   const daily = useGameStore(s => s.dailyChallenge);
@@ -22,14 +24,14 @@ export function DailyChallengeScreen() {
   return (
     <div className="screen-bg min-h-screen flex items-center justify-center py-8 px-4">
       <div className="max-w-md w-full space-y-6">
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
-          <button onClick={() => setPhase('MENU')} className="text-slate-500 hover:text-white text-xl">←</button>
-          <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
-            {t('daily.title')}
-          </h1>
-          <span className="text-xs bg-purple-900/60 text-purple-300 border border-purple-700/40 px-2 py-0.5 rounded-full font-semibold ml-auto">
-            {t('daily.new')}
-          </span>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setPhase('MENU')} className="text-slate-400 hover:text-white text-xl">←</button>
+            <h1 className="text-2xl font-black text-white font-heading uppercase tracking-wide">
+              {t('daily.title')}
+            </h1>
+          </div>
+          <LanguageSwitcher size="sm" />
         </motion.div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}

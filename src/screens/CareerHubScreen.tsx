@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { StatBar } from '../components/ui/StatBar';
 import { Card, CardHeader } from '../components/ui/Card';
 import { RoleBadge } from '../components/ui/RoleBadge';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import { REGION_FLAGS } from '../data/teams';
 import { TIER_ICONS } from '../data/ranks';
 import { SoloQScreen } from './SoloQScreen';
@@ -56,7 +57,7 @@ export function CareerHubScreen() {
     <div className="screen-bg min-h-screen py-6 px-4 pb-16">
       <div className="max-w-4xl mx-auto space-y-5">
 
-        {/* Top Hextech Nav Bar with Energy, Bank Balance & Time */}
+        {/* Top Hextech Nav Bar with Energy, Bank Balance, Language Switcher & Time */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -69,7 +70,7 @@ export function CareerHubScreen() {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+                <h1 className="text-xl font-black text-white uppercase font-heading tracking-wide">
                   {career.gameName}
                 </h1>
                 <RoleBadge role={career.role} size="sm" />
@@ -83,8 +84,11 @@ export function CareerHubScreen() {
             </div>
           </div>
 
-          {/* Season Time, Energy, Money & Forfeit Button */}
-          <div className="flex items-center gap-3 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
+          {/* Season Time, Energy, Money, Language & Forfeit Button */}
+          <div className="flex flex-wrap items-center gap-3 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
+            {/* Live In-Game Language Switcher */}
+            <LanguageSwitcher size="sm" />
+
             {/* Energy */}
             <div className="bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-800/40 text-center">
               <p className="text-[10px] text-amber-300 font-bold uppercase">⚡ {t('hub.energy' as any) || 'Energie'}</p>
@@ -161,7 +165,9 @@ export function CareerHubScreen() {
                       <>
                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: career.currentTeam.color }} />
                         <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
-                        <span className="text-xs text-slate-400 font-bold">({career.lifestyle.rosterStatus.toUpperCase()})</span>
+                        <span className="text-xs text-slate-400 font-bold">
+                          ({career.lifestyle.rosterStatus === 'starter' ? 'ZÁKLADNÍ SESTAVA' : 'NÁHRADNÍK'})
+                        </span>
                       </>
                     ) : (
                       <span className="font-bold text-amber-400 text-base">
@@ -257,7 +263,7 @@ export function CareerHubScreen() {
               className="bg-rift-card border border-red-800/60 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl text-center"
             >
               <div className="text-5xl mb-2">🏳️</div>
-              <h3 className="text-xl font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+              <h3 className="text-xl font-bold text-white font-heading">
                 Vzdat a ukončit tento RUN?
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">

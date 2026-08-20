@@ -139,6 +139,8 @@ const LATE_CHOICES: TacticalChoice[] = [
   },
 ];
 
+import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+
 export function InteractiveMatch() {
   const { t } = useTranslation();
   const career = useGameStore(s => s.career);
@@ -218,17 +220,22 @@ export function InteractiveMatch() {
     <div className="screen-bg min-h-screen py-8 px-4 flex items-center justify-center">
       <div className="w-full max-w-2xl space-y-5">
 
+        {/* Language Switcher Bar */}
+        <div className="flex justify-end">
+          <LanguageSwitcher size="sm" />
+        </div>
+
         {/* Match Header with Live Advantage Bar */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <Card className="p-4 border-gold-600/30">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-base">{career.gameName}</span>
+                <span className="font-bold text-white text-base uppercase font-heading">{career.gameName}</span>
                 <span className="text-xs text-rift-purple bg-purple-950/60 px-2 py-0.5 rounded border border-purple-800/40 font-mono font-bold">
                   {selectedChamp}
                 </span>
               </div>
-              <div className="text-xs font-bold text-slate-400">
+              <div className="text-xs font-bold text-slate-400 font-heading tracking-wider uppercase">
                 {step === 'champion_select' ? 'FÁZE DRAFTU' :
                  step === 'laning' ? 'EARLY GAME' :
                  step === 'mid_game' ? 'MID GAME' :
@@ -236,7 +243,7 @@ export function InteractiveMatch() {
                  step === 'late_game' ? 'LATE GAME' : 'VÝSLEDEK'}
               </div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-slate-200 text-sm">{interactiveMatch.opponentTeam.shortName}</span>
+                <span className="font-bold text-slate-200 text-sm font-heading uppercase">{interactiveMatch.opponentTeam.shortName}</span>
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: interactiveMatch.opponentTeam.color }} />
               </div>
             </div>
@@ -282,17 +289,17 @@ export function InteractiveMatch() {
                   <img src={getChampIconUrl(enemyChamp.id)} className="w-12 h-12 rounded-lg border border-red-700" alt="" />
                   <div>
                     <span className="text-xs text-red-400 font-bold uppercase">Soupeř zamknul:</span>
-                    <h3 className="text-white font-black text-base">{enemyChamp.name}</h3>
+                    <h3 className="text-white font-black text-base uppercase font-heading">{enemyChamp.name}</h3>
                     <p className="text-[11px] text-slate-400">Styl: {enemyChamp.playstyle} · {enemyChamp.counterTags.join(', ')}</p>
                   </div>
                 </div>
-                <span className="text-xs bg-red-900/60 text-red-200 px-2.5 py-1 rounded font-bold">
+                <span className="text-xs bg-red-900/60 text-red-200 px-2.5 py-1 rounded font-bold font-mono">
                   MATCHUP
                 </span>
               </div>
 
               <div className="text-center space-y-1">
-                <h2 className="text-lg font-black text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+                <h2 className="text-lg font-black text-white font-heading uppercase tracking-wide">
                   {t('match.select_champ_title')}
                 </h2>
                 <p className="text-xs text-slate-400">
@@ -375,7 +382,7 @@ export function InteractiveMatch() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+                  <h3 className="text-lg font-bold text-white uppercase font-heading tracking-wide">
                     {step === 'laning' ? t('match.phase_laning') :
                      step === 'mid_game' ? t('match.phase_mid') :
                      step === 'map_macro' ? '🗺️ LoL Mapa: Rozhodující Makro Situace' : t('match.phase_late')}
@@ -475,8 +482,7 @@ export function InteractiveMatch() {
               }`}>
                 <div className="text-6xl mb-2">{isWon ? '🏆' : '💀'}</div>
                 <h2
-                  className={`text-3xl font-black ${isWon ? 'text-green-400' : 'text-red-400'}`}
-                  style={{ fontFamily: 'Cinzel, serif' }}
+                  className={`text-3xl font-black uppercase font-heading tracking-wide ${isWon ? 'text-green-400' : 'text-red-400'}`}
                 >
                   {isWon ? t('match.victory_title') : t('match.defeat_title')}
                 </h2>

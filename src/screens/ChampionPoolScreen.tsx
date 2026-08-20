@@ -54,7 +54,7 @@ export function ChampionPoolScreen() {
       {/* Header with current patch info and swap limits */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-rift-card p-4 rounded-xl border border-rift-border">
         <div>
-          <h2 className="text-lg font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+          <h2 className="text-lg font-bold text-white uppercase font-heading tracking-wide">
             {t('champs.my_pool_title')} (6 Mainů)
           </h2>
           <p className="text-xs text-slate-400">
@@ -159,7 +159,7 @@ export function ChampionPoolScreen() {
       {/* Role Meta Tier List */}
       <Card className="p-5 space-y-4">
         <div className="border-b border-rift-border pb-3">
-          <h3 className="text-base font-bold text-white" style={{ fontFamily: 'Cinzel, serif' }}>
+          <h3 className="text-base font-bold text-white uppercase font-heading tracking-wide">
             📊 {career.role.toUpperCase()} {t('champs.meta_tier_list_title')} (Patch {currentPatch.patchVersion})
           </h3>
           <p className="text-xs text-slate-400">

@@ -80,8 +80,7 @@ export function MatchScreen() {
               }`}
             >
               <div className="text-5xl mb-3">{currentMatch.won ? '🏆' : '💔'}</div>
-              <h2 className={`text-3xl font-black ${currentMatch.won ? 'text-green-400' : 'text-red-400'}`}
-                  style={{ fontFamily: 'Cinzel, serif' }}>
+              <h2 className={`text-3xl font-black uppercase font-heading tracking-wide ${currentMatch.won ? 'text-green-400' : 'text-red-400'}`}>
                 {currentMatch.won ? t('match.won') : t('match.lost')}
               </h2>
               <p className="text-slate-400 text-2xl font-bold mt-2">{currentMatch.score}</p>

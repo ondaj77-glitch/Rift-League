@@ -23,7 +23,8 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Cinzel"', 'serif'],
+        display: ['"Rajdhani"', '"Inter"', 'sans-serif'],
+        heading: ['"Rajdhani"', '"Inter"', 'sans-serif'],
         body: ['"Inter"', 'sans-serif'],
       },
       animation: {

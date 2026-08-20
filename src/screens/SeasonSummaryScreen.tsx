@@ -6,6 +6,8 @@ import { Card } from '../components/ui/Card';
 import { TEAMS } from '../data/teams';
 import { generateStandings } from '../utils/simulation';
 
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+
 export function SeasonSummaryScreen() {
   const { t } = useTranslation();
   const career = useGameStore(s => s.career);
@@ -32,12 +34,17 @@ export function SeasonSummaryScreen() {
     <div className="screen-bg min-h-screen py-8 px-4">
       <div className="max-w-xl mx-auto space-y-5">
 
+        {/* Top Header with Language Switcher */}
+        <div className="flex justify-end">
+          <LanguageSwitcher size="sm" />
+        </div>
+
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <h1 className="text-2xl font-bold text-white text-center" style={{ fontFamily: 'Cinzel, serif' }}>
+          <h1 className="text-2xl font-black text-white text-center font-heading uppercase tracking-wide">
             {t('season.title')}
           </h1>
-          <p className="text-center text-slate-500 text-sm mt-1">
+          <p className="text-center text-slate-400 text-sm mt-1">
             {career.split} Split {career.year}
           </p>
         </motion.div>

@@ -24,7 +24,7 @@ export function LanguageSelectScreen() {
         <div className="text-8xl trophy-glow select-none">🏆</div>
 
         <div>
-          <h1 className="text-5xl font-black tracking-tight" style={{ fontFamily: 'Cinzel, serif' }}>
+          <h1 className="text-5xl font-black tracking-tight uppercase font-heading">
             <span className="text-white">RIFT </span>
             <span className="text-gold-400">LEGACY</span>
           </h1>

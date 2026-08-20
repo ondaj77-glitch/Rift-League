@@ -6,6 +6,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { TEAMS, getTopTeamsByRegion } from '../data/teams';
 import { simulateMatch } from '../utils/simulation';
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
 import type { Team } from '../types/game';
 
 type BracketRound = 'QF' | 'SF' | 'F';
@@ -170,11 +171,16 @@ export function WorldsBracketScreen() {
     <div className="screen-bg min-h-screen py-8 px-4">
       <div className="max-w-xl mx-auto space-y-5">
 
+        {/* Top Header with Language Switcher */}
+        <div className="flex justify-end">
+          <LanguageSwitcher size="sm" />
+        </div>
+
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-          <h1 className="text-2xl font-bold text-gold-400" style={{ fontFamily: 'Cinzel, serif' }}>
+          <h1 className="text-2xl font-black text-gold-400 font-heading uppercase tracking-wide">
             {t(titleKey as any)}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">{career.year}</p>
+          <p className="text-slate-400 text-sm mt-1">{career.year}</p>
         </motion.div>
 
         {/* QF */}
@@ -240,7 +246,7 @@ export function WorldsBracketScreen() {
             className="text-center py-8 bg-gold-600/10 rounded-xl border border-gold-600/30"
           >
             <div className="text-6xl mb-3">🏆</div>
-            <p className="text-gold-400 font-black text-2xl" style={{ fontFamily: 'Cinzel, serif' }}>
+            <p className="text-gold-400 font-black text-2xl font-heading uppercase tracking-wide">
               {t('bracket.champion')}
             </p>
           </motion.div>

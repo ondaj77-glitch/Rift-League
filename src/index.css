@@ -41,8 +41,8 @@
   }
 
   .gold-text {
-    @apply text-gold-400;
-    font-family: 'Cinzel', serif;
+    @apply text-gold-400 font-bold tracking-wide;
+    font-family: 'Rajdhani', 'Inter', sans-serif;
   }
 
   .card-glow {

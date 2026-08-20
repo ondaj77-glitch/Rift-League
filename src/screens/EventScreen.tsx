@@ -32,6 +32,8 @@ function EffectChip({ label, value }: { label: string; value: number }) {
   );
 }
 
+import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+
 export function EventScreen() {
   const { t } = useTranslation();
   const career = useGameStore(s => s.career);
@@ -77,20 +79,21 @@ export function EventScreen() {
     <div className="screen-bg min-h-screen py-8 px-4 flex items-start justify-center">
       <div className="w-full max-w-xl space-y-5">
 
-        {/* Event Header */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="flex items-center gap-2 mb-2">
+        {/* Event Header with Language Switcher */}
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
             <span className="text-xl">{CATEGORY_ICONS[currentEvent.category] || '📋'}</span>
             <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">
               {career.gameName} · {t('event.week')} {career.week}
             </span>
           </div>
+          <LanguageSwitcher size="sm" />
         </motion.div>
 
         {/* Main Event Card */}
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <Card className="p-6 space-y-4 border-gold-600/30">
-            <h2 className="text-xl font-bold text-white leading-tight" style={{ fontFamily: 'Cinzel, serif' }}>
+            <h2 className="text-xl font-bold text-white leading-tight font-heading uppercase tracking-wide">
               {t(currentEvent.titleKey as any)}
             </h2>
             <p className="text-slate-200 text-sm leading-relaxed">
