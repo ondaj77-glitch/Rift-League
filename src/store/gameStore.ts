@@ -308,7 +308,15 @@ export const useGameStore = create<GameStore>()(
 
       startSoloQMatch: () => {
         const { career } = get();
-        if (!career || career.lifestyle.energy < 20) return;
+        if (!career || (career.lifestyle?.energy ?? 100) < 20) return;
+
+        // Pick random lane opponent champion
+        const champPool = career.championPool || ['Aatrox'];
+        const roleChamps = getChampionsByRole(career.role);
+        const enemyCandidates = roleChamps.filter(c => !champPool.includes(c.id));
+        const randomEnemy = enemyCandidates.length > 0
+          ? enemyCandidates[Math.floor(Math.random() * enemyCandidates.length)]
+          : roleChamps[0];
 
         // Create mock opponent team for soloq
         const mockOpponent: Team = {
@@ -322,14 +330,17 @@ export const useGameStore = create<GameStore>()(
           color: '#e31e24',
         };
 
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+
         set(state => ({
           career: {
             ...state.career!,
-            lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 20 },
+            lifestyle: { ...currentLifestyle, energy: Math.max(0, currentLifestyle.energy - 20) },
           },
           interactiveMatch: {
             opponentTeam: mockOpponent,
-            selectedChampion: state.career!.championPool[0] || 'Aatrox',
+            selectedChampion: champPool[0] || 'Aatrox',
+            enemyChampion: randomEnemy.id,
             currentStep: 'champion_select',
             playerScore: 50,
             opponentScore: 50,
@@ -348,7 +359,10 @@ export const useGameStore = create<GameStore>()(
         const champPool = career.championPool || ['Aatrox'];
         const champId = champPool[Math.floor(Math.random() * champPool.length)];
         const roleChamps = getChampionsByRole(career.role);
-        const randomEnemy = roleChamps.find(c => !champPool.includes(c.id)) || roleChamps[0];
+        const enemyCandidates = roleChamps.filter(c => !champPool.includes(c.id));
+        const randomEnemy = enemyCandidates.length > 0
+          ? enemyCandidates[Math.floor(Math.random() * enemyCandidates.length)]
+          : roleChamps[0];
         
         const matchup = getMatchupAdvantage(champId, randomEnemy.id);
         const eloInfo = calculateEloDifficulty(career.rank.tier, career.stats);
@@ -381,18 +395,20 @@ export const useGameStore = create<GameStore>()(
           addNotification(`-18 LP Prohra vs ${randomEnemy.name} (-1 Mentál) · Lobby: ${eloInfo.labelCs}`, 'negative', '💀');
         }
 
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+
         set(state => ({
           career: {
             ...state.career!,
-            lifestyle: { ...state.career!.lifestyle, energy: state.career!.lifestyle.energy - 15 },
-            soloqWins: won ? state.career!.soloqWins + 1 : state.career!.soloqWins,
-            soloqLosses: won ? state.career!.soloqLosses : state.career!.soloqLosses + 1,
+            lifestyle: { ...currentLifestyle, energy: Math.max(0, currentLifestyle.energy - 15) },
+            soloqWins: won ? (state.career!.soloqWins ?? 0) + 1 : (state.career!.soloqWins ?? 0),
+            soloqLosses: won ? (state.career!.soloqLosses ?? 0) : (state.career!.soloqLosses ?? 0) + 1,
             rank: newRank,
-            masteries: { ...state.career!.masteries, [champId]: newMastery },
+            masteries: { ...(state.career!.masteries || {}), [champId]: newMastery },
             stats: {
               ...state.career!.stats,
-              mechanics: clamp(state.career!.stats.mechanics + (won ? 1 : 0)),
-              mental: clamp(state.career!.stats.mental + (won ? 0 : -1)),
+              mechanics: clamp((state.career!.stats?.mechanics ?? 50) + (won ? 1 : 0)),
+              mental: clamp((state.career!.stats?.mental ?? 50) + (won ? 0 : -1)),
             },
           },
         }));
@@ -402,13 +418,16 @@ export const useGameStore = create<GameStore>()(
         const { career, interactiveMatch, addNotification } = get();
         if (!career || !interactiveMatch) return;
 
-        const prevMastery = career.masteries[championId] || { championId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
+        const masteries = career.masteries || {};
+        const prevMastery = masteries[championId] || { championId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
         const newMastery = {
           ...prevMastery,
           gamesPlayed: prevMastery.gamesPlayed + 1,
           wins: won ? prevMastery.wins + 1 : prevMastery.wins,
           masteryLevel: Math.min(7, Math.floor((prevMastery.gamesPlayed + 1) / 6) + 1),
         };
+
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
 
         if (interactiveMatch.isSoloQ) {
           const newRank = calculateRankProgression(career.rank, won);
@@ -420,14 +439,15 @@ export const useGameStore = create<GameStore>()(
           set(state => ({
             career: {
               ...state.career!,
-              soloqWins: won ? state.career!.soloqWins + 1 : state.career!.soloqWins,
-              soloqLosses: won ? state.career!.soloqLosses : state.career!.soloqLosses + 1,
+              soloqWins: won ? (state.career!.soloqWins ?? 0) + 1 : (state.career!.soloqWins ?? 0),
+              soloqLosses: won ? (state.career!.soloqLosses ?? 0) : (state.career!.soloqLosses ?? 0) + 1,
               rank: newRank,
-              masteries: { ...state.career!.masteries, [championId]: newMastery },
+              masteries: { ...(state.career!.masteries || {}), [championId]: newMastery },
+              lifestyle: currentLifestyle,
               stats: {
                 ...state.career!.stats,
-                mechanics: clamp(state.career!.stats.mechanics + (won ? 1 : 0)),
-                mental: clamp(state.career!.stats.mental + (won ? 0 : -1)),
+                mechanics: clamp((state.career!.stats?.mechanics ?? 50) + (won ? 1 : 0)),
+                mental: clamp((state.career!.stats?.mental ?? 50) + (won ? 0 : -1)),
               },
             },
             interactiveMatch: null,
@@ -436,8 +456,8 @@ export const useGameStore = create<GameStore>()(
         } else {
           // Official team match
           const newTrust = won
-            ? clamp(career.lifestyle.coachTrust + 6)
-            : clamp(career.lifestyle.coachTrust - 8);
+            ? clamp((currentLifestyle.coachTrust ?? 50) + 6)
+            : clamp((currentLifestyle.coachTrust ?? 50) - 8);
 
           if (won) {
             addNotification(`Týmové Vítězství! +6 Důvěra trenéra`, 'gold', '🏆');
@@ -448,10 +468,10 @@ export const useGameStore = create<GameStore>()(
           set(state => ({
             career: {
               ...state.career!,
-              wins: won ? state.career!.wins + 1 : state.career!.wins,
-              losses: won ? state.career!.losses : state.career!.losses + 1,
-              masteries: { ...state.career!.masteries, [championId]: newMastery },
-              lifestyle: { ...state.career!.lifestyle, coachTrust: newTrust },
+              wins: won ? (state.career!.wins ?? 0) + 1 : (state.career!.wins ?? 0),
+              losses: won ? (state.career!.losses ?? 0) : (state.career!.losses ?? 0) + 1,
+              masteries: { ...(state.career!.masteries || {}), [championId]: newMastery },
+              lifestyle: { ...currentLifestyle, coachTrust: newTrust },
             },
             interactiveMatch: null,
             phase: 'CAREER_HUB',
@@ -702,6 +722,13 @@ export const useGameStore = create<GameStore>()(
           const opponentTeams = TEAMS.filter(t => t.region === career.region && t.id !== currentTeam?.id);
           const opponent = opponentTeams[Math.floor(Math.random() * opponentTeams.length)] || TEAMS[0];
 
+          const champPool = career.championPool || ['Aatrox'];
+          const roleChamps = getChampionsByRole(career.role);
+          const enemyCandidates = roleChamps.filter(c => !champPool.includes(c.id));
+          const randomEnemy = enemyCandidates.length > 0
+            ? enemyCandidates[Math.floor(Math.random() * enemyCandidates.length)]
+            : roleChamps[0];
+
           set(state => ({
             career: {
               ...state.career!,
@@ -712,7 +739,8 @@ export const useGameStore = create<GameStore>()(
             },
             interactiveMatch: {
               opponentTeam: opponent,
-              selectedChampion: state.career!.championPool?.[0] || 'Aatrox',
+              selectedChampion: champPool[0] || 'Aatrox',
+              enemyChampion: randomEnemy.id,
               currentStep: 'champion_select',
               playerScore: 50,
               opponentScore: 50,
@@ -742,18 +770,23 @@ export const useGameStore = create<GameStore>()(
         if (!career) return;
 
         const choice = event.choices[choiceIndex];
-        const effects = choice.effects;
+        const effects = choice.effects || {};
+
+        const currentStats = career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 };
+        const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+        const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
+        const currentHistory = career.eventHistory || [];
 
         const newStats = {
-          mechanics:     clamp(career.stats.mechanics     + (effects.mechanics || 0)),
-          gameKnowledge: clamp(career.stats.gameKnowledge + (effects.gameKnowledge || 0)),
-          communication: clamp(career.stats.communication + (effects.communication || 0)),
-          mental:        clamp(career.stats.mental        + (effects.mental || 0)),
-          adaptability:  clamp(career.stats.adaptability  + (effects.adaptability || 0)),
-          reputation:    clamp(career.stats.reputation    + (effects.reputation || 0)),
+          mechanics:     clamp((currentStats.mechanics ?? 50)     + (effects.mechanics || 0)),
+          gameKnowledge: clamp((currentStats.gameKnowledge ?? 50) + (effects.gameKnowledge || 0)),
+          communication: clamp((currentStats.communication ?? 50) + (effects.communication || 0)),
+          mental:        clamp((currentStats.mental ?? 50)        + (effects.mental || 0)),
+          adaptability:  clamp((currentStats.adaptability ?? 50)  + (effects.adaptability || 0)),
+          reputation:    clamp((currentStats.reputation ?? 20)    + (effects.reputation || 0)),
         };
 
-        const newTrust = clamp(career.lifestyle.coachTrust + (effects.coachTrust || 0));
+        const newTrust = clamp((currentLifestyle.coachTrust ?? 50) + (effects.coachTrust || 0));
 
         // Format short toast summary of event outcomes
         const gains: string[] = [];
@@ -779,16 +812,16 @@ export const useGameStore = create<GameStore>()(
             ...state.career!,
             stats: newStats,
             finances: {
-              ...state.career!.finances,
-              salary: Math.max(0, state.career!.finances.salary + (effects.salary || 0)),
-              savings: Math.max(0, state.career!.finances.savings + (effects.savings || 0)),
+              ...currentFinances,
+              salary: Math.max(0, (currentFinances.salary ?? 0) + (effects.salary || 0)),
+              savings: Math.max(0, (currentFinances.savings ?? 0) + (effects.savings || 0)),
             },
             lifestyle: {
-              ...state.career!.lifestyle,
+              ...currentLifestyle,
               coachTrust: newTrust,
             },
             eventHistory: [
-              ...state.career!.eventHistory,
+              ...currentHistory,
               {
                 week: state.career!.week,
                 split: state.career!.split,

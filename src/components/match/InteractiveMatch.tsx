@@ -174,9 +174,9 @@ export function InteractiveMatch() {
   const currentPatch = career.currentPatch || { patchVersion: '15.1', season: 15, tiers: {} };
   const champPool = career.championPool || [];
   const poolChamps = ALL_CHAMPIONS.filter(c => champPool.includes(c.id));
-  const roleChamps = getChampionsByRole(career.role);
-  // Pick opponent champion for the lane
-  const enemyChamp = roleChamps.find(c => !champPool.includes(c.id)) || roleChamps[0];
+  // Pick opponent champion for the lane from match state
+  const enemyChampId = interactiveMatch.enemyChampion || roleChamps.find(c => !champPool.includes(c.id))?.id || roleChamps[0].id;
+  const enemyChamp = ALL_CHAMPIONS.find(c => c.id === enemyChampId) || roleChamps[0];
 
   const matchup = getMatchupAdvantage(selectedChamp, enemyChamp.id);
   const eloInfo = calculateEloDifficulty(career.rank.tier, career.stats);

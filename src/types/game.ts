@@ -187,6 +187,7 @@ export interface TacticalChoice {
 export interface InteractiveMatchState {
   opponentTeam: Team;
   selectedChampion: string;
+  enemyChampion?: string;
   currentStep: MatchPhaseStep;
   playerScore: number;     // 0-100
   opponentScore: number;   // 0-100
