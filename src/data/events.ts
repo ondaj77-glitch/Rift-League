@@ -1587,19 +1587,193 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+  {
+    id: 'prodigy_school_exam',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_school_exam.title',
+    descriptionKey: 'event.prodigy_school_exam.desc',
+    weight: 12,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_school_exam.a',
+        effects: { mental: 8, gameKnowledge: 6, mechanics: -2 },
+        nextTextKey: 'event.prodigy_school_exam.a.result',
+      },
+      {
+        textKey: 'event.prodigy_school_exam.b',
+        effects: { mechanics: 8, mental: -4 },
+        nextTextKey: 'event.prodigy_school_exam.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_broken_mouse',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_broken_mouse.title',
+    descriptionKey: 'event.prodigy_broken_mouse.desc',
+    weight: 10,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_broken_mouse.a',
+        effects: { mechanics: 6, adaptability: 8 },
+        nextTextKey: 'event.prodigy_broken_mouse.a.result',
+      },
+      {
+        textKey: 'event.prodigy_broken_mouse.b',
+        effects: { mechanics: 8, savings: -80 },
+        nextTextKey: 'event.prodigy_broken_mouse.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_inhouse_invite',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_inhouse_invite.title',
+    descriptionKey: 'event.prodigy_inhouse_invite.desc',
+    weight: 11,
+    minReputation: 20,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_inhouse_invite.a',
+        effects: { reputation: 12, gameKnowledge: 8, mechanics: 6 },
+        nextTextKey: 'event.prodigy_inhouse_invite.a.result',
+      },
+      {
+        textKey: 'event.prodigy_inhouse_invite.b',
+        effects: { reputation: 8, savings: 300 },
+        nextTextKey: 'event.prodigy_inhouse_invite.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_energy_drink_offer',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_energy_drink_offer.title',
+    descriptionKey: 'event.prodigy_energy_drink_offer.desc',
+    weight: 9,
+    minReputation: 25,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_energy_drink_offer.a',
+        effects: { savings: 350, reputation: 5 },
+        nextTextKey: 'event.prodigy_energy_drink_offer.a.result',
+      },
+      {
+        textKey: 'event.prodigy_energy_drink_offer.b',
+        effects: { reputation: 8, mental: 4 },
+        nextTextKey: 'event.prodigy_energy_drink_offer.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_ex_pro_coaching',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_ex_pro_coaching.title',
+    descriptionKey: 'event.prodigy_ex_pro_coaching.desc',
+    weight: 10,
+    minReputation: 30,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_ex_pro_coaching.a',
+        effects: { gameKnowledge: 14, adaptability: 8 },
+        nextTextKey: 'event.prodigy_ex_pro_coaching.a.result',
+      },
+      {
+        textKey: 'event.prodigy_ex_pro_coaching.b',
+        effects: { mechanics: 10, reputation: 6 },
+        nextTextKey: 'event.prodigy_ex_pro_coaching.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_birthday_16',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_birthday_16.title',
+    descriptionKey: 'event.prodigy_birthday_16.desc',
+    weight: 8,
+    minAge: 16,
+    maxAge: 16,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_birthday_16.a',
+        effects: { mechanics: 8, mental: 6 },
+        nextTextKey: 'event.prodigy_birthday_16.a.result',
+      },
+      {
+        textKey: 'event.prodigy_birthday_16.b',
+        effects: { mental: 12, energy: 20 },
+        nextTextKey: 'event.prodigy_birthday_16.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_rank1_race',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_rank1_race.title',
+    descriptionKey: 'event.prodigy_rank1_race.desc',
+    weight: 9,
+    minReputation: 40,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_rank1_race.a',
+        effects: { mechanics: 12, reputation: 18, mental: -6 },
+        nextTextKey: 'event.prodigy_rank1_race.a.result',
+      },
+      {
+        textKey: 'event.prodigy_rank1_race.b',
+        effects: { gameKnowledge: 10, mental: 8, reputation: 10 },
+        nextTextKey: 'event.prodigy_rank1_race.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'prodigy_twitch_host',
+    category: 'prodigy',
+    titleKey: 'event.prodigy_twitch_host.title',
+    descriptionKey: 'event.prodigy_twitch_host.desc',
+    weight: 9,
+    minReputation: 20,
+    requiresFreeAgent: true,
+    choices: [
+      {
+        textKey: 'event.prodigy_twitch_host.a',
+        effects: { reputation: 15, savings: 450 },
+        nextTextKey: 'event.prodigy_twitch_host.a.result',
+      },
+      {
+        textKey: 'event.prodigy_twitch_host.b',
+        effects: { mental: 10, mechanics: 6 },
+        nextTextKey: 'event.prodigy_twitch_host.b.result',
+      },
+    ],
+  },
 ];
 
-// Get a random set of events for a week, filtered by career state
+// Clean dual-pool event router based strictly on team contract status
 export function getWeeklyEvent(
-  career: { age: number; reputation: number; inInternational: boolean; hasTeam?: boolean },
+  career: { age: number; reputation: number; inInternational: boolean; hasTeam?: boolean; currentTeam?: any },
   usedEventIds: string[],
   seed?: number
 ): GameEvent {
-  const isFreeAgent = career.hasTeam === false || career.hasTeam === undefined;
+  const isFreeAgent = career.hasTeam === false || career.hasTeam === undefined || career.currentTeam === null;
   const isProdigy = career.age < 17 || isFreeAgent;
 
   const TEAM_CATEGORIES = ['team_dynamics', 'contract', 'match'];
-  const TEAM_ONLY_IDS = [
+  const TEAM_ONLY_IDS = new Set([
     'training_vod_review',
     'training_vod_coach',
     'training_scrim_analysis',
@@ -1620,6 +1794,9 @@ export function getWeeklyEvent(
     'team_new_analyst',
     'team_bench_rivalry',
     'team_seoul',
+    'team_pocket',
+    'team_ad',
+    'team_starter_threat',
     'health_wrist_pain',
     'health_slump',
     'intl_scrim_top_team',
@@ -1637,7 +1814,9 @@ export function getWeeklyEvent(
     'contract_streamer_clause',
     'contract_bench_threat',
     'contract_salary_delay',
-  ];
+  ]);
+
+  const PRODIGY_CATEGORIES = new Set(['prodigy', 'soloq', 'social', 'health']);
 
   const available = EVENTS.filter(e => {
     if (usedEventIds.includes(e.id)) return false;
@@ -1647,21 +1826,27 @@ export function getWeeklyEvent(
     if (e.maxReputation !== undefined && career.reputation > e.maxReputation) return false;
     if (e.requiresInternational && !career.inInternational) return false;
     
-    // Strict isolation for SoloQ Prodigy / Free Agent runs (NO team / coach / scrim events)
+    // 1. When player is NOT in a pro team (Free Agent / Prodigy):
     if (isFreeAgent) {
       if (e.requiresTeam) return false;
       if (TEAM_CATEGORIES.includes(e.category)) return false;
-      if (TEAM_ONLY_IDS.includes(e.id)) return false;
+      if (TEAM_ONLY_IDS.has(e.id)) return false;
+      if (!PRODIGY_CATEGORIES.has(e.category) && e.category !== 'training') return false;
     }
 
-    if (e.requiresFreeAgent && !isFreeAgent) return false;
-    if (isProdigy && (e.category === 'contract' || (e.minAge !== undefined && e.minAge >= 17))) return false;
+    // 2. When player IS in a pro team (Signed Contract):
+    if (!isFreeAgent) {
+      if (e.requiresFreeAgent) return false;
+      if (e.category === 'prodigy') return false;
+    }
 
     return true;
   });
 
   if (available.length === 0) {
-    const prodigyFallbacks = EVENTS.filter(e => e.category === 'prodigy' || e.category === 'soloq' || e.category === 'social');
+    const prodigyFallbacks = EVENTS.filter(e => isFreeAgent
+      ? (e.category === 'prodigy' || e.category === 'soloq')
+      : (e.category === 'team_dynamics' || e.requiresTeam));
     return prodigyFallbacks.length > 0
       ? prodigyFallbacks[Math.floor(Math.random() * prodigyFallbacks.length)]
       : EVENTS[0];

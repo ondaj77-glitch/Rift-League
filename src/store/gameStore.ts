@@ -726,7 +726,8 @@ export const useGameStore = create<GameStore>()(
             age: career.age,
             reputation: career.stats?.reputation ?? 10,
             inInternational: Boolean(career.inInternational),
-            hasTeam: currentTeam !== null,
+            hasTeam: currentTeam !== null && career.age >= 17,
+            currentTeam: currentTeam,
           },
           usedIds,
         );
