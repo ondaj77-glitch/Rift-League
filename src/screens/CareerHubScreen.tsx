@@ -14,16 +14,19 @@ import { SoloQScreen } from './SoloQScreen';
 import { ChampionPoolScreen } from './ChampionPoolScreen';
 import { LifestyleScreen } from './LifestyleScreen';
 import { TransferMarketScreen } from './TransferMarketScreen';
-import type { StatKey, HubTab } from '../types/game';
+import type { StatKey, HubTab, SplitName } from '../types/game';
 
 const STATS: StatKey[] = ['mechanics', 'gameKnowledge', 'communication', 'mental', 'adaptability', 'reputation'];
 
-const SPLIT_ICONS: Record<string, string> = {
-  Winter: '❄️', Spring: '🌸', Summer: '☀️',
-};
+const SPLITS: Array<{ name: SplitName; label: string; icon: string }> = [
+  { name: 'Winter', label: 'WINTER', icon: '❄️' },
+  { name: 'Spring', label: 'SPRING', icon: '🌸' },
+  { name: 'Summer', label: 'SUMMER', icon: '☀️' },
+];
 
 export function CareerHubScreen() {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const isCs = language === 'cs';
   const career = useGameStore(s => s.career);
   const currentTab = useGameStore(s => s.currentTab);
   const setCurrentTab = useGameStore(s => s.setCurrentTab);
@@ -54,8 +57,23 @@ export function CareerHubScreen() {
   const lifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
   const energy = lifestyle.energy ?? 100;
   const maxEnergy = lifestyle.maxEnergy ?? 100;
+  const trust = lifestyle.coachTrust ?? 50;
   const finances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
   const currentPatch = career.currentPatch || { patchVersion: '15.1', season: 15, tiers: {} };
+
+  // Calculate overall rating (OVR)
+  const ovrRating = Math.round(
+    career.stats.mechanics * 0.35 +
+    career.stats.gameKnowledge * 0.25 +
+    career.stats.mental * 0.20 +
+    career.stats.communication * 0.20
+  );
+
+  const moraleScore = Math.min(100, Math.max(20, Math.round(career.stats.mental * 0.6 + trust * 0.4)));
+
+  const teamTierTag = career.currentTeam
+    ? career.currentTeam.strength >= 80 ? 'TIER 1' : 'TIER 2'
+    : 'FREE AGENT';
 
   function handleContinue() {
     if (currentEvent) {
@@ -74,85 +92,175 @@ export function CareerHubScreen() {
     <div className="screen-bg min-h-screen py-6 px-4 pb-16">
       <div className="max-w-4xl mx-auto space-y-5">
 
-        {/* Top Hextech Nav Bar with Energy, Bank Balance, Language Switcher & Time */}
+        {/* ─── RIFT LEGACY STYLE HEADER BAR ────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-rift-card border border-gold-600/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl"
+          className="bg-rift-card border border-gold-600/30 rounded-2xl p-5 shadow-2xl space-y-4"
         >
-          {/* Identity & Rank & Team */}
-          <div className="flex items-center gap-3">
-            {career.currentTeam ? (
-              <TeamLogo team={career.currentTeam} size="md" />
-            ) : (
-              <div className="text-3xl bg-rift-surface p-2 rounded-xl border border-rift-border">
-                {rankIcon}
-              </div>
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black text-white uppercase font-heading tracking-wide">
-                  {career.gameName}
-                </h1>
-                <RoleBadge role={career.role} size="sm" />
-                <span className="text-xs text-slate-300 font-bold">
-                  {REGION_FLAGS[career.region]} {career.region}
+          {/* Top Row: Flag + Name, Age, Role, Team & Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b border-rift-border/70">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-xl">{REGION_FLAGS[career.region]}</span>
+              <h1 className="text-xl font-black text-white uppercase font-heading tracking-wide">
+                {career.gameName}
+              </h1>
+              <span className="text-xs text-slate-400 font-semibold">{career.age} yrs</span>
+              <RoleBadge role={career.role} size="xs" />
+
+              {career.currentTeam ? (
+                <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-700">
+                  <TeamLogo team={career.currentTeam} size="xs" />
+                  <span className="text-xs font-bold text-slate-200">{career.currentTeam.name}</span>
+                  <span className="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">
+                    {teamTierTag}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-[10px] font-black px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 uppercase ml-2">
+                  FREE AGENT
                 </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <LanguageSwitcher size="sm" />
+              <button
+                onClick={() => setShowPatchNotesModal(true)}
+                className="bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-600/40 px-2 py-1 rounded-lg text-xs font-bold font-mono transition-all flex items-center gap-1"
+                title="Patch Notes"
+              >
+                📋 {currentPatch.patchVersion}
+              </button>
+              <button
+                onClick={() => setForfeitModalOpen(true)}
+                title="Vzdat běh"
+                className="text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-600 bg-rift-surface p-1.5 rounded-lg transition-all"
+              >
+                🏳️
+              </button>
+            </div>
+          </div>
+
+          {/* Clean 4-Card Quick Stats Grid (RFT Rating, Solo Queue, Followers, Money) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* 1. Overall Rating */}
+            <div className="bg-rift-surface p-3 rounded-xl border border-rift-border flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">RFT RATING</span>
+                <div className="mt-1">
+                  <span className="px-2.5 py-1 rounded-lg text-sm font-black bg-emerald-500 text-slate-950 font-mono shadow-sm">
+                    {ovrRating}
+                  </span>
+                </div>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5 font-medium">
-                {t('hub.age')} {career.age} · {rank.tier} {rank.division || ''} ({rank.lp} LP) · #{rank.globalRank?.toLocaleString() || '1.5M'} {t('soloq.global_ranking')}
+              <span className="text-xl opacity-80">⚡</span>
+            </div>
+
+            {/* 2. Solo Queue Rank */}
+            <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">SOLO QUEUE</span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <span className="text-lg leading-none">{rankIcon}</span>
+                <div>
+                  <p className="text-xs font-black text-white font-mono leading-none">
+                    {rank.lp} LP <span className="text-[10px] text-slate-400">({rank.tier})</span>
+                  </p>
+                  <p className="text-[10px] text-slate-500 font-mono mt-0.5">#{rank.globalRank?.toLocaleString() || '1.5M'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Stream Followers */}
+            <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">FOLLOWERS</span>
+              <p className="text-base font-black text-purple-400 font-mono mt-1">
+                {(career.streamFollowers ?? 0) >= 1000
+                  ? `${((career.streamFollowers ?? 0) / 1000).toFixed(1)}K`
+                  : (career.streamFollowers ?? 0)}
+              </p>
+            </div>
+
+            {/* 4. Money / Savings */}
+            <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
+              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{isCs ? 'ÚSPORY' : 'MONEY'}</span>
+              <p className="text-base font-black text-green-400 font-mono mt-1">
+                ${finances.savings.toLocaleString()}
               </p>
             </div>
           </div>
 
-          {/* Season Time, Energy, Money, Language & Forfeit Button */}
-          <div className="flex flex-wrap items-center gap-3 text-left sm:text-right w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-rift-border">
-            {/* Live In-Game Language Switcher */}
-            <LanguageSwitcher size="sm" />
+          {/* Segmented LED Bars for Team Trust & Morale */}
+          {career.currentTeam && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11px] font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider">{isCs ? 'Důvěra Týmu' : 'TEAM TRUST'}</span>
+                  <span className={trust >= 60 ? 'text-emerald-400 font-mono' : 'text-amber-400 font-mono'}>{trust}%</span>
+                </div>
+                <div className="flex gap-1">
+                  {Array.from({ length: 20 }).map((_, i) => {
+                    const filled = i < Math.round(trust / 5);
+                    return (
+                      <div
+                        key={i}
+                        className={`h-2 flex-1 rounded-sm ${
+                          filled ? 'bg-emerald-500 shadow-sm shadow-emerald-500/50' : 'bg-slate-800'
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
 
-            {/* Patch Notes Button */}
-            <button
-              onClick={() => setShowPatchNotesModal(true)}
-              className="bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-600/40 px-2.5 py-1 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-1 shadow-sm"
-              title="Zobrazit aktuální Patch Notes a meta změny"
-            >
-              📋 {currentPatch.patchVersion}
-            </button>
-
-            {/* Energy */}
-            <div className="bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-800/40 text-center">
-              <p className="text-[10px] text-amber-300 font-bold uppercase">⚡ {t('hub.energy' as any) || 'Energie'}</p>
-              <p className="text-sm font-black text-amber-400 font-mono">
-                {energy} <span className="text-[11px] text-amber-600">/ {maxEnergy}</span>
-              </p>
+              <div className="space-y-1">
+                <div className="flex justify-between text-[11px] font-bold">
+                  <span className="text-slate-400 uppercase tracking-wider">{isCs ? 'Morálka' : 'MORALE'}</span>
+                  <span className="text-amber-400 font-mono">{moraleScore}%</span>
+                </div>
+                <div className="flex gap-1">
+                  {Array.from({ length: 20 }).map((_, i) => {
+                    const filled = i < Math.round(moraleScore / 5);
+                    return (
+                      <div
+                        key={i}
+                        className={`h-2 flex-1 rounded-sm ${
+                          filled ? 'bg-amber-500 shadow-sm shadow-amber-500/50' : 'bg-slate-800'
+                        }`}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
             </div>
+          )}
 
-            {/* Split & Week */}
-            <div>
-              <p className="text-xs text-slate-400 font-medium">
-                {SPLIT_ICONS[career.split || 'Spring']} {t(`hub.split.${(career.split || 'spring').toLowerCase()}` as any)} {career.year}
-              </p>
-              <p className="text-sm font-bold text-gold-400 font-mono">
-                {t('hub.week')} {career.week} / 9
-              </p>
+          {/* Season Stepper (Winter -> Spring -> Summer -> Off-Season) */}
+          <div className="pt-2 border-t border-rift-border/60 flex items-center justify-between">
+            <span className="text-xs font-black text-slate-400 font-mono">
+              {career.year} SEASON
+            </span>
+            <div className="flex items-center gap-2">
+              {SPLITS.map(split => {
+                const isActive = (career.split || 'Winter') === split.name;
+                return (
+                  <span
+                    key={split.name}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold font-mono transition-all ${
+                      isActive
+                        ? 'bg-purple-950 text-purple-200 border border-purple-500/50 shadow-md shadow-purple-950/50'
+                        : 'text-slate-500 bg-slate-900/40'
+                    }`}
+                  >
+                    {split.label}
+                  </span>
+                );
+              })}
+              <span className="text-xs font-bold text-slate-600 px-2 py-1 font-mono">OFF-SEASON</span>
             </div>
-
-            {/* Bank Balance */}
-            <div className="border-l border-rift-border pl-3">
-              <p className="text-xs text-slate-400 font-medium">{t('hub.savings')}</p>
-              <p className="text-sm font-black text-green-400 font-mono">
-                ${finances.savings.toLocaleString()}
-              </p>
-            </div>
-
-            {/* Forfeit / End Run Button */}
-            <button
-              onClick={() => setForfeitModalOpen(true)}
-              title="Vzdat běh a zobrazit statistiky"
-              className="text-xs text-slate-400 hover:text-red-400 border border-slate-700 hover:border-red-600 bg-rift-surface p-2 rounded-xl transition-all"
-            >
-              🏳️
-            </button>
+            <span className="text-xs font-black text-amber-400 font-mono">
+              {t('hub.week')} {career.week}/9
+            </span>
           </div>
         </motion.div>
 
@@ -163,7 +271,7 @@ export function CareerHubScreen() {
             { id: 'soloq', label: `⚔️ ${t('tab.soloq' as any) || 'SoloQ Žebříček'}` },
             { id: 'champions', label: `🧙 ${t('tab.champions' as any) || 'Champion Pool'}` },
             { id: 'lifestyle', label: `⚡ ${t('tab.lifestyle' as any) || 'Životní Styl & Energie'}` },
-            { id: 'transfers', label: `🤝 ${t('tab.transfers' as any) || 'Tým & Skauti'}` },
+            { id: 'transfers', label: `🤝 ${t('tab.transfers' as any) || 'Tým & Organizace'}` },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -182,44 +290,6 @@ export function CareerHubScreen() {
         {/* TAB 1: OVERVIEW */}
         {currentTab === 'overview' && (
           <div className="space-y-5">
-
-            {/* Team or SoloQ Status Banner */}
-            <Card className="p-4 border-gold-600/30">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                <div>
-                  <span className="text-xs text-slate-400 uppercase font-semibold">
-                    {t('hub.status_title' as any) || 'Status'}
-                  </span>
-                  <div className="flex items-center gap-3 mt-1">
-                    {career.currentTeam ? (
-                      <>
-                        <TeamLogo team={career.currentTeam} size="sm" />
-                        <div>
-                          <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
-                          <span className="text-xs text-slate-400 font-bold ml-2">
-                            ({(lifestyle.rosterStatus ?? 'free_agent') === 'starter' ? t('hub.starter' as any) : t('hub.substitute' as any)})
-                          </span>
-                        </div>
-                      </>
-                    ) : (
-                      <span className="font-bold text-amber-400 text-base">
-                        {career.age < 18
-                          ? t('hub.prodigy_status' as any).replace('{age}', String(career.age))
-                          : t('hub.free_agent' as any)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {career.currentTeam && (
-                  <div className="flex items-center gap-4 text-xs font-semibold">
-                    <span className="text-green-400">{career.wins} {t('season.wins')}</span>
-                    <span className="text-red-400">{career.losses} {t('season.losses')}</span>
-                    <span className="text-gold-400">{t('hub.team_strength' as any)}: {career.teamStrength}</span>
-                  </div>
-                )}
-              </div>
-            </Card>
 
             {/* Player Stats */}
             <Card>
@@ -278,7 +348,7 @@ export function CareerHubScreen() {
         {/* TAB 4: LIFESTYLE */}
         {currentTab === 'lifestyle' && <LifestyleScreen />}
 
-        {/* TAB 5: TRANSFERS */}
+        {/* TAB 5: TRANSFERS / TEAM */}
         {currentTab === 'transfers' && <TransferMarketScreen />}
 
       </div>
