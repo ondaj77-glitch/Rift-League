@@ -44,17 +44,16 @@ export function InteractiveMatch() {
     return generateTacticalScenarios(selectedChamp, enemyChamp.id, career?.role || 'top');
   }, [selectedChamp, enemyChamp.id, career?.role]);
 
-  if (!career || !interactiveMatch) {
-    return (
-      <div className="screen-bg min-h-screen flex items-center justify-center p-4">
-        <Card className="p-6 text-center space-y-4 max-w-sm border-gold-600/30">
-          <p className="text-white font-bold">{isCs ? 'Zápas nebyl nalezen' : 'Match not found'}</p>
-          <Button variant="primary" fullWidth onClick={() => useGameStore.getState().setPhase('CAREER_HUB')}>
-            {isCs ? 'Kariérní Centrum' : 'Career Hub'}
-          </Button>
-        </Card>
-      </div>
-    );
+  // Keep last match state in state so during AnimatePresence exit transitions it doesn't flash
+  const [cachedMatch, setCachedMatch] = useState(interactiveMatch);
+  if (interactiveMatch && interactiveMatch !== cachedMatch) {
+    setCachedMatch(interactiveMatch);
+  }
+
+  const matchToRender = interactiveMatch || cachedMatch;
+
+  if (!career || !matchToRender) {
+    return null;
   }
 
   const activeScenario =
@@ -63,7 +62,7 @@ export function InteractiveMatch() {
     step === 'late_game' ? scenarios.lateGame : null;
 
   function handleConfirmChamp() {
-    setPlayerScore(Math.max(20, Math.min(80, 50 + matchup.scoreBonus)));
+    setPlayerScore(Math.max(30, Math.min(70, 50 + matchup.scoreBonus)));
     setOpponentScore(50);
     setStep('laning');
     setSelectedChoiceIdx(null);
@@ -77,23 +76,24 @@ export function InteractiveMatch() {
     const stats = career?.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 };
     const statVal = stats[choice.statKey] ?? 50;
     const champTier = currentPatch.tiers[selectedChamp]?.tier || 'A';
-    const tierBonus = champTier === 'S+' ? 10 : champTier === 'S' ? 6 : champTier === 'A' ? 3 : champTier === 'B' ? 0 : -5;
+    const tierBonus = champTier === 'S+' ? 6 : champTier === 'S' ? 4 : champTier === 'A' ? 2 : champTier === 'B' ? 0 : -4;
     const mastery = career?.masteries?.[selectedChamp]?.masteryLevel || 1;
-    const masteryBonus = mastery * 2;
+    const masteryBonus = Math.min(6, mastery) * 1.5;
 
-    // Check synergy with champion playstyle
+    // Check synergy with champion playstyle (rewarded moderately +6, not auto-win)
     const isSynergy = choice.synergyRequired && currentChampObj.playstyle.toLowerCase().includes(choice.synergyRequired.toLowerCase());
-    const synergyBonus = isSynergy ? 18 : 0;
+    const synergyBonus = isSynergy ? 6 : 0;
 
-    // Matchup modifier
-    const matchupBonus = matchup.scoreBonus > 0 ? 8 : matchup.scoreBonus < 0 ? -8 : 0;
+    // Matchup modifier (+6 to -6)
+    const matchupBonus = matchup.scoreBonus > 0 ? 6 : matchup.scoreBonus < 0 ? -6 : 0;
 
-    // Tactical Check DC adjusted by Champion Counter Matchup & Rank Tier Elo Requirement
-    const eloPenalty = Math.max(-8, Math.min(15, Math.floor((eloInfo.targetStat - eloInfo.playerAvg) * 0.35)));
+    // Tactical Check DC adjusted by Rank Tier Elo Requirement (higher elo requires higher stats!)
+    const eloPenalty = Math.max(-5, Math.min(18, Math.floor((eloInfo.targetStat - eloInfo.playerAvg) * 0.4)));
     const finalDC = choice.difficulty + eloPenalty;
 
-    const totalScore = statVal + tierBonus + masteryBonus + synergyBonus + matchupBonus + (Math.random() * 24 - 12);
-    const success = totalScore >= finalDC;
+    // Roll with balanced variance
+    const roll = statVal + tierBonus + masteryBonus + synergyBonus + matchupBonus + (Math.random() * 20 - 10);
+    const success = roll >= finalDC;
     const scoreDelta = success ? choice.scoreGain : choice.scoreLoss;
 
     const newPScore = Math.max(0, Math.min(100, playerScore + (success ? scoreDelta : 0)));
@@ -338,7 +338,7 @@ export function InteractiveMatch() {
                   variant={isWon ? 'gold' : 'primary'}
                   size="lg"
                   fullWidth
-                  onClick={() => finishInteractiveMatch(isWon)}
+                  onClick={() => finishInteractiveMatch(isWon, selectedChamp)}
                 >
                   {isCs ? 'Ukončit Zápas a Zapsat Výsledek →' : 'Finish Match & Save Results →'}
                 </Button>
