@@ -4,154 +4,242 @@ import { useGameStore } from '../../store/gameStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { getChampIconUrl, ALL_CHAMPIONS, getChampionsByRole } from '../../data/champions';
-import type { TacticalChoice, MatchPhaseStep } from '../../types/game';
-
-const LANING_CHOICES: TacticalChoice[] = [
-  {
-    id: 'lane_aggressive',
-    titleKey: 'match.lane_aggressive.title',
-    descriptionKey: 'match.lane_aggressive.desc',
-    statKey: 'mechanics',
-    difficulty: 55,
-    risk: 'High',
-    successEffect: { scoreDelta: 25, textKey: 'match.lane_aggressive.win' },
-    failEffect: { scoreDelta: -20, textKey: 'match.lane_aggressive.loss' },
-  },
-  {
-    id: 'lane_freeze',
-    titleKey: 'match.lane_freeze.title',
-    descriptionKey: 'match.lane_freeze.desc',
-    statKey: 'gameKnowledge',
-    difficulty: 50,
-    risk: 'Low',
-    successEffect: { scoreDelta: 15, textKey: 'match.lane_freeze.win' },
-    failEffect: { scoreDelta: -10, textKey: 'match.lane_freeze.loss' },
-  },
-  {
-    id: 'lane_roam',
-    titleKey: 'match.lane_roam.title',
-    descriptionKey: 'match.lane_roam.desc',
-    statKey: 'communication',
-    difficulty: 52,
-    risk: 'Medium',
-    successEffect: { scoreDelta: 20, textKey: 'match.lane_roam.win' },
-    failEffect: { scoreDelta: -15, textKey: 'match.lane_roam.loss' },
-  },
-];
-
-const MID_CHOICES: TacticalChoice[] = [
-  {
-    id: 'mid_dragon_engage',
-    titleKey: 'match.mid_dragon_engage.title',
-    descriptionKey: 'match.mid_dragon_engage.desc',
-    statKey: 'mechanics',
-    difficulty: 60,
-    risk: 'High',
-    successEffect: { scoreDelta: 30, textKey: 'match.mid_dragon_engage.win' },
-    failEffect: { scoreDelta: -25, textKey: 'match.mid_dragon_engage.loss' },
-  },
-  {
-    id: 'mid_vision_trap',
-    titleKey: 'match.mid_vision_trap.title',
-    descriptionKey: 'match.mid_vision_trap.desc',
-    statKey: 'gameKnowledge',
-    difficulty: 55,
-    risk: 'Medium',
-    successEffect: { scoreDelta: 20, textKey: 'match.mid_vision_trap.win' },
-    failEffect: { scoreDelta: -15, textKey: 'match.mid_vision_trap.loss' },
-  },
-  {
-    id: 'mid_cross_map',
-    titleKey: 'match.mid_cross_map.title',
-    descriptionKey: 'match.mid_cross_map.desc',
-    statKey: 'adaptability',
-    difficulty: 52,
-    risk: 'Low',
-    successEffect: { scoreDelta: 15, textKey: 'match.mid_cross_map.win' },
-    failEffect: { scoreDelta: -10, textKey: 'match.mid_cross_map.loss' },
-  },
-];
-
-const MAP_MACRO_CHOICES: TacticalChoice[] = [
-  {
-    id: 'map_push_mid',
-    titleKey: 'match.map_push_mid.title',
-    descriptionKey: 'match.map_push_mid.desc',
-    statKey: 'mechanics',
-    difficulty: 62,
-    risk: 'High',
-    successEffect: { scoreDelta: 35, textKey: 'match.map_push_mid.win' },
-    failEffect: { scoreDelta: -25, textKey: 'match.map_push_mid.loss' },
-  },
-  {
-    id: 'map_baron',
-    titleKey: 'match.map_baron.title',
-    descriptionKey: 'match.map_baron.desc',
-    statKey: 'gameKnowledge',
-    difficulty: 55,
-    risk: 'Medium',
-    successEffect: { scoreDelta: 28, textKey: 'match.map_baron.win' },
-    failEffect: { scoreDelta: -18, textKey: 'match.map_baron.loss' },
-  },
-  {
-    id: 'map_dragon_soul',
-    titleKey: 'match.map_dragon_soul.title',
-    descriptionKey: 'match.map_dragon_soul.desc',
-    statKey: 'communication',
-    difficulty: 54,
-    risk: 'Low',
-    successEffect: { scoreDelta: 22, textKey: 'match.map_dragon_soul.win' },
-    failEffect: { scoreDelta: -12, textKey: 'match.map_dragon_soul.loss' },
-  },
-];
-
-const LATE_CHOICES: TacticalChoice[] = [
-  {
-    id: 'late_flash_engage',
-    titleKey: 'match.late_flash_engage.title',
-    descriptionKey: 'match.late_flash_engage.desc',
-    statKey: 'mechanics',
-    difficulty: 65,
-    risk: 'High',
-    successEffect: { scoreDelta: 35, textKey: 'match.late_flash_engage.win' },
-    failEffect: { scoreDelta: -30, textKey: 'match.late_flash_engage.loss' },
-  },
-  {
-    id: 'late_front_to_back',
-    titleKey: 'match.late_front_to_back.title',
-    descriptionKey: 'match.late_front_to_back.desc',
-    statKey: 'mental',
-    difficulty: 58,
-    risk: 'Medium',
-    successEffect: { scoreDelta: 25, textKey: 'match.late_front_to_back.win' },
-    failEffect: { scoreDelta: -18, textKey: 'match.late_front_to_back.loss' },
-  },
-  {
-    id: 'late_baron_bait',
-    titleKey: 'match.late_baron_bait.title',
-    descriptionKey: 'match.late_baron_bait.desc',
-    statKey: 'communication',
-    difficulty: 60,
-    risk: 'High',
-    successEffect: { scoreDelta: 30, textKey: 'match.late_baron_bait.win' },
-    failEffect: { scoreDelta: -25, textKey: 'match.late_baron_bait.loss' },
-  },
-];
-
 import { ALL_CHAMPIONS, getChampIconUrl, getChampionsByRole } from '../../data/champions';
 import { getMatchupAdvantage } from '../../data/matchups';
 import { calculateEloDifficulty } from '../../data/ranks';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
+import { MinimapRadar } from './MinimapRadar';
+import type { StatKey } from '../../types/game';
+
+export interface RichTacticalChoice {
+  id: string;
+  tagCs: string;
+  tagEn: string;
+  titleCs: string;
+  titleEn: string;
+  descCs: string;
+  descEn: string;
+  statKey: StatKey;
+  synergy?: string; // 'Aggressive' | 'Teamfight' | 'Splitpush' | 'Poke' | 'Drain Tank' | 'Assassin' | 'Tank'
+  difficulty: number;
+  risk: 'Low' | 'Medium' | 'High';
+  successScore: number;
+  failScore: number;
+  successTextCs: string;
+  successTextEn: string;
+  failTextCs: string;
+  failTextEn: string;
+}
+
+const LANING_SCENARIO = {
+  titleCs: '⚔️ SITUACE NA LINCE: VLNA & LVL 2/3 SPIKE',
+  titleEn: '⚔️ LANING SITUATION: WAVE STATE & LEVEL 2/3 SPIKE',
+  descCs: 'Oponent dorazil na linku a chystá se last-hitovat 2. vlnu. Nepřátelský jungler začal na opačné straně mapy.',
+  descEn: 'Opponent arrived in lane preparing to last-hit the 2nd wave. Enemy jungler started on the opposite side.',
+};
+
+const LANING_CHOICES: RichTacticalChoice[] = [
+  {
+    id: 'lane_allin',
+    tagCs: '⚡ Mechanický All-in',
+    tagEn: '⚡ Mechanical All-in',
+    titleCs: 'Rychlý Push na Lvl 2 a Flash Ignite All-in',
+    titleEn: 'Fast Lvl 2 Push & Flash Ignite All-in',
+    descCs: 'Využij náskok úrovně a zaútoč plným kombem dřív, než oponent stihne ustoupit pod věž.',
+    descEn: 'Exploit level advantage and dive with full combo before opponent retreats under turret.',
+    statKey: 'mechanics',
+    synergy: 'Aggressive',
+    difficulty: 56,
+    risk: 'High',
+    successScore: 28,
+    failScore: -22,
+    successTextCs: '⚡ SOLO KILL! Získal jsi First Blood a kompletní kontrolu nad linkou (+28 Skóre).',
+    successTextEn: '⚡ SOLO KILL! First Blood secured and total lane dominance (+28 Score).',
+    failTextCs: '💀 Minul jsi klíčový skillshot, oponent přežil s 5 % HP a otočil duel (-22 Skóre).',
+    failTextEn: '💀 Key skillshot missed, enemy survived with 5% HP and turned the trade (-22 Score).',
+  },
+  {
+    id: 'lane_freeze',
+    tagCs: '🧠 Dokonalý Freeze & Zónování',
+    tagEn: '🧠 Wave Freeze & Zone Control',
+    titleCs: 'Zmrazit vlnu před věží a zónovat oponenta z XP',
+    titleEn: 'Freeze Wave before Tower & Zone from XP',
+    descCs: 'Udržuj 3 nepřátelské kouzelníky na živu. Oponent musí riskovat gank nebo přijde o celou vlnu.',
+    descEn: 'Keep 3 enemy casters alive. Opponent is forced to overextend or lose entire wave.',
+    statKey: 'gameKnowledge',
+    synergy: 'Scaling',
+    difficulty: 48,
+    risk: 'Low',
+    successScore: 18,
+    failScore: -10,
+    successTextCs: '🎯 Mistrovský Freeze! Oponent ztratil 15 CS a je pod obřím psychickým tlakem (+18 Skóre).',
+    successTextEn: '🎯 Flawless Freeze! Enemy starved of 15 CS and bleeding gold (+18 Score).',
+    failTextCs: '⚠️ Vlna se nechtěně odrazila do soupeřovy věže a ztratil jsi tempo (-10 Skóre).',
+    failTextEn: '⚠️ Wave accidentally bounced into enemy turret, lost lane tempo (-10 Score).',
+  },
+  {
+    id: 'lane_fake_roam',
+    tagCs: '🗡️ Mind Game Past v Křoví',
+    tagEn: '🗡️ Mind Game Brush Trap',
+    titleCs: 'Falešný odchod do řeky a přepad z nehlídaného křoví',
+    titleEn: 'Fake River Roam & Ambush from Unwarded Bush',
+    descCs: 'Předstírej rotaci na mid. Když soupeř začne bezstarostně pushovat, vyskoč ze zálohy.',
+    descEn: 'Pretend roaming mid. When opponent steps up to fast shove, ambush with surprise burst.',
+    statKey: 'mental',
+    synergy: 'Assassin',
+    difficulty: 52,
+    risk: 'Medium',
+    successScore: 22,
+    failScore: -14,
+    successTextCs: '💥 Překvapivý Ambush! Oponent spálil Flash a musel okamžitě dát Recall (+22 Skóre).',
+    successTextEn: '💥 Surprise Ambush! Opponent burned Flash and forced to back (+22 Score).',
+    failTextCs: '👀 Oponent měl v křoví wardu a tvůj přepad snadno odhalil (-14 Skóre).',
+    failTextEn: '👀 Enemy had ward in brush and safely disengaged (-14 Score).',
+  },
+];
+
+const MID_SCENARIO = {
+  titleCs: '🐉 SITUACE V MID GAME: DRUHÝ DRAK & PRVNÍ VĚŽ',
+  titleEn: '🐉 MID GAME SITUATION: 2ND DRAKE & TIER 1 TURRETS',
+  descCs: 'Drak spawnul v řece a oba týmy rotují na vizi. Nepřátelské ADC pushuje boční linku.',
+  descEn: 'Dragon spawned in river and both teams contesting vision. Enemy ADC pushing side lane.',
+};
+
+const MID_CHOICES: RichTacticalChoice[] = [
+  {
+    id: 'mid_teamfight_engage',
+    tagCs: '🛡️ Týmový Front-to-Back Engage',
+    tagEn: '🛡️ Front-to-Back Teamfight Engage',
+    titleCs: '5v5 Týmový boj v Dračím Pitu přes CC řetězec',
+    titleEn: '5v5 Dragon Pit Teamfight via CC Chain',
+    descCs: 'Udržuj přední linii, zablokuj nepřátelské assassiny a umožni svým carry volně střílet.',
+    descEn: 'Hold frontline, peel off enemy divers, and enable your carries to deal free damage.',
+    statKey: 'communication',
+    synergy: 'Teamfight',
+    difficulty: 56,
+    risk: 'Medium',
+    successScore: 28,
+    failScore: -20,
+    successTextCs: '🏆 Vyhraný Teamfight! Získali jste Draka a 3 killy (+28 Skóre).',
+    successTextEn: '🏆 Teamfight Won! Clean Ace, Dragon secured (+28 Score).',
+    failTextCs: '💔 Nepřátelský Womboc-Combo prošel a váš tým ztratil Draka (-20 Skóre).',
+    failTextEn: '💔 Enemy team landed huge AoE combo, dragon stolen (-20 Score).',
+  },
+  {
+    id: 'mid_flank_assassinate',
+    tagCs: '⚡ Hluboký Flank na Zadní Linii',
+    tagEn: '⚡ Deep Flank onto Enemy Backline',
+    titleCs: 'Obejít Dračí pit zezadu a vymazat nepřátelské ADC',
+    titleEn: 'Flank Dragon Pit from Behind & Burst Enemy ADC',
+    descCs: 'Projdi přes mlhu vize za záda soupeře a one-shotni klíčového carry hned v úvodu.',
+    descEn: 'Sneak through fog of war behind enemy backline and delete their main carry instantly.',
+    statKey: 'mechanics',
+    synergy: 'Assassin',
+    difficulty: 62,
+    risk: 'High',
+    successScore: 34,
+    failScore: -26,
+    successTextCs: '⚡ ONE-SHOT! Nepřátelské ADC padlo za 0.5s a zbytek týmu zpanikařil (+34 Skóre).',
+    successTextEn: '⚡ ONE-SHOT! Enemy ADC deleted in 0.5s, fight completely broken (+34 Score).',
+    failTextCs: '💀 Chytil tě nepřátelský support do Exhaustu a zemřel jsi bez killu (-26 Skóre).',
+    failTextEn: '💀 Exhausted by enemy support, collapsed on and died (-26 Score).',
+  },
+  {
+    id: 'mid_crossmap_split',
+    tagCs: '🗺️ Cross-map Splitpush & Věž',
+    tagEn: '🗺️ Cross-map Splitpush & Turret',
+    titleCs: 'Využít chaosu na drakovi a zničit dvě věže na protější lince',
+    titleEn: 'Cross-map Splitpush: Trade Drake for 2 Turrets',
+    descCs: 'Tým zdrží draka na dálku pokem, zatímco ty prolomíš věže a získáš obří zlaťákový náskok.',
+    descEn: 'Team stalls dragon while you crush two side lane turrets with huge gold bounty.',
+    statKey: 'adaptability',
+    synergy: 'Splitpush',
+    difficulty: 50,
+    risk: 'Low',
+    successScore: 22,
+    failScore: -12,
+    successTextCs: '🏰 Obří Makro Tah! Zničil jsi 2 věže (+600G) a soupeř ztratil mapu (+22 Skóre).',
+    successTextEn: '🏰 Macro Outplay! Crushed 2 towers, enemy map control destroyed (+22 Score).',
+    failTextCs: '⚠️ Soupeř rychle zabil draka a stihl tě chytit na lince (-12 Skóre).',
+    failTextEn: '⚠️ Enemy quickly finished dragon and collapsed on your lane (-12 Score).',
+  },
+];
+
+const LATE_SCENARIO = {
+  titleCs: '👑 ROZHODUJÍCÍ BITVA: BARON NASHOR & ELDER DRAK',
+  titleEn: '👑 DECIDING CLUTCH: BARON NASHOR & ELDER DRAGON',
+  descCs: '34. minuta zápasu. Jeden jediný teamfight rozhodne o vítězi celého zápasu!',
+  descEn: 'Minute 34. A single clean teamfight will decide the entire match!',
+};
+
+const LATE_CHOICES: RichTacticalChoice[] = [
+  {
+    id: 'late_brush_trap',
+    tagCs: '🧠 5-Man Death Brush Ambush',
+    tagEn: '🧠 5-Man Death Brush Ambush',
+    titleCs: 'Zhasnout vizi kolem Barona a počkat v Death Bushi',
+    titleEn: 'Deny Baron Vision & Wait in Death Bush',
+    descCs: 'Vyčistěte všechny wardy u Barona. Když soupeř půjde wardovat pit, okamžitě ho smažte.',
+    descEn: 'Clear all Baron vision. When enemy facechecks to ward the pit, execute instant pick.',
+    statKey: 'gameKnowledge',
+    synergy: 'Teamfight',
+    difficulty: 58,
+    risk: 'Medium',
+    successScore: 36,
+    failScore: -28,
+    successTextCs: '🎯 ACE! Soupeř facechecknul do 5 lidí, perfektní Ace a otevřený Nexus (+36 Skóre)!',
+    successTextEn: '🎯 ACE! Enemy facechecked into 5 men, clean wipe and open Nexus (+36 Score)!',
+    failTextCs: '👀 Soupeř hodil modrý trinket, odhalil vás a obklíčil v pasti (-28 Skóre).',
+    failTextEn: '👀 Enemy used blue trinket, spotted the trap and counter-engaged (-28 Score).',
+  },
+  {
+    id: 'late_heroic_clutch',
+    tagCs: '🔥 Mechanický Clutch & Flash Smite',
+    tagEn: '🔥 Mechanical Clutch & Flash Smite',
+    titleCs: 'Flash přes stěnu, ukrást Barona a přežít přes Zhonyu',
+    titleEn: 'Flash over Wall, Smite Steal Baron & Zhonya Stall',
+    descCs: 'Skoč do středu pitu na 2000 HP Barona, tref Smite a aktivuj stopky, dokud nedorazí tým.',
+    descEn: 'Flash into pit at 2k Baron HP, hit Smite steal and pop stopwatch until team arrives.',
+    statKey: 'mechanics',
+    synergy: 'Aggressive',
+    difficulty: 64,
+    risk: 'High',
+    successScore: 42,
+    failScore: -35,
+    successTextCs: '👑 BARON UKRADEN! Neuvěřitelný mechanický steal roku a obrat zápasu (+42 Skóre)!',
+    successTextEn: '👑 BARON STOLEN! Incredible clutch steal of the year, match turned (+42 Score)!',
+    failTextCs: '💀 Minul jsi Smite o 50 HP, Baron padl soupeři a Nexus je ztracen (-35 Skóre).',
+    failTextEn: '💀 Missed Smite by 50 HP, Baron secured by enemy (-35 Score).',
+  },
+  {
+    id: 'late_peel_wall',
+    tagCs: '🛡️ Ochrana Hlavního Carried',
+    tagEn: '🛡️ Hypercarry Peel & Frontline Wall',
+    titleCs: 'Absorbovat nepřátelské ultimátky a chránit své ADC',
+    titleEn: 'Absorb Enemy Ults & Bodyguard Your ADC',
+    descCs: 'Využij své staty a mentál k tomu, abys absorboval veškerý nepřátelský burst damage.',
+    descEn: 'Use your defensive stats and positioning to absorb all enemy cooldowns for your ADC.',
+    statKey: 'mental',
+    synergy: 'Tank',
+    difficulty: 54,
+    risk: 'Low',
+    successScore: 28,
+    failScore: -16,
+    successTextCs: '🛡️ Neproniknutelná Zeď! Tvé ADC přežilo s plným HP a vyčistilo bojiště (+28 Skóre)!',
+    successTextEn: '🛡️ Impenetrable Wall! Your ADC survived full HP and aced the lobby (+28 Score)!',
+    failTextCs: '⚠️ Nepřátelský burst byl příliš vysoký a přední linie padla (-16 Skóre).',
+    failTextEn: '⚠️ Enemy burst damage overwhelmed your frontline defense (-16 Score).',
+  },
+];
 
 export function InteractiveMatch() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const career = useGameStore(s => s.career);
   const interactiveMatch = useGameStore(s => s.interactiveMatch);
   const finishInteractiveMatch = useGameStore(s => s.finishInteractiveMatch);
 
   const [selectedChamp, setSelectedChamp] = useState<string>(career?.championPool[0] || 'Aatrox');
-  const [step, setStep] = useState<MatchPhaseStep | 'map_macro'>('champion_select');
+  const [step, setStep] = useState<'champion_select' | 'laning' | 'minimap_radar' | 'mid_game' | 'late_game' | 'summary'>('champion_select');
   const [selectedChoiceIdx, setSelectedChoiceIdx] = useState<number | null>(null);
   const [playerScore, setPlayerScore] = useState(50);
   const [opponentScore, setOpponentScore] = useState(50);
@@ -174,17 +262,24 @@ export function InteractiveMatch() {
   const currentPatch = career.currentPatch || { patchVersion: '15.1', season: 15, tiers: {} };
   const champPool = career.championPool || [];
   const poolChamps = ALL_CHAMPIONS.filter(c => champPool.includes(c.id));
+  const roleChamps = getChampionsByRole(career.role);
+  
   // Pick opponent champion for the lane from match state
   const enemyChampId = interactiveMatch.enemyChampion || roleChamps.find(c => !champPool.includes(c.id))?.id || roleChamps[0].id;
   const enemyChamp = ALL_CHAMPIONS.find(c => c.id === enemyChampId) || roleChamps[0];
 
   const matchup = getMatchupAdvantage(selectedChamp, enemyChamp.id);
   const eloInfo = calculateEloDifficulty(career.rank.tier, career.stats);
+  const currentChampObj = ALL_CHAMPIONS.find(c => c.id === selectedChamp);
+
+  const currentScenario =
+    step === 'laning' ? LANING_SCENARIO :
+    step === 'mid_game' ? MID_SCENARIO :
+    step === 'late_game' ? LATE_SCENARIO : null;
 
   const currentChoices =
     step === 'laning' ? LANING_CHOICES :
     step === 'mid_game' ? MID_CHOICES :
-    step === 'map_macro' ? MAP_MACRO_CHOICES :
     step === 'late_game' ? LATE_CHOICES : [];
 
   function handleConfirmChamp() {
@@ -194,6 +289,26 @@ export function InteractiveMatch() {
     setSelectedChoiceIdx(null);
   }
 
+  function handleMinimapComplete(success: boolean, scoreBonus: number, logText: string) {
+    if (success) {
+      setPlayerScore(prev => Math.min(100, prev + scoreBonus));
+    } else {
+      setOpponentScore(prev => Math.min(100, prev + Math.abs(scoreBonus)));
+    }
+
+    setLogs(prev => [
+      ...prev,
+      {
+        phase: 'MINIMAP RADAR',
+        text: logText,
+        success,
+        scoreDelta: scoreBonus,
+      },
+    ]);
+
+    setStep('mid_game');
+  }
+
   function handleConfirmTacticalChoice() {
     if (selectedChoiceIdx === null) return;
     const choice = currentChoices[selectedChoiceIdx];
@@ -201,20 +316,27 @@ export function InteractiveMatch() {
 
     const statVal = career!.stats[choice.statKey];
     const champTier = currentPatch.tiers[selectedChamp]?.tier || 'A';
-    const tierBonus = champTier === 'S+' ? 12 : champTier === 'S' ? 8 : champTier === 'A' ? 4 : champTier === 'B' ? 0 : -6;
-    const mastery = career!.masteries[selectedChamp]?.masteryLevel || 1;
+    const tierBonus = champTier === 'S+' ? 10 : champTier === 'S' ? 6 : champTier === 'A' ? 3 : champTier === 'B' ? 0 : -5;
+    const mastery = career!.masteries?.[selectedChamp]?.masteryLevel || 1;
     const masteryBonus = mastery * 2;
+
+    // Check synergy with champion playstyle
+    const isSynergy = currentChampObj && choice.synergy && currentChampObj.playstyle.toLowerCase().includes(choice.synergy.toLowerCase());
+    const synergyBonus = isSynergy ? 18 : 0;
+
+    // Matchup modifier
+    const matchupBonus = matchup.scoreBonus > 0 ? 8 : matchup.scoreBonus < 0 ? -8 : 0;
 
     // Tactical Check DC adjusted by Champion Counter Matchup & Rank Tier Elo Requirement
     const eloPenalty = Math.max(-8, Math.min(15, Math.floor((eloInfo.targetStat - eloInfo.playerAvg) * 0.35)));
-    const finalDC = choice.difficulty + matchup.difficultyDelta + eloPenalty;
+    const finalDC = choice.difficulty + eloPenalty;
 
-    const totalScore = statVal + tierBonus + masteryBonus + (Math.random() * 24 - 12);
+    const totalScore = statVal + tierBonus + masteryBonus + synergyBonus + matchupBonus + (Math.random() * 24 - 12);
     const success = totalScore >= finalDC;
-    const effect = success ? choice.successEffect : choice.failEffect;
+    const scoreDelta = success ? choice.successScore : choice.failScore;
 
-    const newPScore = Math.max(0, Math.min(100, playerScore + (success ? effect.scoreDelta : 0)));
-    const newOScore = Math.max(0, Math.min(100, opponentScore + (!success ? Math.abs(effect.scoreDelta) : 0)));
+    const newPScore = Math.max(0, Math.min(100, playerScore + (success ? scoreDelta : 0)));
+    const newOScore = Math.max(0, Math.min(100, opponentScore + (!success ? Math.abs(scoreDelta) : 0)));
 
     setTimeout(() => {
       setPlayerScore(newPScore);
@@ -222,23 +344,25 @@ export function InteractiveMatch() {
       setLogs(prev => [
         ...prev,
         {
-          phase: step === 'map_macro' ? 'MAP MACRO' : step.toUpperCase().replace('_', ' '),
-          text: t(effect.textKey as any),
+          phase: step.toUpperCase().replace('_', ' '),
+          text: lang === 'cs'
+            ? (success ? choice.successTextCs : choice.failTextCs)
+            : (success ? choice.successTextEn : choice.failTextEn),
           success,
-          scoreDelta: effect.scoreDelta,
+          scoreDelta,
         },
       ]);
       setResolving(false);
       setSelectedChoiceIdx(null);
 
-      if (step === 'laning') setStep('mid_game');
-      else if (step === 'mid_game') setStep('map_macro');
-      else if (step === 'map_macro') setStep('late_game');
+      if (step === 'laning') setStep('minimap_radar');
+      else if (step === 'mid_game') setStep('late_game');
       else if (step === 'late_game') setStep('summary');
     }, 600);
   }
 
   const isWon = playerScore >= opponentScore;
+  const isCs = lang === 'cs';
 
   return (
     <div className="screen-bg min-h-screen py-8 px-4 flex items-center justify-center">
@@ -262,8 +386,8 @@ export function InteractiveMatch() {
               <div className="text-xs font-bold text-slate-400 font-heading tracking-wider uppercase">
                 {step === 'champion_select' ? 'FÁZE DRAFTU' :
                  step === 'laning' ? 'EARLY GAME' :
+                 step === 'minimap_radar' ? '🗺️ RADAR MINIMAPY' :
                  step === 'mid_game' ? 'MID GAME' :
-                 step === 'map_macro' ? '🗺️ MAPA ROZHODNUTÍ' :
                  step === 'late_game' ? 'LATE GAME' : 'VÝSLEDEK'}
               </div>
               <div className="flex items-center gap-2">
@@ -350,7 +474,7 @@ export function InteractiveMatch() {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {poolChamps.map(champ => {
                   const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0 };
-                  const mastery = career.masteries[champ.id]?.masteryLevel || 1;
+                  const mastery = career.masteries?.[champ.id]?.masteryLevel || 1;
                   const isSelected = selectedChamp === champ.id;
                   const champMatchup = getMatchupAdvantage(champ.id, enemyChamp.id);
 
@@ -423,39 +547,45 @@ export function InteractiveMatch() {
             </motion.div>
           )}
 
-          {/* STEP 2, 3, 4, 5: TACTICAL PHASES & MAP SITUATION */}
-          {(step === 'laning' || step === 'mid_game' || step === 'map_macro' || step === 'late_game') && (
+          {/* STEP 2: MINIMAP RADAR MINI-GAME */}
+          {step === 'minimap_radar' && (
+            <motion.div
+              key="radar"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <MinimapRadar onComplete={handleMinimapComplete} lang={lang} />
+            </motion.div>
+          )}
+
+          {/* STEP 3, 4, 5: TACTICAL DECISION PHASES */}
+          {(step === 'laning' || step === 'mid_game' || step === 'late_game') && (
             <motion.div
               key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
               className="space-y-4"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-white uppercase font-heading tracking-wide">
-                    {step === 'laning' ? t('match.phase_laning') :
-                     step === 'mid_game' ? t('match.phase_mid') :
-                     step === 'map_macro' ? '🗺️ LoL Mapa: Rozhodující Makro Situace' : t('match.phase_late')}
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    {step === 'map_macro'
-                      ? 'Nepřátelský tým je oslaben po boji! Zvol další postup na mapě:'
-                      : t('match.select_tactical_action')}
+              {/* Dynamic Tactical Scenario Banner */}
+              {currentScenario && (
+                <div className="bg-gradient-to-r from-blue-950/40 to-slate-900/60 p-4 rounded-xl border border-blue-800/40 space-y-1">
+                  <span className="text-[11px] font-black uppercase text-cyan-400 tracking-wider font-heading">
+                    {isCs ? currentScenario.titleCs : currentScenario.titleEn}
+                  </span>
+                  <p className="text-xs text-slate-200 leading-relaxed">
+                    {isCs ? currentScenario.descCs : currentScenario.descEn}
                   </p>
                 </div>
-                <div className="flex items-center gap-1.5 bg-rift-card px-3 py-1.5 rounded-lg border border-rift-border">
-                  <img src={getChampIconUrl(selectedChamp)} className="w-5 h-5 rounded" alt="" />
-                  <span className="text-xs font-bold text-gold-400">{selectedChamp}</span>
-                </div>
-              </div>
+              )}
 
               {/* Tactical Choices */}
               <div className="space-y-3">
                 {currentChoices.map((choice, i) => {
                   const isSelected = selectedChoiceIdx === i;
                   const statValue = career.stats[choice.statKey];
+                  const hasSynergy = currentChampObj && choice.synergy && currentChampObj.playstyle.toLowerCase().includes(choice.synergy.toLowerCase());
 
                   return (
                     <motion.div
@@ -468,25 +598,44 @@ export function InteractiveMatch() {
                           : 'border-rift-border bg-rift-card hover:border-slate-400'
                       }`}
                     >
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="space-y-1">
-                          <p className="text-sm font-bold text-white">{t(choice.titleKey as any)}</p>
-                          <p className="text-xs text-slate-300">{t(choice.descriptionKey as any)}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black text-gold-400 bg-gold-950/60 px-2 py-0.5 rounded border border-gold-700/40 font-mono">
+                              {isCs ? choice.tagCs : choice.tagEn}
+                            </span>
+                            {hasSynergy && (
+                              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-700/50">
+                                🌟 Synergie s {currentChampObj?.playstyle} (+18)
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm font-bold text-white pt-0.5">
+                            {isCs ? choice.titleCs : choice.titleEn}
+                          </p>
+                          <p className="text-xs text-slate-300">
+                            {isCs ? choice.descCs : choice.descEn}
+                          </p>
                         </div>
-                        {isSelected && <span className="text-gold-400 font-black text-base">✓</span>}
+                        {isSelected && <span className="text-gold-400 font-black text-base shrink-0">✓</span>}
                       </div>
 
-                      <div className="flex items-center gap-3 mt-3 pt-2 border-t border-rift-border/60 text-xs">
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-rift-border/60 text-xs">
                         <span className="text-slate-400 font-medium">
                           Testuje: <strong className="text-slate-200">{t(`stat.${choice.statKey}` as any)} ({statValue})</strong>
                         </span>
-                        <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
-                          choice.risk === 'High' ? 'bg-red-950/70 text-red-400 border border-red-800' :
-                          choice.risk === 'Medium' ? 'bg-yellow-950/70 text-yellow-400 border border-yellow-800' :
-                          'bg-green-950/70 text-green-400 border border-green-800'
-                        }`}>
-                          {choice.risk} Riziko
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[11px] text-green-400 font-bold font-mono">
+                            +{choice.successScore} / {choice.failScore}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded font-bold text-[10px] ${
+                            choice.risk === 'High' ? 'bg-red-950/70 text-red-400 border border-red-800' :
+                            choice.risk === 'Medium' ? 'bg-yellow-950/70 text-yellow-400 border border-yellow-800' :
+                            'bg-green-950/70 text-green-400 border border-green-800'
+                          }`}>
+                            {choice.risk} Riziko
+                          </span>
+                        </div>
                       </div>
                     </motion.div>
                   );
@@ -556,14 +705,14 @@ export function InteractiveMatch() {
 
               {/* Combat Recap */}
               <Card className="p-4 text-left space-y-2">
-                <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Průběh Zápasu</p>
+                <p className="text-xs text-slate-400 uppercase tracking-wider font-bold">Průběh Zápasu & Rozhodnutí</p>
                 <div className="space-y-1 text-xs">
                   {logs.map((log, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <span className={log.success ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
                         {log.success ? '✓' : '✗'}
                       </span>
-                      <span className="text-slate-300">{log.text}</span>
+                      <span className="text-slate-300"><strong>[{log.phase}]:</strong> {log.text}</span>
                     </div>
                   ))}
                 </div>
