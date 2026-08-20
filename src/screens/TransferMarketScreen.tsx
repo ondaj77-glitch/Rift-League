@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { Card, CardHeader } from '../components/ui/Card';
+import { TeamLogo } from '../components/ui/TeamLogo';
 import { REGION_FLAGS } from '../data/teams';
 
 export function TransferMarketScreen() {
@@ -23,20 +24,23 @@ export function TransferMarketScreen() {
 
       {/* Current Team & Roster Status */}
       <Card className="p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div>
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
-              Organization & Contract
-            </span>
-            <div className="flex items-center gap-2 mt-1">
-              <h2 className="text-xl font-bold text-white">
-                {career.currentTeam ? career.currentTeam.name : 'Free Agent / Unsigned'}
-              </h2>
-              {career.currentTeam && (
-                <span className="text-xs text-slate-400">
-                  ({REGION_FLAGS[career.currentTeam.region]} {career.currentTeam.region})
-                </span>
-              )}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <TeamLogo team={career.currentTeam} size="lg" />
+            <div>
+              <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">
+                Organization & Contract
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <h2 className="text-xl font-bold text-white">
+                  {career.currentTeam ? career.currentTeam.name : 'Free Agent / Unsigned'}
+                </h2>
+                {career.currentTeam && (
+                  <span className="text-xs text-slate-400">
+                    ({REGION_FLAGS[career.currentTeam.region]} {career.currentTeam.region})
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -120,7 +124,7 @@ export function TransferMarketScreen() {
                 className="p-4 rounded-xl border border-rift-border bg-rift-surface flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-3.5 h-3.5 rounded-full flex-shrink-0" style={{ backgroundColor: offer.team.color }} />
+                  <TeamLogo team={offer.team} size="md" />
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-white text-base">{offer.team.name}</h4>

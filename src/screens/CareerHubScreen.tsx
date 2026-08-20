@@ -7,6 +7,7 @@ import { StatBar } from '../components/ui/StatBar';
 import { Card, CardHeader } from '../components/ui/Card';
 import { RoleBadge } from '../components/ui/RoleBadge';
 import { LanguageSwitcher } from '../components/ui/LanguageSwitcher';
+import { TeamLogo } from '../components/ui/TeamLogo';
 import { REGION_FLAGS } from '../data/teams';
 import { TIER_ICONS } from '../data/ranks';
 import { SoloQScreen } from './SoloQScreen';
@@ -79,11 +80,15 @@ export function CareerHubScreen() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-rift-card border border-gold-600/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl"
         >
-          {/* Identity & Rank */}
+          {/* Identity & Rank & Team */}
           <div className="flex items-center gap-3">
-            <div className="text-3xl bg-rift-surface p-2 rounded-xl border border-rift-border">
-              {rankIcon}
-            </div>
+            {career.currentTeam ? (
+              <TeamLogo team={career.currentTeam} size="md" />
+            ) : (
+              <div className="text-3xl bg-rift-surface p-2 rounded-xl border border-rift-border">
+                {rankIcon}
+              </div>
+            )}
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-black text-white uppercase font-heading tracking-wide">
@@ -185,14 +190,16 @@ export function CareerHubScreen() {
                   <span className="text-xs text-slate-400 uppercase font-semibold">
                     {t('hub.status_title' as any) || 'Status'}
                   </span>
-                  <div className="flex items-center gap-2 mt-0.5">
+                  <div className="flex items-center gap-3 mt-1">
                     {career.currentTeam ? (
                       <>
-                        <div className="w-3 h-3 rounded-full" style={{ backgroundColor: career.currentTeam.color }} />
-                        <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
-                        <span className="text-xs text-slate-400 font-bold">
-                          ({(lifestyle.rosterStatus ?? 'free_agent') === 'starter' ? t('hub.starter' as any) : t('hub.substitute' as any)})
-                        </span>
+                        <TeamLogo team={career.currentTeam} size="sm" />
+                        <div>
+                          <span className="font-bold text-white text-base">{career.currentTeam.name}</span>
+                          <span className="text-xs text-slate-400 font-bold ml-2">
+                            ({(lifestyle.rosterStatus ?? 'free_agent') === 'starter' ? t('hub.starter' as any) : t('hub.substitute' as any)})
+                          </span>
+                        </div>
                       </>
                     ) : (
                       <span className="font-bold text-amber-400 text-base">

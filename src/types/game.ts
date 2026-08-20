@@ -25,7 +25,8 @@ export type HubTab = 'overview' | 'soloq' | 'champions' | 'lifestyle' | 'transfe
 
 export type SplitName = 'Winter' | 'Spring' | 'Summer';
 export type RosterStatus = 'starter' | 'benched' | 'sub' | 'free_agent';
-export type Housing = 'parents_home' | 'budget_room' | 'gaming_house' | 'luxury_apt';
+export type Housing = 'parents_home' | 'budget_room' | 'modern_apt' | 'gaming_house' | 'luxury_apt';
+export type NutritionPlan = 'home_cooked' | 'chef_meals' | 'groceries' | 'meal_prep' | 'fast_food' | 'none';
 
 // ─── Player Stats ─────────────────────────────────────────────────────────────
 
@@ -51,11 +52,12 @@ export interface Finances {
 
 export interface Lifestyle {
   housing: Housing;
-  pcLevel: number;         // 1: Potato PC, 2: 144Hz Rig, 3: Pro Esport 360Hz Beast
+  pcLevel: number;         // 1: Potato PC, 2: 144Hz Rig, 3: Esports 240Hz, 4: Pro 360Hz Beast
   energy: number;          // 0–100 energy per week
   maxEnergy: number;
   coachTrust: number;      // 0–100 (if < 25 => benched, if 0 => fired)
   rosterStatus: RosterStatus;
+  nutrition?: NutritionPlan;
 }
 
 // ─── Champion Pool & Meta ─────────────────────────────────────────────────────

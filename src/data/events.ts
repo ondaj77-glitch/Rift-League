@@ -2710,6 +2710,193 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // ── High Stakes Financial Events ──────────────────────────────────────────
+  {
+    id: 'financial_crypto_scam_or_moon',
+    category: 'social',
+    titleKey: 'event.financial_crypto_scam_or_moon.title',
+    descriptionKey: 'event.financial_crypto_scam_or_moon.desc',
+    weight: 8,
+    minAge: 18,
+    choices: [
+      {
+        textKey: 'event.financial_crypto_scam_or_moon.a',
+        effects: { savings: -3000, mental: -8, reputation: 6 },
+        nextTextKey: 'event.financial_crypto_scam_or_moon.a.result',
+      },
+      {
+        textKey: 'event.financial_crypto_scam_or_moon.b',
+        effects: { savings: 350, gameKnowledge: 4 },
+        nextTextKey: 'event.financial_crypto_scam_or_moon.b.result',
+      },
+      {
+        textKey: 'event.financial_crypto_scam_or_moon.c',
+        effects: { savings: -800, mental: 12, adaptability: 6 },
+        nextTextKey: 'event.financial_crypto_scam_or_moon.c.result',
+      },
+      {
+        textKey: 'event.financial_crypto_scam_or_moon.d',
+        effects: { reputation: 18, communication: 8 },
+        nextTextKey: 'event.financial_crypto_scam_or_moon.d.result',
+      },
+    ],
+  },
+
+  {
+    id: 'financial_riot_conduct_fine',
+    category: 'social',
+    titleKey: 'event.financial_riot_conduct_fine.title',
+    descriptionKey: 'event.financial_riot_conduct_fine.desc',
+    weight: 8,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.financial_riot_conduct_fine.a',
+        effects: { savings: -2500, mental: 4 },
+        nextTextKey: 'event.financial_riot_conduct_fine.a.result',
+      },
+      {
+        textKey: 'event.financial_riot_conduct_fine.b',
+        effects: { savings: -1000, reputation: 14, communication: 8 },
+        nextTextKey: 'event.financial_riot_conduct_fine.b.result',
+      },
+      {
+        textKey: 'event.financial_riot_conduct_fine.c',
+        effects: { savings: -1500, gameKnowledge: 6 },
+        nextTextKey: 'event.financial_riot_conduct_fine.c.result',
+      },
+      {
+        textKey: 'event.financial_riot_conduct_fine.d',
+        effects: { reputation: -5, mental: 10, mechanics: 8 },
+        nextTextKey: 'event.financial_riot_conduct_fine.d.result',
+      },
+    ],
+  },
+
+  {
+    id: 'financial_luxury_supercar',
+    category: 'social',
+    titleKey: 'event.financial_luxury_supercar.title',
+    descriptionKey: 'event.financial_luxury_supercar.desc',
+    weight: 7,
+    minAge: 18,
+    choices: [
+      {
+        textKey: 'event.financial_luxury_supercar.a',
+        effects: { savings: -6000, reputation: 25, mental: 15 },
+        nextTextKey: 'event.financial_luxury_supercar.a.result',
+      },
+      {
+        textKey: 'event.financial_luxury_supercar.b',
+        effects: { savings: -2500, mental: 8 },
+        nextTextKey: 'event.financial_luxury_supercar.b.result',
+      },
+      {
+        textKey: 'event.financial_luxury_supercar.c',
+        effects: { savings: 300, adaptability: 6 },
+        nextTextKey: 'event.financial_luxury_supercar.c.result',
+      },
+      {
+        textKey: 'event.financial_luxury_supercar.d',
+        effects: { savings: -3500, mental: 20, reputation: 8 },
+        nextTextKey: 'event.financial_luxury_supercar.d.result',
+      },
+    ],
+  },
+
+  {
+    id: 'financial_streaming_studio_renovation',
+    category: 'social',
+    titleKey: 'event.financial_streaming_studio_renovation.title',
+    descriptionKey: 'event.financial_streaming_studio_renovation.desc',
+    weight: 7,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.financial_streaming_studio_renovation.a',
+        effects: { savings: -3500, reputation: 20, mechanics: 8 },
+        nextTextKey: 'event.financial_streaming_studio_renovation.a.result',
+      },
+      {
+        textKey: 'event.financial_streaming_studio_renovation.b',
+        effects: { savings: -600, mental: 6, reputation: 5 },
+        nextTextKey: 'event.financial_streaming_studio_renovation.b.result',
+      },
+      {
+        textKey: 'event.financial_streaming_studio_renovation.c',
+        effects: { reputation: 10, communication: 6 },
+        nextTextKey: 'event.financial_streaming_studio_renovation.c.result',
+      },
+      {
+        textKey: 'event.financial_streaming_studio_renovation.d',
+        effects: { mental: 6, adaptability: 4 },
+        nextTextKey: 'event.financial_streaming_studio_renovation.d.result',
+      },
+    ],
+  },
+
+  {
+    id: 'financial_agent_contract_dispute',
+    category: 'contract',
+    titleKey: 'event.financial_agent_contract_dispute.title',
+    descriptionKey: 'event.financial_agent_contract_dispute.desc',
+    weight: 7,
+    minAge: 18,
+    choices: [
+      {
+        textKey: 'event.financial_agent_contract_dispute.a',
+        effects: { savings: -3000, mental: 8 },
+        nextTextKey: 'event.financial_agent_contract_dispute.a.result',
+      },
+      {
+        textKey: 'event.financial_agent_contract_dispute.b',
+        effects: { savings: -4500, reputation: 15, gameKnowledge: 8 },
+        nextTextKey: 'event.financial_agent_contract_dispute.b.result',
+      },
+      {
+        textKey: 'event.financial_agent_contract_dispute.c',
+        effects: { savings: -1200, coachTrust: 8, communication: 6 },
+        nextTextKey: 'event.financial_agent_contract_dispute.c.result',
+      },
+      {
+        textKey: 'event.financial_agent_contract_dispute.d',
+        effects: { reputation: -6, mental: 10 },
+        nextTextKey: 'event.financial_agent_contract_dispute.d.result',
+      },
+    ],
+  },
+
+  {
+    id: 'financial_charity_marathon',
+    category: 'social',
+    titleKey: 'event.financial_charity_marathon.title',
+    descriptionKey: 'event.financial_charity_marathon.desc',
+    weight: 7,
+    minAge: 17,
+    choices: [
+      {
+        textKey: 'event.financial_charity_marathon.a',
+        effects: { savings: -2500, reputation: 30, mental: 15 },
+        nextTextKey: 'event.financial_charity_marathon.a.result',
+      },
+      {
+        textKey: 'event.financial_charity_marathon.b',
+        effects: { savings: -500, reputation: 15, mental: 8 },
+        nextTextKey: 'event.financial_charity_marathon.b.result',
+      },
+      {
+        textKey: 'event.financial_charity_marathon.c',
+        effects: { reputation: 20, communication: 15 },
+        nextTextKey: 'event.financial_charity_marathon.c.result',
+      },
+      {
+        textKey: 'event.financial_charity_marathon.d',
+        effects: { mechanics: 8, gameKnowledge: 6 },
+        nextTextKey: 'event.financial_charity_marathon.d.result',
+      },
+    ],
+  },
 ];
 
 // Clean dual-pool event router based strictly on team contract status

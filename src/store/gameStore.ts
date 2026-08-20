@@ -60,6 +60,8 @@ interface GameStore extends GameState {
   swapPoolChampion: (oldChampId: string, newChampId: string) => void;
   performWeeklyAction: (action: 'job' | 'stream' | 'vod' | 'gym') => void;
   upgradePC: () => void;
+  changeHousing: (housing: Housing) => void;
+  setNutritionPlan: (nutrition: NutritionPlan) => void;
 
   // Transfers & Contracts
   searchForTeamOffers: () => void;
@@ -124,19 +126,27 @@ export const useGameStore = create<GameStore>()(
         const isProdigy = mode === 'prodigy';
         const startAge = isProdigy ? 14 : 18;
 
+        // Calibrated starting stats:
+        // Prodigy starts at ~35-40 (Bronze elo, raw diamond in rough)
+        // Pro Debut starts at ~72-78 (Diamond I elo, battle-tested competitive starter)
         const stats: PlayerStats = {
-          mechanics:     clamp((base.mechanics || 50) + (bonus.mechanics || 0) - (isProdigy ? 15 : 0)),
-          gameKnowledge: clamp((base.gameKnowledge || 50) + (bonus.gameKnowledge || 0) - (isProdigy ? 15 : 0)),
-          communication: clamp((base.communication || 50) + (bonus.communication || 0) - (isProdigy ? 15 : 0)),
-          mental:        clamp((base.mental || 50) + (bonus.mental || 0)),
-          adaptability:  clamp((base.adaptability || 50) + (bonus.adaptability || 0)),
-          reputation:    isProdigy ? 5 : clamp((base.reputation || 20) + (bonus.reputation || 0)),
+          mechanics:     clamp((base.mechanics || 50) + (bonus.mechanics || 0) + (isProdigy ? -15 : 22)),
+          gameKnowledge: clamp((base.gameKnowledge || 50) + (bonus.gameKnowledge || 0) + (isProdigy ? -15 : 20)),
+          communication: clamp((base.communication || 50) + (bonus.communication || 0) + (isProdigy ? -15 : 20)),
+          mental:        clamp((base.mental || 50) + (bonus.mental || 0) + (isProdigy ? 0 : 16)),
+          adaptability:  clamp((base.adaptability || 50) + (bonus.adaptability || 0) + (isProdigy ? 0 : 16)),
+          reputation:    isProdigy ? 5 : clamp((base.reputation || 20) + (bonus.reputation || 0) + 15),
         };
 
         // Masteries init
         const masteries: Record<string, ChampionMastery> = {};
         championPool.forEach(id => {
-          masteries[id] = { championId: id, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
+          masteries[id] = {
+            championId: id,
+            masteryLevel: isProdigy ? 1 : 3,
+            gamesPlayed: isProdigy ? 0 : 25,
+            wins: isProdigy ? 0 : 15,
+          };
         });
 
         // Patch init with full rich details
@@ -176,8 +186,8 @@ export const useGameStore = create<GameStore>()(
             lp: startLP,
             globalRank: calculateGlobalRank(startTier, startLP),
           },
-          soloqWins: 0,
-          soloqLosses: 0,
+          soloqWins: isProdigy ? 0 : 35,
+          soloqLosses: isProdigy ? 0 : 18,
           mmr: isProdigy ? 800 : 2200,
           championPool,
           masteries,
@@ -195,12 +205,13 @@ export const useGameStore = create<GameStore>()(
             streamingIncome: 0,
           },
           lifestyle: {
-            housing: isProdigy ? 'parents_home' : 'budget_room',
-            pcLevel: 1,
+            housing: isProdigy ? 'parents_home' : (startTeam ? 'gaming_house' : 'budget_room'),
+            pcLevel: isProdigy ? 1 : 2, // Starts with 144Hz Rig if already in a pro team
             energy: 100,
-            maxEnergy: 100,
+            maxEnergy: isProdigy ? 100 : 115,
             coachTrust: startTeam ? 75 : 0,
             rosterStatus: startTeam ? 'starter' : 'free_agent',
+            nutrition: isProdigy ? 'home_cooked' : (startTeam ? 'chef_meals' : 'groceries'),
           },
           teamStrength: startTeam ? startTeam.strength : 0,
           wins: 0,
@@ -617,6 +628,73 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
+    changeHousing: (newHousing) => {
+      const { career, addNotification } = get();
+      if (!career) return;
+      const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+
+      if (newHousing !== 'parents_home' && career.age < 18 && newHousing !== 'gaming_house') {
+        addNotification('⚠️ Pro samostatné odstěhování musíš mít alespoň 18 let!', 'negative', '🔞');
+        return;
+      }
+      if (newHousing === 'gaming_house' && !career.currentTeam) {
+        addNotification('⚠️ Týmový Gaming House vyžaduje aktivní smlouvu s esportovým týmem!', 'negative', '⚠️');
+        return;
+      }
+
+      const maxEnergyMap: Record<string, number> = {
+        parents_home: 100,
+        budget_room: 105,
+        modern_apt: 110,
+        gaming_house: 115,
+        luxury_apt: 120,
+      };
+
+      const newMaxEnergy = maxEnergyMap[newHousing] ?? 100;
+      const defaultNutrition = newHousing === 'parents_home' ? 'home_cooked' : newHousing === 'gaming_house' ? 'chef_meals' : (currentLifestyle.nutrition || 'groceries');
+
+      addNotification(`🏠 Přestěhoval ses do nového bydlení! (Max energie: ${newMaxEnergy}⚡)`, 'gold', '📦');
+
+      set(state => ({
+        career: {
+          ...state.career!,
+          lifestyle: {
+            ...currentLifestyle,
+            housing: newHousing,
+            maxEnergy: newMaxEnergy,
+            nutrition: defaultNutrition,
+          },
+        },
+      }));
+    },
+
+    setNutritionPlan: (newPlan) => {
+      const { career, addNotification } = get();
+      if (!career) return;
+      const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
+
+      if (currentLifestyle.housing === 'parents_home') {
+        addNotification('ℹ️ Bydlíš u rodičů – o stravu je automaticky a zdarma postaráno!', 'neutral', '🍲');
+        return;
+      }
+      if (currentLifestyle.housing === 'gaming_house') {
+        addNotification('ℹ️ V týmovém gaming housu vaří osobní šéfkuchař zdarma!', 'neutral', '👨‍🍳');
+        return;
+      }
+
+      addNotification(`🥗 Změněn týdenní stravovací plán!`, 'positive', '🍱');
+
+      set(state => ({
+        career: {
+          ...state.career!,
+          lifestyle: {
+            ...currentLifestyle,
+            nutrition: newPlan,
+          },
+        },
+      }));
+    },
+
       searchForTeamOffers: () => {
         const { career } = get();
         if (!career) return;
@@ -646,25 +724,27 @@ export const useGameStore = create<GameStore>()(
       },
 
       acceptTeamOffer: (offer) => {
-        const { career } = get();
+        const { career, addNotification } = get();
         if (!career) return;
+
         const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
         const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
+
+        addNotification(`✍️ Podepsána smlouva s ${offer.team.name}! ($${offer.salary.toLocaleString()}/rok)`, 'gold', '🎉');
 
         set(state => ({
           career: {
             ...state.career!,
             currentTeam: offer.team,
             teamStrength: offer.team.strength,
-            finances: {
-              ...currentFinances,
-              salary: offer.salary,
-            },
+            finances: { ...currentFinances, salary: offer.salary },
             lifestyle: {
               ...currentLifestyle,
-              rosterStatus: offer.role === 'Starter' ? 'starter' : 'sub',
+              rosterStatus: 'starter',
               coachTrust: 75,
               housing: 'gaming_house',
+              nutrition: 'chef_meals',
+              maxEnergy: 115,
             },
           },
           pendingOffers: [],
@@ -672,10 +752,13 @@ export const useGameStore = create<GameStore>()(
       },
 
       leaveTeam: () => {
-        const { career } = get();
-        if (!career) return;
+        const { career, addNotification } = get();
+        if (!career || !career.currentTeam) return;
+
         const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
         const currentFinances = career.finances || { salary: 0, savings: 300, monthlyExpenses: 0 };
+
+        addNotification(`📋 Smlouva s ${career.currentTeam.name} ukončena. Jsi volný hráč.`, 'negative', '📄');
 
         set(state => ({
           career: {
@@ -688,6 +771,8 @@ export const useGameStore = create<GameStore>()(
               rosterStatus: 'free_agent',
               coachTrust: 0,
               housing: 'budget_room',
+              nutrition: 'groceries',
+              maxEnergy: 105,
             },
           },
         }));
@@ -707,18 +792,27 @@ export const useGameStore = create<GameStore>()(
           pcLevel: 1,
           coachTrust: 50,
           rosterStatus: career.currentTeam ? 'starter' : 'free_agent',
+          nutrition: 'home_cooked',
         };
 
-        const housingMaxEnergy = lifestyle.housing === 'luxury_apt' ? 115 : 100;
-        const newEnergy = housingMaxEnergy;
+        const maxEnergyMap: Record<string, number> = {
+          parents_home: 100,
+          budget_room: 105,
+          modern_apt: 110,
+          gaming_house: 115,
+          luxury_apt: 120,
+        };
+        const housingMaxEnergy = maxEnergyMap[lifestyle.housing ?? 'parents_home'] ?? 100;
+        let newEnergy = housingMaxEnergy;
 
         // Charge weekly living costs
         const currentSavings = career.finances?.savings ?? 300;
         const housingRents: Record<string, number> = {
           parents_home: 0,
           budget_room: 450,
+          modern_apt: 1200,
           gaming_house: 0,
-          luxury_apt: 2800,
+          luxury_apt: 3200,
         };
         const monthlyRent = housingRents[lifestyle.housing ?? 'parents_home'] ?? 0;
         const weeklyRent = Math.floor(monthlyRent / 4);
@@ -737,8 +831,67 @@ export const useGameStore = create<GameStore>()(
           }
         }
 
-        // Fatigue / Burnout check if player was at 0 energy or mental < 30
         let newStats = { ...(career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 }) };
+
+        // Housing Perks
+        if (updatedHousing === 'modern_apt') {
+          newStats.mental = clamp(newStats.mental + 4);
+        } else if (updatedHousing === 'gaming_house') {
+          newStats.communication = clamp(newStats.communication + 2);
+        } else if (updatedHousing === 'luxury_apt') {
+          newStats.mental = clamp(newStats.mental + 8);
+          newStats.reputation = clamp((newStats.reputation ?? 10) + 2);
+        }
+
+        // Food & Nutrition Processing
+        const currentNutrition = (updatedHousing === 'parents_home')
+          ? 'home_cooked'
+          : (updatedHousing === 'gaming_house')
+          ? 'chef_meals'
+          : (lifestyle.nutrition || 'groceries');
+
+        if (currentNutrition === 'home_cooked') {
+          newStats.mental = clamp(newStats.mental + 2);
+        } else if (currentNutrition === 'chef_meals') {
+          newStats.mental = clamp(newStats.mental + 4);
+          newStats.mechanics = clamp(newStats.mechanics + 2);
+        } else if (currentNutrition === 'groceries') {
+          const groceryCost = 40;
+          if (newSavings >= groceryCost) {
+            newSavings -= groceryCost;
+            newStats.mental = clamp(newStats.mental + 4);
+          } else {
+            get().addNotification('⚠️ Nemáš peníze na jídlo! Hladovíš.', 'negative', '🥫');
+            newStats.mental = clamp(newStats.mental - 6);
+            newEnergy = Math.max(50, newEnergy - 15);
+          }
+        } else if (currentNutrition === 'meal_prep') {
+          const mealCost = 120;
+          if (newSavings >= mealCost) {
+            newSavings -= mealCost;
+            newStats.mental = clamp(newStats.mental + 6);
+          } else {
+            get().addNotification('⚠️ Nedostatek úspor na krabičkovou dietu!', 'negative', '🍱');
+            newStats.mental = clamp(newStats.mental - 6);
+            newEnergy = Math.max(50, newEnergy - 15);
+          }
+        } else if (currentNutrition === 'fast_food') {
+          const fastFoodCost = 25;
+          if (newSavings >= fastFoodCost) {
+            newSavings -= fastFoodCost;
+            newStats.mental = clamp(newStats.mental - 2);
+            newStats.mechanics = clamp(newStats.mechanics - 2);
+          } else {
+            newStats.mental = clamp(newStats.mental - 6);
+            newEnergy = Math.max(50, newEnergy - 15);
+          }
+        } else if (currentNutrition === 'none') {
+          newStats.mental = clamp(newStats.mental - 6);
+          newEnergy = Math.max(50, newEnergy - 15);
+          get().addNotification('⚠️ Vynechal jsi stravu! (-15 Max Energie, -6 Mentál)', 'negative', '⚠️');
+        }
+
+        // Fatigue / Burnout check if player was at 0 energy or mental < 30
         if (lifestyle.energy === 0 && newStats.mental < 35) {
           newStats.mechanics = clamp(newStats.mechanics - 1);
           newStats.mental = clamp(newStats.mental - 1);
