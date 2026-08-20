@@ -5,6 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { ALL_CHAMPIONS, getChampIconUrl, getChampSplashUrl, getChampionsByRole, TIER_PRIORITY, generateMetaPatch } from '../data/champions';
+import { getChampionCounters } from '../data/matchups';
 
 export function ChampionPoolScreen() {
   const { t } = useTranslation();
@@ -150,6 +151,25 @@ export function ChampionPoolScreen() {
               <p className="text-[11px] text-slate-300 italic bg-rift-surface/90 p-2 rounded border border-rift-border/50 relative z-10">
                 "{meta.note}"
               </p>
+
+              {/* Matchup Counters Box */}
+              {(() => {
+                const counterInfo = getChampionCounters(champ.id);
+                return (
+                  <div className="space-y-1 relative z-10 text-[11px] bg-slate-950/60 p-2 rounded-lg border border-slate-800">
+                    {counterInfo.counters.length > 0 && (
+                      <p className="text-emerald-400 font-medium truncate">
+                        🎯 <strong>Silný vs:</strong> {counterInfo.counters.slice(0, 3).join(', ')}
+                      </p>
+                    )}
+                    {counterInfo.counteredBy.length > 0 && (
+                      <p className="text-red-400 font-medium truncate">
+                        ⚠️ <strong>Slabý vs:</strong> {counterInfo.counteredBy.slice(0, 3).join(', ')}
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Swap Button */}
               <Button

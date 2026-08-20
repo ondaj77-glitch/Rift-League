@@ -139,6 +139,9 @@ const LATE_CHOICES: TacticalChoice[] = [
   },
 ];
 
+import { ALL_CHAMPIONS, getChampIconUrl, getChampionsByRole } from '../../data/champions';
+import { getMatchupAdvantage } from '../../data/matchups';
+import { calculateEloDifficulty } from '../../data/ranks';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
 export function InteractiveMatch() {
@@ -175,6 +178,9 @@ export function InteractiveMatch() {
   // Pick opponent champion for the lane
   const enemyChamp = roleChamps.find(c => !champPool.includes(c.id)) || roleChamps[0];
 
+  const matchup = getMatchupAdvantage(selectedChamp, enemyChamp.id);
+  const eloInfo = calculateEloDifficulty(career.rank.tier, career.stats);
+
   const currentChoices =
     step === 'laning' ? LANING_CHOICES :
     step === 'mid_game' ? MID_CHOICES :
@@ -182,6 +188,8 @@ export function InteractiveMatch() {
     step === 'late_game' ? LATE_CHOICES : [];
 
   function handleConfirmChamp() {
+    setPlayerScore(Math.max(20, Math.min(80, 50 + matchup.scoreBonus)));
+    setOpponentScore(50);
     setStep('laning');
     setSelectedChoiceIdx(null);
   }
@@ -197,8 +205,12 @@ export function InteractiveMatch() {
     const mastery = career!.masteries[selectedChamp]?.masteryLevel || 1;
     const masteryBonus = mastery * 2;
 
-    const totalScore = statVal + tierBonus + masteryBonus + (Math.random() * 26 - 13);
-    const success = totalScore >= choice.difficulty;
+    // Tactical Check DC adjusted by Champion Counter Matchup & Rank Tier Elo Requirement
+    const eloPenalty = Math.max(-8, Math.min(15, Math.floor((eloInfo.targetStat - eloInfo.playerAvg) * 0.35)));
+    const finalDC = choice.difficulty + matchup.difficultyDelta + eloPenalty;
+
+    const totalScore = statVal + tierBonus + masteryBonus + (Math.random() * 24 - 12);
+    const success = totalScore >= finalDC;
     const effect = success ? choice.successEffect : choice.failEffect;
 
     const newPScore = Math.max(0, Math.min(100, playerScore + (success ? effect.scoreDelta : 0)));
@@ -298,16 +310,32 @@ export function InteractiveMatch() {
               {/* Enemy Lock-In Banner */}
               <div className="bg-red-950/40 border border-red-800/40 p-4 rounded-xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <img src={getChampIconUrl(enemyChamp.id)} className="w-12 h-12 rounded-lg border border-red-700" alt="" />
+                  <img src={getChampIconUrl(enemyChamp.id)} className="w-12 h-12 rounded-lg border border-red-700 object-cover" alt="" />
                   <div>
-                    <span className="text-xs text-red-400 font-bold uppercase">Soupeř zamknul:</span>
+                    <span className="text-xs text-red-400 font-bold uppercase">Soupeř zamknul na linku:</span>
                     <h3 className="text-white font-black text-base uppercase font-heading">{enemyChamp.name}</h3>
                     <p className="text-[11px] text-slate-400">Styl: {enemyChamp.playstyle} · {enemyChamp.counterTags.join(', ')}</p>
                   </div>
                 </div>
                 <span className="text-xs bg-red-900/60 text-red-200 px-2.5 py-1 rounded font-bold font-mono">
-                  MATCHUP
+                  OPPONENT
                 </span>
+              </div>
+
+              {/* Live Matchup Assessment Banner */}
+              <div className={`p-3.5 rounded-xl border flex items-center justify-between gap-3 ${
+                matchup.type === 'HARD_COUNTER' ? 'bg-emerald-950/40 border-emerald-600/50' :
+                matchup.type === 'ADVANTAGE' ? 'bg-green-950/40 border-green-700/40' :
+                matchup.type === 'HARD_COUNTERED' ? 'bg-red-950/50 border-red-700/60' :
+                'bg-rift-surface border-rift-border'
+              }`}>
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-white uppercase font-heading">{matchup.advantageBadge}</span>
+                    <span className="text-[11px] text-slate-400 font-mono">({eloInfo.labelCs})</span>
+                  </div>
+                  <p className="text-xs text-slate-300">{matchup.reasonCs}</p>
+                </div>
               </div>
 
               <div className="text-center space-y-1">
@@ -324,6 +352,7 @@ export function InteractiveMatch() {
                   const meta = currentPatch.tiers[champ.id] || { tier: 'A', winRate: 50.0 };
                   const mastery = career.masteries[champ.id]?.masteryLevel || 1;
                   const isSelected = selectedChamp === champ.id;
+                  const champMatchup = getMatchupAdvantage(champ.id, enemyChamp.id);
 
                   return (
                     <motion.div
@@ -358,9 +387,20 @@ export function InteractiveMatch() {
                               {meta.winRate}% WR
                             </span>
                           </div>
-                          <p className="text-[10px] text-gold-400 font-semibold mt-0.5">
-                            Mastery M{mastery}
-                          </p>
+                          
+                          {/* Matchup Badge */}
+                          <div className="mt-1">
+                            <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                              champMatchup.type === 'HARD_COUNTER' ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' :
+                              champMatchup.type === 'ADVANTAGE' ? 'bg-green-950 text-green-300 border border-green-800' :
+                              champMatchup.type === 'HARD_COUNTERED' ? 'bg-red-950 text-red-300 border border-red-800' :
+                              'bg-slate-900 text-slate-400 border border-slate-700'
+                            }`}>
+                              {champMatchup.type === 'HARD_COUNTER' ? '🎯 Counter (+15)' :
+                               champMatchup.type === 'ADVANTAGE' ? '🗡️ Výhoda (+10)' :
+                               champMatchup.type === 'HARD_COUNTERED' ? '⚠️ Nevýhoda (-15)' : '⚖️ Vyrovnaný'}
+                            </span>
+                          </div>
                         </div>
                       </div>
 
@@ -377,7 +417,7 @@ export function InteractiveMatch() {
               {/* Confirm Champion Button */}
               <div className="pt-2">
                 <Button variant="gold" size="lg" fullWidth onClick={handleConfirmChamp}>
-                  ⚔️ {t('match.confirm_champion')}: {selectedChamp}
+                  ⚔️ {t('match.confirm_champion')}: {selectedChamp} ({matchup.advantageBadge})
                 </Button>
               </div>
             </motion.div>

@@ -4,7 +4,7 @@ import { useGameStore } from '../store/gameStore';
 import { useTranslation } from '../hooks/useTranslation';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { TIER_COLORS, TIER_ICONS, generateLeaderboard } from '../data/ranks';
+import { TIER_COLORS, TIER_ICONS, generateLeaderboard, calculateEloDifficulty } from '../data/ranks';
 import { getChampIconUrl } from '../data/champions';
 
 export function SoloQScreen() {
@@ -25,6 +25,7 @@ export function SoloQScreen() {
     : 50;
   const playerMainChamp = career.championPool?.[0] || 'Aatrox';
   const leaderboard = generateLeaderboard(rank, career.gameName, career.week, career.year, playerMainChamp, winRate);
+  const eloInfo = calculateEloDifficulty(rank.tier, career.stats);
 
   return (
     <div className="space-y-6">
@@ -101,6 +102,38 @@ export function SoloQScreen() {
               </div>
             </div>
           </motion.div>
+
+          {/* Tier Difficulty & Elo Expectation Bar */}
+          <Card className="p-4 border-slate-700/60 bg-rift-card">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                    ⚡ Obtížnost Elo Lobby ({rank.tier}):
+                  </span>
+                  <span className={`text-xs font-black px-2 py-0.5 rounded ${
+                    eloInfo.isSmurf ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' :
+                    eloInfo.isStruggling ? 'bg-red-950 text-red-300 border border-red-700' :
+                    'bg-blue-950 text-blue-300 border border-blue-700'
+                  }`}>
+                    {eloInfo.isSmurf ? `🔥 SMURF VÝHODA (+${eloInfo.statGap} Statů)` :
+                     eloInfo.isStruggling ? `⚠️ NÁROČNÉ ELO (${eloInfo.statGap} Statů)` : '⚖️ VYROVNANÁ LOBBY'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300">
+                  {eloInfo.descCs}
+                </p>
+              </div>
+
+              <div className="text-left sm:text-right shrink-0 bg-slate-950/60 px-3 py-2 rounded-xl border border-slate-800">
+                <p className="text-[10px] text-slate-400 font-medium">Tvůj průměr vs Cíl tieru</p>
+                <p className="text-sm font-black font-mono">
+                  <span className={eloInfo.statGap >= 0 ? 'text-green-400' : 'text-amber-400'}>{eloInfo.playerAvg}</span>
+                  <span className="text-slate-500"> / {eloInfo.targetStat}</span>
+                </p>
+              </div>
+            </div>
+          </Card>
 
           {/* Stats & Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

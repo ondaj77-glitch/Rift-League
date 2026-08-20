@@ -58,6 +58,106 @@ export const TIER_ICONS: Record<Tier, string> = {
   CHALLENGER: '👑',
 };
 
+export const TIER_DIFFICULTY: Record<Tier, { targetStat: number; labelCs: string; labelEn: string; descCs: string; descEn: string }> = {
+  IRON: {
+    targetStat: 20,
+    labelCs: 'Začátečnické Lobby',
+    labelEn: 'Beginner Lobby',
+    descCs: 'Nízký tlak, ideální pro budování základů (vyžaduje ~20 staty).',
+    descEn: 'Low pressure environment, great for learning basics (~20 stats).',
+  },
+  BRONZE: {
+    targetStat: 30,
+    labelCs: 'Nízké Elo',
+    labelEn: 'Low Elo',
+    descCs: 'Časté chyby v pozicování, stačí základní mechanika (~30 staty).',
+    descEn: 'Frequent positioning mistakes, basic mechanics suffice (~30 stats).',
+  },
+  SILVER: {
+    targetStat: 42,
+    labelCs: 'Střední Elo',
+    labelEn: 'Mid Elo',
+    descCs: 'Hráči znají ability a začínají týmové souboje (~42 staty).',
+    descEn: 'Players understand abilities and initiate teamfights (~42 stats).',
+  },
+  GOLD: {
+    targetStat: 52,
+    labelCs: 'Zlatý Standard',
+    labelEn: 'Gold Tier Standard',
+    descCs: 'Solidní laning, nutné hlídat vizi a rotace (~52 staty).',
+    descEn: 'Solid laning, vision and map rotations become vital (~52 stats).',
+  },
+  PLATINUM: {
+    targetStat: 62,
+    labelCs: 'Vysoké Elo',
+    labelEn: 'High Elo',
+    descCs: 'Trestání chyb na lince a rychlé reakce na ganky (~62 staty).',
+    descEn: 'Mistake punishment and swift jungle reaction time (~62 stats).',
+  },
+  EMERALD: {
+    targetStat: 72,
+    labelCs: 'Emerald Peklo',
+    labelEn: 'Emerald Grinder',
+    descCs: 'Agresivní souboje o draky, vysoké nároky na mentál a soustředění (~72 staty).',
+    descEn: 'Aggressive objective fights, high mental and focus required (~72 stats).',
+  },
+  DIAMOND: {
+    targetStat: 82,
+    labelCs: 'Diamantová Elita',
+    labelEn: 'Diamond Apex',
+    descCs: 'Téměř bezchybné mechaniky, makro rozhoduje každou minutu (~82 staty).',
+    descEn: 'Crisp mechanics, macro execution dictates every objective (~82 stats).',
+  },
+  MASTER: {
+    targetStat: 90,
+    labelCs: 'Master Scéna',
+    labelEn: 'Master Tier',
+    descCs: 'Apex úroveň. Sebemenší zaváhání znamená prohru zápasu (~90 staty).',
+    descEn: 'Apex tier. Slight missteps instantly turn into lost games (~90 stats).',
+  },
+  GRANDMASTER: {
+    targetStat: 95,
+    labelCs: 'Grandmaster Koruna',
+    labelEn: 'Grandmaster Crown',
+    descCs: 'Poloprofesionální tempo, špičkový drafting a counter-picky (~95 staty).',
+    descEn: 'Semi-pro tempo, elite drafting and decisive counter-picks (~95 stats).',
+  },
+  CHALLENGER: {
+    targetStat: 99,
+    labelCs: 'Světová Challenger Špička',
+    labelEn: 'World Challenger Peak',
+    descCs: 'Nejlepší z nejlepších. Vyžaduje maximální mastery a špičkové staty (~99 staty).',
+    descEn: 'Top 0.01% of the world. Demands maximum mastery and flawless stats (~99 stats).',
+  },
+};
+
+export function calculateEloDifficulty(tier: Tier, playerStats: { mechanics: number; gameKnowledge: number; mental: number; adaptability: number; communication: number }) {
+  const req = TIER_DIFFICULTY[tier] || TIER_DIFFICULTY.BRONZE;
+  const playerAvg = Math.round(
+    (playerStats.mechanics * 0.35 +
+     playerStats.gameKnowledge * 0.25 +
+     playerStats.mental * 0.20 +
+     playerStats.adaptability * 0.10 +
+     playerStats.communication * 0.10)
+  );
+
+  const diff = playerAvg - req.targetStat;
+  const isSmurf = diff >= 10;
+  const isStruggling = diff <= -10;
+
+  return {
+    targetStat: req.targetStat,
+    playerAvg,
+    statGap: diff,
+    isSmurf,
+    isStruggling,
+    labelCs: req.labelCs,
+    labelEn: req.labelEn,
+    descCs: req.descCs,
+    descEn: req.descEn,
+  };
+}
+
 export interface LeaderboardPlayer {
   rank: number;
   name: string;

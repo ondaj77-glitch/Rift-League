@@ -9,8 +9,9 @@ import { TEAMS, STARTER_TEAMS } from '../data/teams';
 import { EVENTS, getWeeklyEvent } from '../data/events';
 import { getDailyChallenge } from '../utils/dailyChallenge';
 import { simulateMatch } from '../utils/simulation';
-import { generateMetaPatch, ALL_CHAMPIONS } from '../data/champions';
-import { calculateGlobalRank, TIER_ORDER } from '../data/ranks';
+import { generateMetaPatch, ALL_CHAMPIONS, getChampionsByRole } from '../data/champions';
+import { calculateGlobalRank, TIER_ORDER, calculateEloDifficulty } from '../data/ranks';
+import { getMatchupAdvantage } from '../data/matchups';
 import type { Tier, Division } from '../data/ranks';
 
 // ─── Stat Templates ─────────────────────────────────────────────────────────
@@ -341,14 +342,30 @@ export const useGameStore = create<GameStore>()(
 
       grindSoloQFast: () => {
         const { career, addNotification } = get();
-        if (!career || career.lifestyle.energy < 15) return;
+        if (!career || (career.lifestyle?.energy ?? 100) < 15) return;
 
-        const winChance = (career.stats.mechanics * 0.4 + career.stats.gameKnowledge * 0.3 + career.stats.mental * 0.3) / 100;
-        const won = Math.random() < Math.max(0.2, Math.min(0.85, winChance + (Math.random() * 0.2 - 0.1)));
+        // Select random champ from pool
+        const champPool = career.championPool || ['Aatrox'];
+        const champId = champPool[Math.floor(Math.random() * champPool.length)];
+        const roleChamps = getChampionsByRole(career.role);
+        const randomEnemy = roleChamps.find(c => !champPool.includes(c.id)) || roleChamps[0];
+        
+        const matchup = getMatchupAdvantage(champId, randomEnemy.id);
+        const eloInfo = calculateEloDifficulty(career.rank.tier, career.stats);
 
-        // Select random champ from pool to gain exp
-        const champId = career.championPool[Math.floor(Math.random() * career.championPool.length)];
-        const prevMastery = career.masteries[champId] || { championId: champId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
+        // Win chance accurately scales with Player Stats vs Ranked Tier Elo requirement + Matchup + Meta
+        const statRatio = eloInfo.playerAvg / Math.max(1, eloInfo.targetStat);
+        let baseWinChance = 0.50 + (statRatio - 1.0) * 0.65;
+        baseWinChance += matchup.winRateDelta / 100;
+        
+        const currentTier = career.currentPatch?.tiers?.[champId]?.tier || 'A';
+        const metaBonus = currentTier === 'S+' ? 0.08 : currentTier === 'S' ? 0.04 : currentTier === 'A' ? 0.01 : currentTier === 'B' ? -0.03 : -0.07;
+        baseWinChance += metaBonus;
+
+        const finalWinChance = Math.max(0.12, Math.min(0.88, baseWinChance + (Math.random() * 0.16 - 0.08)));
+        const won = Math.random() < finalWinChance;
+
+        const prevMastery = career.masteries?.[champId] || { championId: champId, masteryLevel: 1, gamesPlayed: 0, wins: 0 };
         const newMastery = {
           ...prevMastery,
           gamesPlayed: prevMastery.gamesPlayed + 1,
@@ -359,9 +376,9 @@ export const useGameStore = create<GameStore>()(
         const newRank = calculateRankProgression(career.rank, won);
 
         if (won) {
-          addNotification(`+24 LP Výhra v SoloQ (${champId})!`, 'positive', '⚔️');
+          addNotification(`+24 LP Výhra vs ${randomEnemy.name} (${champId})! ${matchup.advantageBadge}`, 'positive', '⚔️');
         } else {
-          addNotification(`-18 LP Prohra v SoloQ (-1 Mentál)`, 'negative', '💀');
+          addNotification(`-18 LP Prohra vs ${randomEnemy.name} (-1 Mentál) · Lobby: ${eloInfo.labelCs}`, 'negative', '💀');
         }
 
         set(state => ({
