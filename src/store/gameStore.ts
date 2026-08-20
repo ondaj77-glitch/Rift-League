@@ -805,8 +805,12 @@ export const useGameStore = create<GameStore>()(
         const housingMaxEnergy = maxEnergyMap[lifestyle.housing ?? 'parents_home'] ?? 100;
         let newEnergy = housingMaxEnergy;
 
-        // Charge weekly living costs
-        const currentSavings = career.finances?.savings ?? 300;
+        // 1. Pro Salary weekly payout
+        const weeklySalary = Math.round((career.finances?.salary ?? 0) / 52);
+        let newSavings = currentSavings + weeklySalary;
+        let updatedHousing = lifestyle.housing ?? 'parents_home';
+
+        // 2. Charge weekly rent
         const housingRents: Record<string, number> = {
           parents_home: 0,
           budget_room: 450,
@@ -814,24 +818,25 @@ export const useGameStore = create<GameStore>()(
           gaming_house: 0,
           luxury_apt: 3200,
         };
-        const monthlyRent = housingRents[lifestyle.housing ?? 'parents_home'] ?? 0;
+        const monthlyRent = housingRents[updatedHousing] ?? 0;
         const weeklyRent = Math.floor(monthlyRent / 4);
 
-        let newSavings = currentSavings;
-        let updatedHousing = lifestyle.housing;
-
         if (weeklyRent > 0) {
-          if (currentSavings >= weeklyRent) {
-            newSavings = currentSavings - weeklyRent;
-          } else {
-            // Cannot afford rent! Downgrade to parents home
-            newSavings = 0;
+          newSavings -= weeklyRent;
+
+          // If in debt and living independently, landlord evicts the player!
+          if (newSavings < 0 && (updatedHousing === 'budget_room' || updatedHousing === 'modern_apt' || updatedHousing === 'luxury_apt')) {
             updatedHousing = 'parents_home';
-            get().addNotification('⚠️ Nezaplatil jsi nájem! Přestěhoval ses zpět k rodičům.', 'negative', '🏠');
+            newEnergy = 100;
+            newStats.mental = clamp(newStats.mental - 15);
+            newStats.reputation = clamp((newStats.reputation ?? 10) - 2);
+            get().addNotification(
+              `🚨 EXEKUCE & VYHAZOV Z BYTU! Kvůli dluhu $${Math.abs(newSavings)} na nájmu tě majitel vyhodil a vyměnil zámky. Musel ses s hanbou vrátit k rodičům! (-15 Mentál)`,
+              'negative',
+              '📦'
+            );
           }
         }
-
-        let newStats = { ...(career.stats || { mechanics: 50, gameKnowledge: 50, communication: 50, mental: 50, adaptability: 50, reputation: 20 }) };
 
         // Housing Perks
         if (updatedHousing === 'modern_apt') {
@@ -861,9 +866,9 @@ export const useGameStore = create<GameStore>()(
             newSavings -= groceryCost;
             newStats.mental = clamp(newStats.mental + 4);
           } else {
-            get().addNotification('⚠️ Nemáš peníze na jídlo! Hladovíš.', 'negative', '🥫');
-            newStats.mental = clamp(newStats.mental - 6);
-            newEnergy = Math.max(50, newEnergy - 15);
+            newSavings -= groceryCost; // Goes deeper in debt or buys on credit
+            get().addNotification('⚠️ Nákup potravin na dluh (-$40) · Napnutý rozpočet!', 'negative', '🥫');
+            newStats.mental = clamp(newStats.mental - 3);
           }
         } else if (currentNutrition === 'meal_prep') {
           const mealCost = 120;
@@ -871,24 +876,23 @@ export const useGameStore = create<GameStore>()(
             newSavings -= mealCost;
             newStats.mental = clamp(newStats.mental + 6);
           } else {
-            get().addNotification('⚠️ Nedostatek úspor na krabičkovou dietu!', 'negative', '🍱');
-            newStats.mental = clamp(newStats.mental - 6);
-            newEnergy = Math.max(50, newEnergy - 15);
+            get().addNotification('⚠️ Zrušena krabičková dieta pro nedostatek financí!', 'negative', '🍱');
+            newStats.mental = clamp(newStats.mental - 4);
+            newEnergy = Math.max(50, newEnergy - 10);
           }
         } else if (currentNutrition === 'fast_food') {
           const fastFoodCost = 25;
-          if (newSavings >= fastFoodCost) {
-            newSavings -= fastFoodCost;
-            newStats.mental = clamp(newStats.mental - 2);
-            newStats.mechanics = clamp(newStats.mechanics - 2);
-          } else {
-            newStats.mental = clamp(newStats.mental - 6);
-            newEnergy = Math.max(50, newEnergy - 15);
-          }
+          newSavings -= fastFoodCost;
+          newStats.mental = clamp(newStats.mental - 2);
+          newStats.mechanics = clamp(newStats.mechanics - 2);
         } else if (currentNutrition === 'none') {
           newStats.mental = clamp(newStats.mental - 6);
           newEnergy = Math.max(50, newEnergy - 15);
           get().addNotification('⚠️ Vynechal jsi stravu! (-15 Max Energie, -6 Mentál)', 'negative', '⚠️');
+        }
+
+        if (newSavings < 0) {
+          get().addNotification(`⚠️ Účet je v mínusu: -$${Math.abs(newSavings)}! Vydělej peníze brigádou nebo streamem.`, 'negative', '💸');
         }
 
         // Fatigue / Burnout check if player was at 0 energy or mental < 30

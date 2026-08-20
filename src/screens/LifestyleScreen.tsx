@@ -138,8 +138,26 @@ export function LifestyleScreen() {
   const followers = career.streamFollowers ?? 0;
   const viewers = career.streamViewers ?? 0;
 
+  const savings = career.finances?.savings ?? 0;
+  const isDebt = savings < 0;
+
   return (
     <div className="space-y-6">
+
+      {/* Debt Warning Banner */}
+      {isDebt && (
+        <div className="p-4 rounded-xl border border-rose-600 bg-rose-950/40 flex items-center gap-3.5 shadow-xl shadow-rose-950/30 animate-pulse">
+          <span className="text-3xl">🚨</span>
+          <div>
+            <h4 className="font-black text-rose-300 text-sm uppercase tracking-wide">
+              Varování: Účet je v dluhu (-${Math.abs(savings).toLocaleString()})!
+            </h4>
+            <p className="text-xs text-rose-200/90 mt-0.5 leading-relaxed">
+              Nemáš peníze na zaplacení nájmu! Pokud dluh nesplatíš před dalším týdnem, hrozí ti <strong>exekuce a vyhazov z bytu zpět k rodičům (-15 Mentál)</strong>. Vydělej peníze brigádou (-30⚡) nebo streamem.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -193,7 +211,8 @@ export function LifestyleScreen() {
             const isCurrent = currentHousing === opt.id;
             const isAgeLocked = (opt.minAge ?? 0) > career.age;
             const isTeamLocked = opt.requiresTeam && !career.currentTeam;
-            const isLocked = isAgeLocked || isTeamLocked;
+            const isDebtLocked = isDebt && opt.rent > 0;
+            const isLocked = isAgeLocked || isTeamLocked || isDebtLocked;
 
             return (
               <div
@@ -229,6 +248,10 @@ export function LifestyleScreen() {
                   {isCurrent ? (
                     <Button variant="secondary" size="sm" fullWidth disabled>
                       ✅ Aktuální domov
+                    </Button>
+                  ) : isDebtLocked ? (
+                    <Button variant="ghost" size="sm" fullWidth disabled>
+                      🔒 V dluhu nelze pronajmout
                     </Button>
                   ) : isAgeLocked ? (
                     <Button variant="ghost" size="sm" fullWidth disabled>

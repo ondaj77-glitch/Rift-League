@@ -182,10 +182,22 @@ export function CareerHubScreen() {
             </div>
 
             {/* 4. Money / Savings */}
-            <div className="bg-rift-surface p-3 rounded-xl border border-rift-border">
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{isCs ? 'ÚSPORY' : 'MONEY'}</span>
-              <p className="text-base font-black text-green-400 font-mono mt-1">
-                ${finances.savings.toLocaleString()}
+            <div className={`p-3 rounded-xl border ${
+              finances.savings < 0
+                ? 'bg-rose-950/40 border-rose-600/80 shadow-md shadow-rose-950/40'
+                : 'bg-rift-surface border-rift-border'
+            }`}>
+              <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                finances.savings < 0 ? 'text-rose-400' : 'text-slate-400'
+              }`}>
+                {finances.savings < 0 ? (isCs ? '⚠️ V DLUHU' : '⚠️ DEBT') : (isCs ? 'ÚSPORY' : 'MONEY')}
+              </span>
+              <p className={`text-base font-black font-mono mt-1 ${
+                finances.savings < 0 ? 'text-rose-400' : 'text-green-400'
+              }`}>
+                {finances.savings < 0
+                  ? `-$${Math.abs(finances.savings).toLocaleString()}`
+                  : `$${finances.savings.toLocaleString()}`}
               </p>
             </div>
           </div>

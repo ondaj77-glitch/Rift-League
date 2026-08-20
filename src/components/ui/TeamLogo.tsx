@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import type { Team } from '../../types/game';
 
 interface TeamLogoProps {
@@ -7,111 +7,132 @@ interface TeamLogoProps {
   className?: string;
 }
 
-const TEAM_ICONS: Record<string, { icon: string; bg: string; border: string; text: string }> = {
+// Real official transparent logo URLs from Wikimedia Commons and official CDNs
+const TEAM_LOGO_URLS: Record<string, string> = {
   // LCK
-  t1: { icon: '👑', bg: 'from-red-900 to-rose-950', border: 'border-red-500', text: 'text-red-300' },
-  geng: { icon: '🛡️', bg: 'from-amber-900 to-yellow-950', border: 'border-amber-400', text: 'text-amber-300' },
-  hle: { icon: '🧡', bg: 'from-orange-900 to-amber-950', border: 'border-orange-500', text: 'text-orange-300' },
-  dk: { icon: '⚡', bg: 'from-blue-900 to-cyan-950', border: 'border-cyan-400', text: 'text-cyan-300' },
-  kt: { icon: '🚀', bg: 'from-rose-900 to-red-950', border: 'border-rose-500', text: 'text-rose-300' },
-  kdf: { icon: '⚔️', bg: 'from-red-950 to-orange-950', border: 'border-red-600', text: 'text-red-300' },
-  drx: { icon: '🐉', bg: 'from-sky-900 to-blue-950', border: 'border-sky-400', text: 'text-sky-300' },
-  bnk: { icon: '🦊', bg: 'from-orange-950 to-amber-950', border: 'border-orange-600', text: 'text-orange-300' },
-  ns: { icon: '🍜', bg: 'from-red-950 to-rose-950', border: 'border-red-500', text: 'text-red-300' },
-  bro: { icon: '⚔️', bg: 'from-emerald-950 to-green-950', border: 'border-emerald-500', text: 'text-emerald-300' },
-
-  // LPL
-  blg: { icon: '⚡', bg: 'from-cyan-900 to-sky-950', border: 'border-cyan-400', text: 'text-cyan-200' },
-  tes: { icon: '⚔️', bg: 'from-amber-900 to-yellow-950', border: 'border-amber-400', text: 'text-amber-300' },
-  jdg: { icon: '👹', bg: 'from-zinc-900 to-red-950', border: 'border-red-600', text: 'text-red-400' },
-  weibo: { icon: '👁️', bg: 'from-orange-900 to-amber-950', border: 'border-orange-500', text: 'text-orange-300' },
-  lng: { icon: '麒', bg: 'from-purple-900 to-indigo-950', border: 'border-purple-400', text: 'text-purple-300' },
-  edg: { icon: '🛡️', bg: 'from-slate-900 to-blue-950', border: 'border-blue-500', text: 'text-blue-300' },
-  fpx: { icon: '🦅', bg: 'from-red-900 to-amber-950', border: 'border-red-500', text: 'text-red-300' },
-  nip: { icon: '🥷', bg: 'from-emerald-950 to-green-900', border: 'border-emerald-400', text: 'text-emerald-300' },
-  rng: { icon: '👑', bg: 'from-amber-950 to-yellow-950', border: 'border-amber-400', text: 'text-amber-300' },
-  imt: { icon: '⚡', bg: 'from-blue-950 to-sky-950', border: 'border-blue-400', text: 'text-blue-300' },
-  omg: { icon: '🌌', bg: 'from-teal-950 to-cyan-950', border: 'border-teal-400', text: 'text-teal-300' },
-  we: { icon: '🛡️', bg: 'from-red-950 to-rose-950', border: 'border-red-500', text: 'text-red-300' },
+  t1: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/T1_esports_logo.svg/300px-T1_esports_logo.svg.png',
+  geng: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Gen.G_logo.svg/300px-Gen.G_logo.svg.png',
+  hle: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Hanwha_Life_Esports_logo.svg/300px-Hanwha_Life_Esports_logo.svg.png',
+  dk: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Dplus_KIA_logo.svg/300px-Dplus_KIA_logo.svg.png',
+  kt: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/KT_Rolster_logo.svg/300px-KT_Rolster_logo.svg.png',
+  kdf: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Kwangdong_Freecs_logo.svg/300px-Kwangdong_Freecs_logo.svg.png',
+  drx: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/DRX_logo.svg/300px-DRX_logo.svg.png',
+  bnk: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/BNK_FearX_logo.svg/300px-BNK_FearX_logo.svg.png',
+  ns: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Nongshim_RedForce_logo.svg/300px-Nongshim_RedForce_logo.svg.png',
+  bro: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/OK_Saving_Bank_BRION_logo.svg/300px-OK_Saving_Bank_BRION_logo.svg.png',
 
   // LEC
-  g2: { icon: '🥷', bg: 'from-slate-900 to-zinc-950', border: 'border-slate-300', text: 'text-white' },
-  fnc: { icon: '⚡', bg: 'from-orange-950 to-amber-950', border: 'border-orange-500', text: 'text-orange-300' },
-  kc: { icon: '🦅', bg: 'from-sky-900 to-blue-950', border: 'border-sky-400', text: 'text-sky-300' },
-  bds: { icon: '🛡️', bg: 'from-rose-950 to-pink-950', border: 'border-rose-500', text: 'text-rose-300' },
-  mad: { icon: '🦁', bg: 'from-cyan-950 to-blue-950', border: 'border-cyan-400', text: 'text-cyan-300' },
-  vit: { icon: '🐝', bg: 'from-yellow-950 to-amber-900', border: 'border-yellow-400', text: 'text-yellow-300' },
-  hr: { icon: '⚔️', bg: 'from-red-950 to-zinc-900', border: 'border-red-500', text: 'text-red-300' },
-  sk: { icon: '🛡️', bg: 'from-orange-950 to-zinc-900', border: 'border-orange-500', text: 'text-orange-300' },
-  gx: { icon: '⚡', bg: 'from-indigo-950 to-purple-950', border: 'border-indigo-400', text: 'text-indigo-300' },
-  rge: { icon: '🥷', bg: 'from-sky-950 to-blue-950', border: 'border-sky-400', text: 'text-sky-300' },
+  g2: 'https://upload.wikimedia.org/wikipedia/en/thumb/1/12/Esports_G2_logo.svg/300px-Esports_G2_logo.svg.png',
+  fnc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Fnatic_logo.svg/300px-Fnatic_logo.svg.png',
+  kc: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Karmine_Corp_logo.svg/300px-Karmine_Corp_logo.svg.png',
+  bds: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Team_BDS_logo.svg/300px-Team_BDS_logo.svg.png',
+  mad: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/MAD_Lions_KOI_logo.svg/300px-MAD_Lions_KOI_logo.svg.png',
+  vit: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Team_Vitality_logo.svg/300px-Team_Vitality_logo.svg.png',
+  hr: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Team_Heretics_logo.svg/300px-Team_Heretics_logo.svg.png',
+  sk: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/SK_Gaming_logo.svg/300px-SK_Gaming_logo.svg.png',
+  gx: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/GiantX_logo.svg/300px-GiantX_logo.svg.png',
+  rge: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Rogue_logo.svg/300px-Rogue_logo.svg.png',
+
+  // LPL
+  blg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Bilibili_Gaming_logo.svg/300px-Bilibili_Gaming_logo.svg.png',
+  tes: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Top_Esports_logo.svg/300px-Top_Esports_logo.svg.png',
+  jdg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/JD_Gaming_logo.svg/300px-JD_Gaming_logo.svg.png',
+  weibo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Weibo_Gaming_logo.svg/300px-Weibo_Gaming_logo.svg.png',
+  lng: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/LNG_Esports_logo.svg/300px-LNG_Esports_logo.svg.png',
+  edg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/EDward_Gaming_logo.svg/300px-EDward_Gaming_logo.svg.png',
+  fpx: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/FunPlus_Phoenix_logo.svg/300px-FunPlus_Phoenix_logo.svg.png',
+  nip: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Ninjas_in_Pyjamas_2021_logo.svg/300px-Ninjas_in_Pyjamas_2021_logo.svg.png',
+  rng: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Royal_Never_Give_Up_logo.svg/300px-Royal_Never_Give_Up_logo.svg.png',
+  ig: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Invictus_Gaming_logo.svg/300px-Invictus_Gaming_logo.svg.png',
+  al: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Anyone%27s_Legend_logo.svg/300px-Anyone%27s_Legend_logo.svg.png',
+  we: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Team_WE_logo.svg/300px-Team_WE_logo.svg.png',
+  omg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Oh_My_God_logo.svg/300px-Oh_My_God_logo.svg.png',
 
   // LTA_N
-  fly: { icon: '🌳', bg: 'from-emerald-950 to-green-950', border: 'border-emerald-400', text: 'text-emerald-300' },
-  tl: { icon: '🐎', bg: 'from-blue-950 to-teal-950', border: 'border-teal-400', text: 'text-teal-300' },
-  c9: { icon: '☁️', bg: 'from-sky-900 to-blue-950', border: 'border-sky-400', text: 'text-sky-200' },
-  '100t': { icon: '💯', bg: 'from-red-950 to-zinc-900', border: 'border-red-500', text: 'text-red-300' },
-  sr: { icon: '⚡', bg: 'from-purple-950 to-indigo-950', border: 'border-purple-400', text: 'text-purple-300' },
-  dig: { icon: '👽', bg: 'from-orange-950 to-amber-950', border: 'border-orange-500', text: 'text-orange-300' },
-  dsg: { icon: '🎭', bg: 'from-yellow-950 to-amber-950', border: 'border-yellow-400', text: 'text-yellow-300' },
+  fly: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/FlyQuest_logo.svg/300px-FlyQuest_logo.svg.png',
+  tl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Team_Liquid_logo.svg/300px-Team_Liquid_logo.svg.png',
+  c9: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Cloud9_logo.svg/300px-Cloud9_logo.svg.png',
+  '100t': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/100_Thieves_logo.svg/300px-100_Thieves_logo.svg.png',
+  sr: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Shopify_Rebellion_logo.svg/300px-Shopify_Rebellion_logo.svg.png',
+  dig: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Dignitas_logo_2021.svg/300px-Dignitas_logo_2021.svg.png',
+  dsg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Disguised_logo.svg/300px-Disguised_logo.svg.png',
 
   // LTA_S
-  pain: { icon: '⚔️', bg: 'from-red-950 to-black', border: 'border-red-600', text: 'text-red-300' },
-  loud: { icon: '🔊', bg: 'from-green-950 to-emerald-950', border: 'border-green-400', text: 'text-green-300' },
-  red: { icon: '🐺', bg: 'from-red-950 to-rose-950', border: 'border-red-500', text: 'text-red-300' },
-  vks: { icon: '⭐', bg: 'from-lime-950 to-green-950', border: 'border-lime-400', text: 'text-lime-300' },
-  fluxo: { icon: '🌊', bg: 'from-orange-950 to-red-950', border: 'border-orange-500', text: 'text-orange-300' },
-  fur: { icon: '🐾', bg: 'from-zinc-900 to-black', border: 'border-zinc-300', text: 'text-zinc-200' },
-  isurus: { icon: '🦈', bg: 'from-cyan-950 to-blue-950', border: 'border-cyan-400', text: 'text-cyan-300' },
+  pain: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/PaiN_Gaming_logo.svg/300px-PaiN_Gaming_logo.svg.png',
+  loud: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/LOUD_logo.svg/300px-LOUD_logo.svg.png',
+  red: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/RED_Canids_logo.svg/300px-RED_Canids_logo.svg.png',
+  vks: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Vivo_Keyd_Stars_logo.svg/300px-Vivo_Keyd_Stars_logo.svg.png',
+  fluxo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Fluxo_logo.svg/300px-Fluxo_logo.svg.png',
+  fur: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/FURIA_Esports_logo.svg/300px-FURIA_Esports_logo.svg.png',
+  isurus: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Isurus_logo.svg/300px-Isurus_logo.svg.png',
 
   // LCP
-  psg: { icon: '🛡️', bg: 'from-blue-950 to-sky-950', border: 'border-blue-400', text: 'text-blue-300' },
-  gam: { icon: '⚡', bg: 'from-amber-950 to-yellow-950', border: 'border-amber-400', text: 'text-amber-300' },
-  cfo: { icon: '🦪', bg: 'from-sky-950 to-blue-950', border: 'border-sky-400', text: 'text-sky-300' },
-  shg: { icon: '🦅', bg: 'from-yellow-950 to-amber-950', border: 'border-yellow-400', text: 'text-yellow-300' },
-  chiefs: { icon: '👑', bg: 'from-amber-950 to-yellow-900', border: 'border-amber-400', text: 'text-amber-300' },
+  psg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/PSG_Talon_logo.svg/300px-PSG_Talon_logo.svg.png',
+  gam: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/GAM_Esports_logo.svg/300px-GAM_Esports_logo.svg.png',
+  cfo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/CTBC_Flying_Oyster_logo.svg/300px-CTBC_Flying_Oyster_logo.svg.png',
+  shg: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Fukuoka_SoftBank_HAWKS_gaming_logo.svg/300px-Fukuoka_SoftBank_HAWKS_gaming_logo.svg.png',
+  chiefs: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/The_Chiefs_Esports_Club_logo.svg/300px-The_Chiefs_Esports_Club_logo.svg.png',
 };
 
 const SIZE_STYLES = {
-  xs: 'w-6 h-6 text-xs rounded-md',
-  sm: 'w-8 h-8 text-sm rounded-lg',
-  md: 'w-11 h-11 text-base rounded-xl',
-  lg: 'w-14 h-14 text-xl rounded-2xl',
-  xl: 'w-16 h-16 text-2xl rounded-2xl',
+  xs: 'w-6 h-6 rounded-md',
+  sm: 'w-8 h-8 rounded-lg',
+  md: 'w-11 h-11 rounded-xl',
+  lg: 'w-14 h-14 rounded-2xl',
+  xl: 'w-16 h-16 rounded-2xl',
 };
 
-const TEXT_SIZES = {
-  xs: 'text-[9px]',
-  sm: 'text-[10px]',
-  md: 'text-xs',
-  lg: 'text-sm',
-  xl: 'text-base',
+const PADDING_STYLES = {
+  xs: 'p-0.5',
+  sm: 'p-1',
+  md: 'p-1.5',
+  lg: 'p-2',
+  xl: 'p-2',
 };
 
 export function TeamLogo({ team, size = 'md', className = '' }: TeamLogoProps) {
+  const [imgError, setImgError] = useState(false);
+
   if (!team) {
     return (
-      <div className={`${SIZE_STYLES[size]} bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 font-bold ${className}`}>
+      <div className={`${SIZE_STYLES[size]} bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 font-bold text-xs ${className}`}>
         FA
       </div>
     );
   }
 
-  const style = TEAM_ICONS[team.id] || {
-    icon: '⚡',
-    bg: 'from-slate-900 to-indigo-950',
-    border: 'border-slate-500',
-    text: 'text-slate-200',
-  };
+  const logoUrl = TEAM_LOGO_URLS[team.id];
 
+  if (logoUrl && !imgError) {
+    return (
+      <div
+        className={`relative ${SIZE_STYLES[size]} ${PADDING_STYLES[size]} bg-slate-900/90 border border-slate-700/80 flex items-center justify-center shadow-md flex-shrink-0 select-none overflow-hidden ${className}`}
+        title={team.name}
+        style={{ borderColor: team.color ? `${team.color}55` : undefined }}
+      >
+        <img
+          src={logoUrl}
+          alt={team.name}
+          className="w-full h-full object-contain filter drop-shadow"
+          loading="lazy"
+          onError={() => setImgError(true)}
+        />
+      </div>
+    );
+  }
+
+  // Stylish fallback badge with official team colors and initials
   return (
     <div
-      className={`relative ${SIZE_STYLES[size]} bg-gradient-to-br ${style.bg} border-2 ${style.border} flex flex-col items-center justify-center shadow-lg flex-shrink-0 select-none ${className}`}
+      className={`relative ${SIZE_STYLES[size]} bg-slate-900 border-2 flex flex-col items-center justify-center shadow-lg flex-shrink-0 select-none font-heading font-black uppercase text-white ${className}`}
       title={team.name}
+      style={{
+        borderColor: team.color || '#6366f1',
+        background: `linear-gradient(135deg, ${team.color || '#1e1b4b'}33, #0f172a)`,
+      }}
     >
-      <span className="leading-none drop-shadow">{style.icon}</span>
-      <span className={`font-black uppercase tracking-tighter ${TEXT_SIZES[size]} ${style.text} font-heading leading-none mt-0.5`}>
-        {team.shortName}
+      <span className="text-[10px] leading-none" style={{ color: team.color || '#ffffff' }}>
+        {team.shortName.slice(0, 3)}
       </span>
     </div>
   );
