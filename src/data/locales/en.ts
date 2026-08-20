@@ -1117,9 +1117,80 @@ export const en = {
   'event.career_off_role_scrims.title': 'Off-Role Practice',
   'event.career_off_role_scrims.desc': 'Coach suggests playing off-role in scrims.',
   'event.career_off_role_scrims.a': 'Embrace off-role learning',
-  'event.career_off_role_scrims.b': 'Stick to main role',
   'event.career_off_role_scrims.a.result': 'Macro vision expanded.',
   'event.career_off_role_scrims.b.result': 'Depth preserved.',
+
+  // New Diverse SoloQ Events
+  'event.soloq_winstreak_smurf.title': '🔥 LPL Smurf on 20-Game Winstreak',
+  'event.soloq_winstreak_smurf.desc': 'Ranked lobby matches you against an unranked account with 95% winrate and 20 straight wins. An LPL pro smurf!',
+  'event.soloq_winstreak_smurf.a': 'Play hyper-aggressive and snap their winstreak with mechanics',
+  'event.soloq_winstreak_smurf.a.result': 'Solo killed the smurf and broke their streak! +28 LP!',
+  'event.soloq_winstreak_smurf.b': 'Play safe CS and rely on superior late-game teamfighting',
+  'event.soloq_winstreak_smurf.b.result': 'Held lane solid and won late game through macro.',
+
+  'event.soloq_disco_nunu_troll.title': '🤡 Lobby Hostage Troll',
+  'event.soloq_disco_nunu_troll.desc': 'Teammate locked Disco Nunu with Ghost/Cleanse threatening to run it down if not given their role.',
+  'event.soloq_disco_nunu_troll.a': 'Dodge the queue (-5 LP, preserved mental)',
+  'event.soloq_disco_nunu_troll.a.result': 'Saved time and MMR. Mental remains untouched.',
+  'event.soloq_disco_nunu_troll.b': 'Play it out and attempt 4v5 hard carry!',
+  'event.soloq_disco_nunu_troll.b.result': 'Absolute zone focus delivered a 4v5 win! Heroic play!',
+
+  'event.soloq_clutch_base_race.title': '⚡ Minute 45 – Chaos Base Race',
+  'event.soloq_clutch_base_race.desc': 'Minute 45. Both teams have naked Nexuses. 5 enemies rushing mid while you hit their Nexus alone!',
+  'event.soloq_clutch_base_race.a': 'Full DPS on Nexus – trust your autos!',
+  'event.soloq_clutch_base_race.a.result': 'Nexus destroyed with 100 HP remaining! +32 LP euphoria!',
+  'event.soloq_clutch_base_race.b': 'TP back to defend your own Nexus',
+  'event.soloq_clutch_base_race.b.result': 'Held off enemy siege and turned counter-attack.',
+
+  'event.soloq_blind_baron_steal.title': '🐉 Blind Baron Steal Dilemma',
+  'event.soloq_blind_baron_steal.desc': 'Jungler is dead. 5 enemies burning Baron in fog of war (~2k HP). Your global ultimate is ready.',
+  'event.soloq_blind_baron_steal.a': 'Blind fire ultimate into pit on precise timing!',
+  'event.soloq_blind_baron_steal.a.result': 'BARON STEAL & DOUBLE KILL! Blind snipe turned the match!',
+  'event.soloq_blind_baron_steal.b': 'Save spell and turtle under base towers',
+  'event.soloq_blind_baron_steal.b.result': 'Safe defense choice, enemy secured buff.',
+
+  'event.soloq_ff15_morale_test.title': '💀 Minute 15 – Team FF Vote',
+  'event.soloq_ff15_morale_test.desc': 'Score is 2-14. Teammates spamming surrender vote, but your champ just hit 2-item core spike.',
+  'event.soloq_ff15_morale_test.a': 'Vote NO, take shotcall lead in chat and mount comeback',
+  'event.soloq_ff15_morale_test.a.result': 'Team rallied, aced two fights and completed legendary comeback!',
+  'event.soloq_ff15_morale_test.b': 'Vote YES to conserve energy for next queue',
+  'event.soloq_ff15_morale_test.b.result': 'Quick mental reset before the next match.',
+
+  'event.soloq_meta_broken_build.title': '🧠 Secret OP Korean Build Discovered',
+  'event.soloq_meta_broken_build.desc': 'During practice tool testing you found an undiscovered item & rune synergy with massive burst.',
+  'event.soloq_meta_broken_build.a': 'Grind SoloQ with the build and ride surprise advantage',
+  'event.soloq_meta_broken_build.a.result': 'Opponents had no idea how to counter the damage! +35 LP streak!',
+  'event.soloq_meta_broken_build.b': 'Record YouTube guide and monetize the discovery',
+  'event.soloq_meta_broken_build.b.result': 'Guide hit 50k views, bringing new followers and cash!',
+
+  'event.soloq_scout_live_spectate.title': '👁️ Tier-2 Academy Scout Spectating',
+  'event.soloq_scout_live_spectate.desc': 'A tier-2 academy scout is live spectating your ranked match in client.',
+  'event.soloq_scout_live_spectate.a': 'Show off highlight mechanical outplays and limit testing',
+  'event.soloq_scout_live_spectate.a.result': 'Highlight montage performance put you at top of scout radar!',
+  'event.soloq_scout_live_spectate.b': 'Showcase perfect macro discipline, vision, and teamplay',
+  'event.soloq_scout_live_spectate.b.result': 'Scout praised your mature, tilt-free consistency.',
+
+  'event.soloq_viral_reddit_clip.title': '🌐 Viral 1v5 Reddit Outplay Clip',
+  'event.soloq_viral_reddit_clip.desc': 'Your 1v5 Flash dodge outplay clip was posted to Reddit with over 10k upvotes.',
+  'event.soloq_viral_reddit_clip.a': 'Claim clip, plug stream link and interact with community',
+  'event.soloq_viral_reddit_clip.a.result': 'Hundreds of new followers and shoutouts from top creators!',
+  'event.soloq_viral_reddit_clip.b': 'Ignore social hype and stay focused on practice',
+  'event.soloq_viral_reddit_clip.b.result': 'Grounding mindset keeps your focus pure.',
+
+  'event.soloq_toxic_rival_rematch.title': '⚔️ Rematch against Toxic Rival',
+  'event.soloq_toxic_rival_rematch.desc': 'Opponent laner is the same player who BM-flashed and emote spammed you last game.',
+  'event.soloq_toxic_rival_rematch.a': 'Crush them in lane, take First Blood and return the favor',
+  'event.soloq_toxic_rival_rematch.a.result': 'Solo kill at level 3! Opponent ragequit the lobby. Sweet revenge!',
+  'event.soloq_toxic_rival_rematch.b': 'Mute all, stay composed and cleanly win on objectives',
+  'event.soloq_toxic_rival_rematch.b.result': 'Flawless macro win. Rival tilted themselves into defeat.',
+
+  'event.soloq_pro_coach_coaching.title': '🎓 Free Pro Coach VOD Review',
+  'event.soloq_pro_coach_coaching.desc': 'A seasoned regional league coach offered a free 1-hour review of your laning phase.',
+  'event.soloq_pro_coach_coaching.a': 'Focus on wave management, recall timings, and freeze control',
+  'event.soloq_pro_coach_coaching.a.result': 'Mastered advanced wave theories! Massive macro leap!',
+  'event.soloq_pro_coach_coaching.b': 'Focus on teamfight positioning and threat assessment',
+  'event.soloq_pro_coach_coaching.b.result': 'Teamfight survivability increased by 40%!',
 };
 
 export type TranslationKey = keyof typeof en;
+

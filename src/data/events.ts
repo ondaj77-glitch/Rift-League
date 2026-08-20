@@ -2336,6 +2336,210 @@ export const EVENTS: GameEvent[] = [
       },
     ],
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // NEW DIVERSE SOLOQ & RANK EVENTS
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'soloq_winstreak_smurf',
+    category: 'soloq',
+    titleKey: 'event.soloq_winstreak_smurf.title',
+    descriptionKey: 'event.soloq_winstreak_smurf.desc',
+    weight: 10,
+    choices: [
+      {
+        textKey: 'event.soloq_winstreak_smurf.a',
+        effects: { mechanics: 8, mental: 6, lpChange: 28 },
+        nextTextKey: 'event.soloq_winstreak_smurf.a.result',
+      },
+      {
+        textKey: 'event.soloq_winstreak_smurf.b',
+        effects: { gameKnowledge: 6, adaptability: 4, lpChange: 15 },
+        nextTextKey: 'event.soloq_winstreak_smurf.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_disco_nunu_troll',
+    category: 'soloq',
+    titleKey: 'event.soloq_disco_nunu_troll.title',
+    descriptionKey: 'event.soloq_disco_nunu_troll.desc',
+    weight: 9,
+    choices: [
+      {
+        textKey: 'event.soloq_disco_nunu_troll.a',
+        effects: { mental: -4, lpChange: -5 },
+        nextTextKey: 'event.soloq_disco_nunu_troll.a.result',
+      },
+      {
+        textKey: 'event.soloq_disco_nunu_troll.b',
+        effects: { mental: 8, mechanics: 6, lpChange: 26 },
+        nextTextKey: 'event.soloq_disco_nunu_troll.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_clutch_base_race',
+    category: 'soloq',
+    titleKey: 'event.soloq_clutch_base_race.title',
+    descriptionKey: 'event.soloq_clutch_base_race.desc',
+    weight: 10,
+    choices: [
+      {
+        textKey: 'event.soloq_clutch_base_race.a',
+        effects: { mechanics: 10, adaptability: 8, lpChange: 32 },
+        nextTextKey: 'event.soloq_clutch_base_race.a.result',
+      },
+      {
+        textKey: 'event.soloq_clutch_base_race.b',
+        effects: { gameKnowledge: 8, communication: 6, lpChange: 22 },
+        nextTextKey: 'event.soloq_clutch_base_race.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_blind_baron_steal',
+    category: 'soloq',
+    titleKey: 'event.soloq_blind_baron_steal.title',
+    descriptionKey: 'event.soloq_blind_baron_steal.desc',
+    weight: 9,
+    choices: [
+      {
+        textKey: 'event.soloq_blind_baron_steal.a',
+        effects: { mechanics: 12, reputation: 6, lpChange: 30 },
+        nextTextKey: 'event.soloq_blind_baron_steal.a.result',
+      },
+      {
+        textKey: 'event.soloq_blind_baron_steal.b',
+        effects: { gameKnowledge: 6, mental: 4, lpChange: -14 },
+        nextTextKey: 'event.soloq_blind_baron_steal.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_ff15_morale_test',
+    category: 'soloq',
+    titleKey: 'event.soloq_ff15_morale_test.title',
+    descriptionKey: 'event.soloq_ff15_morale_test.desc',
+    weight: 10,
+    choices: [
+      {
+        textKey: 'event.soloq_ff15_morale_test.a',
+        effects: { mental: 10, communication: 8, lpChange: 25 },
+        nextTextKey: 'event.soloq_ff15_morale_test.a.result',
+      },
+      {
+        textKey: 'event.soloq_ff15_morale_test.b',
+        effects: { mental: 2, lpChange: -18 },
+        nextTextKey: 'event.soloq_ff15_morale_test.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_meta_broken_build',
+    category: 'soloq',
+    titleKey: 'event.soloq_meta_broken_build.title',
+    descriptionKey: 'event.soloq_meta_broken_build.desc',
+    weight: 10,
+    choices: [
+      {
+        textKey: 'event.soloq_meta_broken_build.a',
+        effects: { adaptability: 10, gameKnowledge: 8, lpChange: 35 },
+        nextTextKey: 'event.soloq_meta_broken_build.a.result',
+      },
+      {
+        textKey: 'event.soloq_meta_broken_build.b',
+        effects: { reputation: 12, savings: 200 },
+        nextTextKey: 'event.soloq_meta_broken_build.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_scout_live_spectate',
+    category: 'prodigy',
+    titleKey: 'event.soloq_scout_live_spectate.title',
+    descriptionKey: 'event.soloq_scout_live_spectate.desc',
+    weight: 8,
+    minReputation: 15,
+    choices: [
+      {
+        textKey: 'event.soloq_scout_live_spectate.a',
+        effects: { reputation: 18, mechanics: 8, lpChange: 26 },
+        nextTextKey: 'event.soloq_scout_live_spectate.a.result',
+      },
+      {
+        textKey: 'event.soloq_scout_live_spectate.b',
+        effects: { mental: 6, gameKnowledge: 6, lpChange: 20 },
+        nextTextKey: 'event.soloq_scout_live_spectate.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_viral_reddit_clip',
+    category: 'social',
+    titleKey: 'event.soloq_viral_reddit_clip.title',
+    descriptionKey: 'event.soloq_viral_reddit_clip.desc',
+    weight: 9,
+    choices: [
+      {
+        textKey: 'event.soloq_viral_reddit_clip.a',
+        effects: { reputation: 15, mental: 6 },
+        nextTextKey: 'event.soloq_viral_reddit_clip.a.result',
+      },
+      {
+        textKey: 'event.soloq_viral_reddit_clip.b',
+        effects: { mechanics: 6, gameKnowledge: 6 },
+        nextTextKey: 'event.soloq_viral_reddit_clip.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_toxic_rival_rematch',
+    category: 'soloq',
+    titleKey: 'event.soloq_toxic_rival_rematch.title',
+    descriptionKey: 'event.soloq_toxic_rival_rematch.desc',
+    weight: 10,
+    choices: [
+      {
+        textKey: 'event.soloq_toxic_rival_rematch.a',
+        effects: { mechanics: 10, mental: 8, lpChange: 30 },
+        nextTextKey: 'event.soloq_toxic_rival_rematch.a.result',
+      },
+      {
+        textKey: 'event.soloq_toxic_rival_rematch.b',
+        effects: { mental: 10, gameKnowledge: 6, lpChange: 22 },
+        nextTextKey: 'event.soloq_toxic_rival_rematch.b.result',
+      },
+    ],
+  },
+
+  {
+    id: 'soloq_pro_coach_coaching',
+    category: 'training',
+    titleKey: 'event.soloq_pro_coach_coaching.title',
+    descriptionKey: 'event.soloq_pro_coach_coaching.desc',
+    weight: 9,
+    choices: [
+      {
+        textKey: 'event.soloq_pro_coach_coaching.a',
+        effects: { gameKnowledge: 10, adaptability: 8 },
+        nextTextKey: 'event.soloq_pro_coach_coaching.a.result',
+      },
+      {
+        textKey: 'event.soloq_pro_coach_coaching.b',
+        effects: { mechanics: 10, mental: 6 },
+        nextTextKey: 'event.soloq_pro_coach_coaching.b.result',
+      },
+    ],
+  },
 ];
 
 // Clean dual-pool event router based strictly on team contract status
@@ -2356,6 +2560,9 @@ export function getWeeklyEvent(
   const isProdigy = career.age < 17 || isFreeAgent;
 
   const playerTierIndex = career.rank?.tier ? TIER_ORDER.indexOf(career.rank.tier) : 1; // default bronze
+
+  // Only remember recent 6 events to prevent infinite lockout exhaustion
+  const recentUsedIds = (usedEventIds || []).slice(-6);
 
   const TEAM_CATEGORIES = ['team_dynamics', 'contract', 'match'];
   const TEAM_ONLY_IDS = new Set([
@@ -2401,10 +2608,10 @@ export function getWeeklyEvent(
     'contract_salary_delay',
   ]);
 
-  const PRODIGY_CATEGORIES = new Set(['prodigy', 'soloq', 'social', 'health']);
+  const PRODIGY_CATEGORIES = new Set(['prodigy', 'soloq', 'social', 'health', 'training']);
 
-  const available = EVENTS.filter(e => {
-    if (usedEventIds.includes(e.id)) return false;
+  const filterEvent = (e: GameEvent, checkRecent: boolean) => {
+    if (checkRecent && recentUsedIds.includes(e.id)) return false;
     if (e.minAge !== undefined && career.age < e.minAge) return false;
     if (e.maxAge !== undefined && career.age > e.maxAge) return false;
     if (e.minReputation !== undefined && career.reputation < e.minReputation) return false;
@@ -2429,7 +2636,7 @@ export function getWeeklyEvent(
       if (e.requiresTeam) return false;
       if (TEAM_CATEGORIES.includes(e.category)) return false;
       if (TEAM_ONLY_IDS.has(e.id)) return false;
-      if (!PRODIGY_CATEGORIES.has(e.category) && e.category !== 'training') return false;
+      if (!PRODIGY_CATEGORIES.has(e.category)) return false;
     }
 
     // 2. When player IS in a pro team (Signed Contract):
@@ -2439,11 +2646,18 @@ export function getWeeklyEvent(
     }
 
     return true;
-  });
+  };
+
+  let available = EVENTS.filter(e => filterEvent(e, true));
+
+  // If recent filter exhausted pool, allow any valid event
+  if (available.length === 0) {
+    available = EVENTS.filter(e => filterEvent(e, false));
+  }
 
   if (available.length === 0) {
     const prodigyFallbacks = EVENTS.filter(e => isFreeAgent
-      ? (e.category === 'prodigy' || e.category === 'soloq')
+      ? (e.category === 'prodigy' || e.category === 'soloq' || e.category === 'social')
       : (e.category === 'team_dynamics' || e.requiresTeam));
     return prodigyFallbacks.length > 0
       ? prodigyFallbacks[Math.floor(Math.random() * prodigyFallbacks.length)]

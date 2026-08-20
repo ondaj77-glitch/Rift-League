@@ -93,7 +93,7 @@ export function EventScreen() {
         {/* Event Header with Language Switcher */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <span className="text-xl">{CATEGORY_ICONS[currentEvent.category] || '📋'}</span>
+            <span className="text-xl">{CATEGORY_ICONS[eventToRender.category] || '📋'}</span>
             <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">
               {career.gameName} · {t('event.week')} {career.week}
             </span>
@@ -105,10 +105,10 @@ export function EventScreen() {
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <Card className="p-6 space-y-4 border-gold-600/30">
             <h2 className="text-xl font-bold text-white leading-tight font-heading uppercase tracking-wide">
-              {t(currentEvent.titleKey as any)}
+              {t(eventToRender.titleKey as any)}
             </h2>
             <p className="text-slate-200 text-sm leading-relaxed">
-              {t(currentEvent.descriptionKey as any)}
+              {t(eventToRender.descriptionKey as any)}
             </p>
           </Card>
         </motion.div>
@@ -127,7 +127,7 @@ export function EventScreen() {
                 {t('event.choose')}
               </p>
 
-              {currentEvent.choices.map((choice, i) => {
+              {eventToRender.choices.map((choice, i) => {
                 const isSelected = selectedIdx === i;
                 const isLocked = choice.requiresStat
                   ? career.stats[choice.requiresStat.stat] < choice.requiresStat.min

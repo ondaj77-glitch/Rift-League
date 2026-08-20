@@ -139,7 +139,7 @@ export function InteractiveMatch() {
           <Card className="p-4 border-gold-600/30">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-sm text-white">{career.summonerName}</span>
+                <span className="font-bold text-sm text-white">{career.gameName || career.playerName}</span>
                 <span className="text-xs text-purple-300 bg-purple-950/80 px-2 py-0.5 rounded-full font-semibold border border-purple-800">
                   {selectedChamp}
                 </span>
@@ -150,7 +150,7 @@ export function InteractiveMatch() {
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs text-rose-300 font-bold uppercase">{interactiveMatch.opponentTeamName || 'ENEMY'}</span>
+                <span className="text-xs text-rose-300 font-bold uppercase">{matchToRender.opponentTeam?.name || 'RED TEAM'}</span>
                 <span className="w-2 h-2 rounded-full bg-red-500" />
               </div>
             </div>
