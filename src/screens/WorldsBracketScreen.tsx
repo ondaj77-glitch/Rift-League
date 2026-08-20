@@ -54,12 +54,10 @@ export function WorldsBracketScreen() {
   const setPhase = useGameStore(s => s.setPhase);
   const retire = useGameStore(s => s.retire);
 
-  if (!career) return null;
-
-  const isWorlds = career.internationalEvent === 'Worlds';
+  const isWorlds = career?.internationalEvent === 'Worlds';
   const titleKey = isWorlds ? 'bracket.title.worlds' :
-                  career.internationalEvent === 'MSI' ? 'bracket.title.msi' :
-                  career.splitNumber ? 'bracket.title.playoffs' : 'bracket.title.fst';
+                  career?.internationalEvent === 'MSI' ? 'bracket.title.msi' :
+                  career?.splitNumber ? 'bracket.title.playoffs' : 'bracket.title.fst';
 
   const [round, setRound] = useState<BracketRound>('QF');
   const [qfResults, setQfResults] = useState<(BracketMatch & { winner: Team; score: string })[] | null>(null);
@@ -69,8 +67,10 @@ export function WorldsBracketScreen() {
   const [playerWon, setPlayerWon] = useState(false);
 
   const bracket = useState(() =>
-    generateBracket(career.currentTeam!, career.region, isWorlds)
+    career?.currentTeam ? generateBracket(career.currentTeam, career.region, Boolean(isWorlds)) : []
   )[0];
+
+  if (!career) return null;
 
   function simulateBracketMatch(match: BracketMatch, playerTeam: Team): BracketMatch & { winner: Team; score: string } {
     const playerIsA = match.teamA.id === playerTeam.id;
