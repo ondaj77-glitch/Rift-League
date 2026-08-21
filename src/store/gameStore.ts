@@ -398,10 +398,16 @@ export const useGameStore = create<GameStore>()(
           masteryLevel: Math.min(7, Math.floor((prevMastery.gamesPlayed + 1) / 8) + 1),
         };
 
-        const newRank = calculateRankProgression(career.rank, won);
+        const currentStreak = won ? (career.winStreak ?? 0) + 1 : 0;
+        const streakBonusLp = won && currentStreak >= 5 ? 12 : won && currentStreak >= 3 ? 8 : won && currentStreak >= 2 ? 4 : 0;
+        const newRank = calculateRankProgression(career.rank, won, streakBonusLp);
 
         if (won) {
-          addNotification(`+24 LP Výhra vs ${randomEnemy.name} (${champId})! ${matchup.advantageBadge}`, 'positive', '⚔️');
+          if (currentStreak >= 2) {
+            addNotification(`🔥 HOT STREAK (${currentStreak} VÝHRY V ŘADĚ)! +${24 + streakBonusLp} LP (+${streakBonusLp} Bonus)`, 'gold', '🔥');
+          } else {
+            addNotification(`+24 LP Výhra vs ${randomEnemy.name} (${champId})! ${matchup.advantageBadge}`, 'positive', '⚔️');
+          }
         } else {
           addNotification(`-18 LP Prohra vs ${randomEnemy.name} (-1 Mentál) · Lobby: ${eloInfo.labelCs}`, 'negative', '💀');
         }
@@ -414,6 +420,7 @@ export const useGameStore = create<GameStore>()(
             lifestyle: { ...currentLifestyle, energy: Math.max(0, currentLifestyle.energy - 15) },
             soloqWins: won ? (state.career!.soloqWins ?? 0) + 1 : (state.career!.soloqWins ?? 0),
             soloqLosses: won ? (state.career!.soloqLosses ?? 0) : (state.career!.soloqLosses ?? 0) + 1,
+            winStreak: currentStreak,
             rank: newRank,
             masteries: { ...(state.career!.masteries || {}), [champId]: newMastery },
             stats: {
@@ -441,9 +448,16 @@ export const useGameStore = create<GameStore>()(
         const currentLifestyle = career.lifestyle || { energy: 100, maxEnergy: 100, housing: 'parents_home', pcLevel: 1, coachTrust: 50, rosterStatus: 'free_agent' };
 
         if (interactiveMatch.isSoloQ) {
-          const newRank = calculateRankProgression(career.rank, won);
+          const currentStreak = won ? (career.winStreak ?? 0) + 1 : 0;
+          const streakBonusLp = won && currentStreak >= 5 ? 12 : won && currentStreak >= 3 ? 8 : won && currentStreak >= 2 ? 4 : 0;
+          const newRank = calculateRankProgression(career.rank, won, streakBonusLp);
+
           if (won) {
-            addNotification(`SoloQ Vítězství! +24 LP & +1 Mechanika`, 'gold', '🏆');
+            if (currentStreak >= 2) {
+              addNotification(`🔥 ON FIRE (${currentStreak} VÝHRY)! +${24 + streakBonusLp} LP (+${streakBonusLp} Streak Bonus) & +1 Mechanika`, 'gold', '🔥');
+            } else {
+              addNotification(`SoloQ Vítězství! +24 LP & +1 Mechanika`, 'gold', '🏆');
+            }
           } else {
             addNotification(`SoloQ Porážka! -18 LP & -1 Mentál`, 'negative', '💔');
           }
@@ -452,6 +466,7 @@ export const useGameStore = create<GameStore>()(
               ...state.career!,
               soloqWins: won ? (state.career!.soloqWins ?? 0) + 1 : (state.career!.soloqWins ?? 0),
               soloqLosses: won ? (state.career!.soloqLosses ?? 0) : (state.career!.soloqLosses ?? 0) + 1,
+              winStreak: currentStreak,
               rank: newRank,
               masteries: { ...(state.career!.masteries || {}), [championId]: newMastery },
               lifestyle: currentLifestyle,
@@ -1269,8 +1284,8 @@ function calculateScore(career: Career): number {
   return Math.min(100, Math.max(5, score));
 }
 
-function calculateRankProgression(currentRank: import('../data/ranks').RankInfo, won: boolean): import('../data/ranks').RankInfo {
-  const lpDelta = won ? 24 : -18;
+function calculateRankProgression(currentRank: import('../data/ranks').RankInfo, won: boolean, bonusLp: number = 0): import('../data/ranks').RankInfo {
+  const lpDelta = won ? (24 + bonusLp) : -18;
   let newLP = currentRank.lp + lpDelta;
   let tier = currentRank.tier;
   let division = currentRank.division || 'IV';

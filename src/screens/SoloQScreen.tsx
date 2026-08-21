@@ -144,6 +144,30 @@ export function SoloQScreen() {
             </div>
           </Card>
 
+          {/* Hot Streak Multiplier Banner */}
+          {career.winStreak && career.winStreak >= 2 ? (
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              className="p-3.5 rounded-xl bg-gradient-to-r from-amber-950/80 via-red-950/80 to-amber-950/80 border border-amber-500/60 shadow-lg shadow-amber-950/40 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl animate-bounce">🔥</span>
+                <div>
+                  <h4 className="text-xs font-black text-amber-300 uppercase tracking-wide">
+                    ON FIRE – {career.winStreak} VÝHRY V ŘADĚ!
+                  </h4>
+                  <p className="text-[11px] text-slate-300">
+                    Aktivní LP Multiplier: +{career.winStreak >= 5 ? '12' : career.winStreak >= 3 ? '8' : '4'} Extra LP za každou další výhru!
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-black px-2.5 py-1 rounded bg-amber-500 text-slate-950 font-mono">
+                +{career.winStreak >= 5 ? '12' : career.winStreak >= 3 ? '8' : '4'} LP BOOST
+              </span>
+            </motion.div>
+          ) : null}
+
           {/* Stats & Actions */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <Card className="p-4 text-center">

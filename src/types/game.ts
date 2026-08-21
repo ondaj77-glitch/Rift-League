@@ -128,6 +128,7 @@ export interface Career {
   rank: RankInfo;
   soloqWins: number;
   soloqLosses: number;
+  winStreak?: number;
   mmr: number;
 
   // Champion Mastery & Pool (6 mains)

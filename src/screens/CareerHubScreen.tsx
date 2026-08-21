@@ -121,6 +121,19 @@ export function CareerHubScreen() {
                   FREE AGENT
                 </span>
               )}
+
+              {/* Hot Streak Flame Badge */}
+              {career.winStreak && career.winStreak >= 2 && (
+                <motion.span
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                  className="text-[10px] font-black px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-red-500 text-slate-950 uppercase shadow-md shadow-amber-500/30 flex items-center gap-1 ml-2"
+                >
+                  <span>🔥</span>
+                  <span>{career.winStreak}W ON FIRE (+50% LP)</span>
+                </motion.span>
+              )}
             </div>
 
             <div className="flex items-center gap-2 self-end sm:self-auto">
