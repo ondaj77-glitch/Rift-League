@@ -1139,6 +1139,7 @@ export const en = {
   'event.career_off_role_scrims.title': 'Off-Role Practice',
   'event.career_off_role_scrims.desc': 'Coach suggests playing off-role in scrims.',
   'event.career_off_role_scrims.a': 'Embrace off-role learning',
+  'event.career_off_role_scrims.b': 'Stick strictly to your main role',
   'event.career_off_role_scrims.a.result': 'Macro vision expanded.',
   'event.career_off_role_scrims.b.result': 'Depth preserved.',
 

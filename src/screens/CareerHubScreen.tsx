@@ -14,6 +14,8 @@ import { SoloQScreen } from './SoloQScreen';
 import { ChampionPoolScreen } from './ChampionPoolScreen';
 import { LifestyleScreen } from './LifestyleScreen';
 import { TransferMarketScreen } from './TransferMarketScreen';
+import { MacroSequencerModal } from '../components/match/MacroSequencerModal';
+import { DraftCounterChallenge } from '../components/match/DraftCounterChallenge';
 import type { StatKey, HubTab, SplitName } from '../types/game';
 
 const STATS: StatKey[] = ['mechanics', 'gameKnowledge', 'communication', 'mental', 'adaptability', 'reputation'];
@@ -35,8 +37,11 @@ export function CareerHubScreen() {
   const currentEvent = useGameStore(s => s.currentEvent);
   const retire = useGameStore(s => s.retire);
   const setShowPatchNotesModal = useGameStore(s => s.setShowPatchNotesModal);
+  const addNotification = useGameStore(s => s.addNotification);
 
   const [forfeitModalOpen, setForfeitModalOpen] = useState(false);
+  const [macroModalOpen, setMacroModalOpen] = useState(false);
+  const [draftModalOpen, setDraftModalOpen] = useState(false);
 
   if (!career) {
     return (
@@ -107,6 +112,17 @@ export function CareerHubScreen() {
               </h1>
               <span className="text-xs text-slate-400 font-semibold">{career.age} yrs</span>
               <RoleBadge role={career.role} size="xs" />
+
+              {/* Origin & Trait Badge */}
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-950/80 text-purple-300 border border-purple-800 uppercase">
+                {career.origin === 'academy_graduate' ? '🎓 Akademie' : career.origin === 'content_creator' ? '🎬 Streamer' : '⚡ SoloQ Talent'}
+              </span>
+
+              {career.archetypeTrait && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-700 uppercase">
+                  {career.archetypeTrait === 'hypercarry' ? '⚔️ Hypercarry' : career.archetypeTrait === 'shotcaller' ? '🧠 Shotcaller' : career.archetypeTrait === 'meta_abuser' ? '🎮 Meta' : '🛡️ Team Anchor'}
+                </span>
+              )}
 
               {career.currentTeam ? (
                 <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-700">
@@ -348,21 +364,71 @@ export function CareerHubScreen() {
               </div>
             </Card>
 
-            {/* Career Milestones / Goal */}
-            <Card gold className="p-4">
+            {/* RiftGG Series Performance & Analyst Review Card */}
+            <Card className="p-4 bg-slate-900/90 border border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">{t('hub.career_goal')}</p>
-                  <p className="text-gold-400 font-bold text-sm">
-                    {career.worldsWins > 0
-                      ? t('hub.worlds_champion_count' as any).replace('{count}', String(career.worldsWins))
-                      : t('hub.goal.worlds')}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">⭐</span>
+                  <div>
+                    <h3 className="text-xs font-black text-white uppercase font-heading tracking-wider">
+                      RiftGG Analyst Review
+                    </h3>
+                    <p className="text-[11px] text-slate-400">Poslední oficiální série & esportové hodnocení</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-black text-gold-400 font-mono">{yearsLeft}</p>
-                  <p className="text-[11px] text-slate-400">{t('hub.until_retirement')}</p>
+                <div className="flex items-center gap-1.5 bg-amber-950/60 border border-amber-500/50 px-2.5 py-1 rounded-lg">
+                  <span className="text-xs font-black text-amber-400 font-mono">
+                    ⭐ {career.riftGgRating || '4.8'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-mono">/ 5.0</span>
                 </div>
+              </div>
+
+              <p className="text-xs text-slate-300 italic bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 leading-relaxed font-medium">
+                "{career.lastAnalystReview || `${career.gameName} byl klíčovým hráčem série. Skvělá prioritizace objektivů a bezchybné rozhodování v pozdní hře.`}"
+              </p>
+            </Card>
+
+            {/* Tactical Drills & Minigames Hub */}
+            <Card className="p-4 border-indigo-900/50 bg-indigo-950/20 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🧠</span>
+                  <div>
+                    <h3 className="text-xs font-black text-indigo-300 uppercase font-heading tracking-wider">
+                      Taktický Trénink & Rozhodování (Minihry)
+                    </h3>
+                    <p className="text-[11px] text-slate-400">Otestuj své esportové makro a draft reakce</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setMacroModalOpen(true)}
+                  className="bg-slate-900/90 border border-indigo-800/60 hover:border-indigo-500 text-left justify-start gap-2"
+                >
+                  <span className="text-base">⏱️</span>
+                  <div className="text-left">
+                    <span className="text-xs font-bold block text-white">Macro Sequencer</span>
+                    <span className="text-[10px] text-slate-400 block">Seřaď kroky po Ace / Baronu (+Makro)</span>
+                  </div>
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="md"
+                  onClick={() => setDraftModalOpen(true)}
+                  className="bg-slate-900/90 border border-red-900/60 hover:border-red-500 text-left justify-start gap-2"
+                >
+                  <span className="text-base">🎯</span>
+                  <div className="text-left">
+                    <span className="text-xs font-bold block text-white">Draft Counter Quiz</span>
+                    <span className="text-[10px] text-slate-400 block">Rychlá reakce na soupeřův lock (+Draft)</span>
+                  </div>
+                </Button>
               </div>
             </Card>
 
@@ -431,6 +497,34 @@ export function CareerHubScreen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* MACRO SEQUENCER MINIGAME MODAL */}
+      <MacroSequencerModal
+        isOpen={macroModalOpen}
+        onClose={() => setMacroModalOpen(false)}
+        lang={language}
+        onComplete={(success) => {
+          if (success) {
+            addNotification('Makro trénink úspěšný! +4 Znalost Hry & +15 LP', 'gold', '🧠');
+          } else {
+            addNotification('Chyba v makro sekvenci! -5 Důvěra týmu', 'negative', '⚠️');
+          }
+        }}
+      />
+
+      {/* DRAFT COUNTER-PICK CHALLENGE MODAL */}
+      <DraftCounterChallenge
+        isOpen={draftModalOpen}
+        onClose={() => setDraftModalOpen(false)}
+        lang={language}
+        onComplete={(success) => {
+          if (success) {
+            addNotification('Draft Counter trefen na jedničku! +6 Znalost Hry & +10 LP', 'gold', '🎯');
+          } else {
+            addNotification('Nevhodný counter-pick. Soupeř získal výhodu v draftu.', 'negative', '⚠️');
+          }
+        }}
+      />
 
     </div>
   );

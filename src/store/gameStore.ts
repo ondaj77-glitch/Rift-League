@@ -3,8 +3,9 @@ import { persist } from 'zustand/middleware';
 import type {
   GameState, GamePhase, Career, PlayerStats, Role, Region, Playstyle,
   Language, GameEvent, Team, DailyChallenge, SplitName, HubTab, GameMode,
-  TeamOffer, ChampionMastery, MetaPatch,
+  TeamOffer, ChampionMastery, MetaPatch, PlayerOrigin, ArchetypeTrait,
 } from '../types/game';
+import { ORIGINS, TRAITS } from '../data/origins';
 import { TEAMS, STARTER_TEAMS } from '../data/teams';
 import { EVENTS, getWeeklyEvent } from '../data/events';
 import { getDailyChallenge } from '../utils/dailyChallenge';
@@ -43,7 +44,9 @@ interface GameStore extends GameState {
     region: Region,
     playstyle: Playstyle,
     championPool: string[],
-    customPatch?: MetaPatch
+    customPatch?: MetaPatch,
+    origin?: PlayerOrigin,
+    archetypeTrait?: ArchetypeTrait
   ) => void;
 
   startDailyChallenge: () => void;
@@ -119,23 +122,26 @@ export const useGameStore = create<GameStore>()(
         set({ dailyChallenge: daily });
       },
 
-      startNewCareerExtended: (mode, name, gameName, role, region, playstyle, championPool, customPatch) => {
+      startNewCareerExtended: (mode, name, gameName, role, region, playstyle, championPool, customPatch, origin = 'soloq_prodigy', archetypeTrait = 'hypercarry') => {
         const base = ROLE_STATS[role];
         const bonus = PLAYSTYLE_BONUS[playstyle];
+        const originObj = ORIGINS.find(o => o.id === origin);
+        const traitObj = TRAITS.find(t => t.id === archetypeTrait);
 
         const isProdigy = mode === 'prodigy';
         const startAge = isProdigy ? 14 : 18;
 
-        // Calibrated starting stats:
-        // Prodigy starts at ~35-40 (Bronze elo, raw diamond in rough)
-        // Pro Debut starts at ~72-78 (Diamond I elo, battle-tested competitive starter)
+        const originMods = originObj?.statModifiers || {};
+        const traitMods = traitObj?.statModifiers || {};
+
+        // Calibrated starting stats incorporating origin & trait modifiers
         const stats: PlayerStats = {
-          mechanics:     clamp((base.mechanics || 50) + (bonus.mechanics || 0) + (isProdigy ? -15 : 22)),
-          gameKnowledge: clamp((base.gameKnowledge || 50) + (bonus.gameKnowledge || 0) + (isProdigy ? -15 : 20)),
-          communication: clamp((base.communication || 50) + (bonus.communication || 0) + (isProdigy ? -15 : 20)),
-          mental:        clamp((base.mental || 50) + (bonus.mental || 0) + (isProdigy ? 0 : 16)),
-          adaptability:  clamp((base.adaptability || 50) + (bonus.adaptability || 0) + (isProdigy ? 0 : 16)),
-          reputation:    isProdigy ? 5 : clamp((base.reputation || 20) + (bonus.reputation || 0) + 15),
+          mechanics:     clamp((base.mechanics || 50) + (bonus.mechanics || 0) + (originMods.mechanics || 0) + (traitMods.mechanics || 0) + (isProdigy ? -15 : 22)),
+          gameKnowledge: clamp((base.gameKnowledge || 50) + (bonus.gameKnowledge || 0) + (originMods.gameKnowledge || 0) + (traitMods.gameKnowledge || 0) + (isProdigy ? -15 : 20)),
+          communication: clamp((base.communication || 50) + (bonus.communication || 0) + (originMods.communication || 0) + (traitMods.communication || 0) + (isProdigy ? -15 : 20)),
+          mental:        clamp((base.mental || 50) + (bonus.mental || 0) + (originMods.mental || 0) + (traitMods.mental || 0) + (isProdigy ? 0 : 16)),
+          adaptability:  clamp((base.adaptability || 50) + (bonus.adaptability || 0) + (originMods.adaptability || 0) + (traitMods.adaptability || 0) + (isProdigy ? 0 : 16)),
+          reputation:    isProdigy ? clamp(5 + (originMods.reputation || 0)) : clamp((base.reputation || 20) + (bonus.reputation || 0) + (originMods.reputation || 0) + 15),
         };
 
         // Masteries init
@@ -155,7 +161,7 @@ export const useGameStore = create<GameStore>()(
         // Starting rank: Bronze IV (if Prodigy) or Diamond I / Master (if Pro Debut)
         const startTier: Tier = isProdigy ? 'BRONZE' : 'DIAMOND';
         const startDiv: Division = isProdigy ? 'IV' : 'I';
-        const startLP = isProdigy ? 0 : 50;
+        const startLP = (isProdigy ? 0 : 50) + (originMods.bonusLp || 0);
 
         let startTeam: Team | null = null;
         if (!isProdigy) {
@@ -165,6 +171,7 @@ export const useGameStore = create<GameStore>()(
         }
 
         const salary = startTeam ? startTeam.salaryRange[0] : 0;
+        const initialFollowers = (isProdigy ? 120 : 3500) + (originMods.followers || 0);
 
         const career: Career = {
           mode,
@@ -173,6 +180,8 @@ export const useGameStore = create<GameStore>()(
           role,
           startRegion: region,
           playstyle,
+          origin,
+          archetypeTrait,
           age: startAge,
           birthYear: 2025 - startAge,
           year: 2025,
@@ -193,7 +202,7 @@ export const useGameStore = create<GameStore>()(
           masteries,
           currentPatch: initialPatch,
           swapsRemainingThisSplit: 2,
-          streamFollowers: isProdigy ? 120 : 3500,
+          streamFollowers: initialFollowers,
           streamViewers: isProdigy ? 12 : 240,
           currentTeam: startTeam,
           region,
@@ -206,10 +215,10 @@ export const useGameStore = create<GameStore>()(
           },
           lifestyle: {
             housing: isProdigy ? 'parents_home' : (startTeam ? 'gaming_house' : 'budget_room'),
-            pcLevel: isProdigy ? 1 : 2, // Starts with 144Hz Rig if already in a pro team
+            pcLevel: isProdigy ? 1 : 2,
             energy: 100,
             maxEnergy: isProdigy ? 100 : 115,
-            coachTrust: startTeam ? 75 : 0,
+            coachTrust: (startTeam ? 75 : 0) + (originMods.coachTrust || 0),
             rosterStatus: startTeam ? 'starter' : 'free_agent',
             nutrition: isProdigy ? 'home_cooked' : (startTeam ? 'chef_meals' : 'groceries'),
           },
@@ -227,8 +236,6 @@ export const useGameStore = create<GameStore>()(
           mvpCount: 0,
           careerScore: 0,
           eventHistory: [],
-          isDailyChallenge: false,
-          dailyCompleted: false,
         };
 
         set({

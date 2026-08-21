@@ -107,6 +107,21 @@ export interface Team {
 
 // ─── Career ───────────────────────────────────────────────────────────────────
 
+export type PlayerOrigin = 'soloq_prodigy' | 'academy_graduate' | 'content_creator';
+export type ArchetypeTrait = 'hypercarry' | 'shotcaller' | 'meta_abuser' | 'team_first';
+
+export interface DailyChallenge {
+  id: string;
+  role: Role;
+  region: Region;
+  titleCs: string;
+  titleEn: string;
+  objectiveCs: string;
+  objectiveEn: string;
+  targetAge: number;
+  targetEvent: 'MSI' | 'Worlds' | 'Challenger' | 'SplitTitle';
+}
+
 export interface Career {
   mode: GameMode;
   playerName: string;
@@ -114,6 +129,9 @@ export interface Career {
   role: Role;
   startRegion: Region;
   playstyle: Playstyle;
+  origin?: PlayerOrigin;
+  archetypeTrait?: ArchetypeTrait;
+  dailyChallenge?: DailyChallenge | null;
 
   // Progression
   age: number;
@@ -155,6 +173,10 @@ export interface Career {
   inPlayoffs: boolean;
   inInternational: boolean;
   internationalEvent: 'FST' | 'MSI' | 'Worlds' | null;
+
+  // RiftGG & Series Analyst Ratings
+  riftGgRating?: number;
+  lastAnalystReview?: string;
 
   // History & Achievements
   achievements: Achievement[];
